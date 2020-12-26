@@ -7,12 +7,15 @@
 class Game {
 public:
 	Game(int num_players);
+	~Game();
 
 	void play();
 
 	void takeRewardTiles(std::vector<Tile> tiles);
 	std::vector<Tile> rewardTiles();
 private:
+	void printFactories();
+
 	// Turn steps
 	void fill_factories();
 	void picking_stage(Tile bonus_tile);

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <stdlib.h>
+#include <string>
 
 typedef std::vector<bool> Star;
 
@@ -14,7 +15,24 @@ enum PlayerColour {
 	GREY
 };
 
+static const std::vector<PlayerColour> all_player_colours = {
+	WHITE,
+	WOOD,
+	BLACK,
+	GREY
+};
+
 enum Location {
+	ORANGE_STAR,
+	RED_STAR,
+	BLUE_STAR,
+	YELLOW_STAR,
+	GREEN_STAR,
+	PURPLE_STAR,
+	CENTRE_STAR
+};
+
+static const std::vector<Location> all_locations = {
 	ORANGE_STAR,
 	RED_STAR,
 	BLUE_STAR,
@@ -48,6 +66,16 @@ enum Tile {
 	GREEN,
 	PURPLE,
 	NONE
+};
+
+static const std::vector<std::string> tile_strings = {
+	"Orange",
+	"Red",
+	"Blue",
+	"Yellow",
+	"Green",
+	"Purple",
+	"None"
 };
 
 static const std::vector<Tile> all_tiles = {
@@ -100,14 +128,14 @@ private:
 
 class Factory {
 public:
-	Factory() : m_centre(nullptr) {};
-	Factory(Factory* centre) : m_centre(centre) {};
+	Factory() : m_tiles() {};
+	~Factory() = default;
 
 	void place(Tile tile) {
 		m_tiles.push_back(tile);
 	}
 
-	void removeTiles(Tile tile_taken, Tile bonus_type) {
+	void removeTiles(Tile tile_taken, Tile bonus_type, Factory* centre) {
 		std::vector<Tile> new_list;
 		// We can't take the bonus type of tile
 		if (tile_taken == bonus_type) return;
@@ -123,11 +151,11 @@ public:
 				}
 			}
 		}
-		if (m_centre) {
+		if (this != centre) {
 			// We're a factory around the edge
 			m_tiles.clear();
 			// Empty and add to centre
-			m_centre->addTiles(new_list);
+			centre->addTiles(new_list);
 		} else {
 			// We're the centre! Retain the leftover list
 			m_tiles = new_list;
@@ -139,18 +167,66 @@ public:
 	}
 
 
-	std::vector<Tile> tiles() const {
+	std::vector<Tile> tiles() {
 		return m_tiles;
+	}
+
+	int numberOf(Tile tile) const {
+		int ret = 0;
+		for (Tile t : m_tiles) {
+			if (t == tile) {
+				ret++;
+			}
+		}
+		return ret;
+	}
+
+	bool hasBonus(Tile bonus) const {
+		for (Tile tile : m_tiles) {
+			if (tile == bonus) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool isOnlyBonus(Tile bonus) const {
+		for (Tile tile : m_tiles) {
+			if (tile != bonus) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	void addTiles(std::vector<Tile> tiles) {
 		m_tiles.insert(m_tiles.end(), tiles.begin(), tiles.end());
 	}
+
+	std::string toString() {
+		std::string str = "";
+		if (m_tiles.size() == 0) {
+			return "Empty";
+		}
+		for (Tile t : m_tiles) {
+			str += tile_strings[t] + " ";
+		}
+		return str;
+	}
 private:
-	Factory* m_centre;
 	std::vector<Tile> m_tiles;
 };
 
+struct PickingChoice {
+	Factory* factory;
+	Tile tile;
+	bool with_bonus;
+};
+
+
+// This is a circular Index, created with a maximum value once reached it'll loop
+// back to it's lowest value (1). For use when you want to loop through a vector
+// from a non-zero starting position
 class cIndex {
 public:
 	// max is inclusive

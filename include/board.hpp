@@ -7,12 +7,26 @@
 // Pre declarations
 class Player;
 
+struct Cost {
+	Tile colour;
+	int num_colour;
+	int num_bonus;
+};
+
+struct PlacingChoice {
+	Location star;
+	Cost cost;
+	cIndex index;
+};
+
 class Board {
 public:
 	Board();
 
-	void placeTile(Tile colour, cIndex index, Location space, Player* me);
+	void placeTile(PlacingChoice choice, Player* me);
 	void keepTiles(std::vector<Tile> to_keep);
+
+	std::vector<PlacingChoice> getAllPlacingChoices();
 private:
 	int bonusPiecesAwarded();
 	int bonusPointsAwarded();

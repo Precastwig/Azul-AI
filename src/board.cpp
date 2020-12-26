@@ -118,17 +118,17 @@ int Board::bonusPointsAwarded() {
 	return 0;
 }
 
-void Board::placeTile(Tile colour, cIndex index, Location space, Player* me) {
+void Board::placeTile(PlacingChoice choice, Player* me) {
 	// Place the tile
-	m_tiles[space][index.getIndex()] = true;
+	m_tiles[choice.star][choice.index.getIndex()] = true;
 
 	// Count points gained
 	int points = 0;
-	count(UP, space, index, points);
+	count(UP, choice.star, choice.index, points);
 	if (points < 6) {
 		// Otherwise we would be double-counting the placed piece
-		cIndex next = index - 1;
-		count(DOWN, space, next, points);
+		cIndex next = choice.index - 1;
+		count(DOWN, choice.star, next, points);
 	}
 	points += bonusPointsAwarded();
 
@@ -141,6 +141,29 @@ void Board::placeTile(Tile colour, cIndex index, Location space, Player* me) {
 		// and then reward them with some bonus tiles
 		me->pickBonusPieces(reward);
 	}
+}
+
+std::vector<PlacingChoice> Board::getAllPlacingChoices() {
+	std::vector<PlacingChoice> choices;
+	for (Location star : all_locations) {
+		for (unsigned int i = 0; i < m_tiles[star].size(); ++i) {
+			bool filled = m_tiles[star][i];
+			if (!filled) {
+				PlacingChoice choice;
+				choice.star = star;
+				if (star == CENTRE_STAR) {
+					// This can be interpreted as "Any colour"
+					choice.cost.colour = NONE;
+				} else {
+					choice.cost.colour = all_tiles[star];
+				}
+				choice.index = cIndex(i + 1, 6);
+				choices.push_back(choice);
+			}
+
+		}
+	}
+	return choices;
 }
 
 void Board::keepTiles(std::vector<Tile> to_keep) {

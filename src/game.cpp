@@ -1,8 +1,14 @@
 #include "game.hpp"
+#include "randomAI.hpp"
 #include <algorithm>
+#include <iostream>
 
 Game::Game(int num_players) : m_tile_bag() {
 	// Create the players
+	for (int i = 0; i < num_players; ++i) {
+		Player* randomai = new RandomAI(all_player_colours[i], this);
+		m_players.push_back(randomai);
+	}
 
 	// Randomise the starting player
 	m_starting_player = rand() % m_players.size();
@@ -10,15 +16,27 @@ Game::Game(int num_players) : m_tile_bag() {
 	// Create the factories
 	int num_factories = (num_players * 2) + 1;
 	for (int i = 0; i < num_factories; ++i) {
-		Factory factory;
-		m_factories.push_back(&factory);
+		m_factories.push_back(new Factory());
 	}
+	m_centre = new Factory();
 
 	// Fill the reward tiles
 	for (int i = 0; i < 10; ++i) {
 		Tile pulled = m_tile_bag.pullTile();
 		m_reward_tiles.push_back(pulled);
 	}
+}
+
+Game::~Game() {
+	for (Player* p : m_players) {
+		delete p;
+	}
+
+	for (Factory* f : m_factories) {
+		delete f;
+	}
+
+	delete m_centre;
 }
 
 void Game::play() {
@@ -64,20 +82,23 @@ bool Game::noTilesLeft() {
 void Game::picking_stage(Tile bonus_tile) {
 	cIndex player_turn(m_starting_player + 1, m_players.size());
 	// Double negative, I won't apologise
-	bool centrePoisoned = true;
 	bool centreTaken = false;
 	while (!noTilesLeft()) {
-		m_players[player_turn.getIndex()]->pickTile(
+		printFactories();
+		Player* player = m_players[player_turn.getIndex()];
+		PickingChoice choice = player->pickTile(
 			m_factories,
 			m_centre,
 			bonus_tile,
-			centrePoisoned
+			!centreTaken
 		);
-		if (!centrePoisoned && !centreTaken) {
+		if (!centreTaken && choice.factory == m_centre) {
 			// Someone has taken the centre!
 			centreTaken = true;
+			player->minusPoisonPoints();
 			m_starting_player = player_turn.getIndex();
 		}
+		player->resolvePickingChoice(choice, bonus_tile, m_centre);
 		player_turn++;
 	}
 }
@@ -117,4 +138,12 @@ void Game::placing_stage() {
 		m_players[player_turn.getIndex()]->placeTile();
 		player_turn++;
 	}
+}
+
+void Game::printFactories() {
+	std::cout << "\n\n\nFACTORIES\n-----------------\n";
+	for (unsigned int i = 0; i < m_factories.size(); ++i) {
+		std::cout << "Factory " << i << ": " << m_factories[i]->toString() << "\n";
+	}
+	std::cout << "Centre: " << m_centre->toString() << "\n";
 }
