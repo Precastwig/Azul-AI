@@ -1,12 +1,14 @@
 #ifndef RANDOM_CHOICE_AI
 #define RANDOM_CHOICE_AI
 
-#include "player.hpp"
+#include "players/Player.hpp"
 
 // A player object that just makes random decisions
 class RandomAI : public Player {
 public:
-	RandomAI(PlayerColour colour, Game* game) : Player(colour, game) {};
+	RandomAI(PlayerColour colour, Game* game) : Player(colour, game) {
+		srand (time(NULL));
+	};
 	~RandomAI() = default;
 
 	// Decision overrides

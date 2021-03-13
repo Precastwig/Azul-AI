@@ -1,8 +1,9 @@
 #ifndef BOARD
 #define BOARD
 
-#include "helper_classes.hpp"
 #include <vector>
+#include "utils/helper_enums.hpp"
+#include "utils/cIndex.hpp"
 
 // Pre declarations
 class Player;

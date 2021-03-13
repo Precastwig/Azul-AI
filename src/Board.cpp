@@ -1,5 +1,5 @@
-#include "board.hpp"
-#include "player.hpp"
+#include "game_elements/Board.hpp"
+#include "players/Player.hpp"
 
 Board::Board()
 {

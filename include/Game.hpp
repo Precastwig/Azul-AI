@@ -2,7 +2,9 @@
 #define GAME
 
 #include <vector>
-#include "player.hpp"
+#include "players/Player.hpp"
+#include "game_elements/Bag.hpp"
+#include "game_elements/Factory.hpp"
 
 class Game {
 public:

@@ -1,10 +1,16 @@
 #ifndef PLAYER
 #define PLAYER
 
-#include "helper_classes.hpp"
-#include "board.hpp"
+#include "game_elements/Factory.hpp"
+#include "game_elements/Board.hpp"
 
 class Game;
+
+struct PickingChoice {
+	Factory* factory;
+	Tile tile;
+	bool with_bonus;
+};
 
 class Player {
 public:

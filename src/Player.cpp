@@ -1,4 +1,4 @@
-#include "player.hpp"
+#include "players/Player.hpp"
 #include <algorithm>
 
 Player::Player(PlayerColour colour, Game* game)

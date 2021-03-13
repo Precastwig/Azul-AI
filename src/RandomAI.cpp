@@ -1,4 +1,4 @@
-#include "randomAI.hpp"
+#include "players/RandomAI.hpp"
 
 PickingChoice RandomAI::pickTile(
 	std::vector<Factory*> factories,

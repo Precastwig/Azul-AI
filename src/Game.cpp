@@ -1,5 +1,5 @@
-#include "game.hpp"
-#include "randomAI.hpp"
+#include "Game.hpp"
+#include "players/RandomAI.hpp"
 #include <algorithm>
 #include <iostream>
 
