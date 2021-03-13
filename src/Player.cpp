@@ -156,8 +156,8 @@ void Player::resolvePickingChoice(
 		// Oh well
 		m_num_of_each_tile[choice.tile] += choice.factory->numberOf(choice.tile);
 		// Remove from factory
-		choice.factory->removeTiles(choice.tile, bonus, centre);
 	}
+	choice.factory->removeTiles(choice.tile, bonus, centre);
 }
 
 std::string Player::toString() {
