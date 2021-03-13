@@ -170,3 +170,21 @@ void Board::keepTiles(std::vector<Tile> to_keep) {
 	if (m_keep.size() <= 4)
 		m_keep = to_keep;
 }
+
+std::string Board::toString() {
+	std::string str = "";
+	for (unsigned int i = 0; i < m_tiles.size(); i++) {
+		str += location_strings[i] + "\n";
+		str += "|1|2|3|4|5|6|\n";
+		str += "|";
+		for (int j = 0; j < 6; j++) {
+			if (m_tiles[i][j]) {
+				str += "X|";
+			} else {
+				str += " |";
+			}
+		}
+		str += "\n\n";
+	}
+	return str;
+}

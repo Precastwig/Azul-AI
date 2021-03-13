@@ -21,6 +21,13 @@ static const std::vector<PlayerColour> all_player_colours = {
 	GREY
 };
 
+static const std::vector<std::string> player_colour_strings = {
+	"White",
+	"Wood",
+	"Black",
+	"Grey"
+};
+
 enum Location {
 	ORANGE_STAR,
 	RED_STAR,
@@ -39,6 +46,16 @@ static const std::vector<Location> all_locations = {
 	GREEN_STAR,
 	PURPLE_STAR,
 	CENTRE_STAR
+};
+
+static const std::vector<std::string> location_strings = {
+	"ORANGE STAR",
+	"RED STAR",
+	"BLUE STAR",
+	"YELLOW STAR",
+	"GREEN STAR",
+	"PURPLE STAR",
+	"CENTRE STAR"
 };
 
 static const int num_locations = 7;

@@ -3,6 +3,7 @@
 
 #include "utils/helper_enums.hpp"
 #include <stdlib.h>
+#include <memory>
 
 class Factory {
 public:
@@ -13,8 +14,7 @@ public:
 	void place(Tile tile);
 	void addTiles(std::vector<Tile> tiles);
 	// Remove tiles from the factory
-	void removeTiles(Tile tile_taken, Tile bonus_type, Factory* centre);
-
+	void removeTiles(Tile tile_taken, Tile bonus_type, std::shared_ptr<Factory> centre);
 
 	// Getter functions
 	std::vector<Tile> tiles() const;

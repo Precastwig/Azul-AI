@@ -35,6 +35,13 @@ public:
 		m_tile_bin.insert(m_tile_bin.end(), tiles.begin(), tiles.end());
 	}
 
+	void toBin(Tile colour, int number) {
+		for (int i = 0; i < number; i++) {
+			// Place a tile in the bin
+			m_tile_bin.push_back(colour);
+		}
+	}
+
 private:
 	void binToBag() {
 		m_tile_bag.insert(m_tile_bag.end(), m_tile_bin.begin(), m_tile_bin.end());

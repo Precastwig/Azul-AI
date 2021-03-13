@@ -6,7 +6,7 @@
 Game::Game(int num_players) : m_tile_bag() {
 	// Create the players
 	for (int i = 0; i < num_players; ++i) {
-		Player* randomai = new RandomAI(all_player_colours[i], this);
+		std::shared_ptr<Player> randomai = std::make_shared<RandomAI>(all_player_colours[i], this);
 		m_players.push_back(randomai);
 	}
 
@@ -16,9 +16,9 @@ Game::Game(int num_players) : m_tile_bag() {
 	// Create the factories
 	int num_factories = (num_players * 2) + 1;
 	for (int i = 0; i < num_factories; ++i) {
-		m_factories.push_back(new Factory());
+		m_factories.push_back(std::make_shared<Factory>());
 	}
-	m_centre = new Factory();
+	m_centre = std::make_shared<Factory>();
 
 	// Fill the reward tiles
 	for (int i = 0; i < 10; ++i) {
@@ -28,15 +28,6 @@ Game::Game(int num_players) : m_tile_bag() {
 }
 
 Game::~Game() {
-	for (Player* p : m_players) {
-		delete p;
-	}
-
-	for (Factory* f : m_factories) {
-		delete f;
-	}
-
-	delete m_centre;
 }
 
 void Game::play() {
@@ -49,18 +40,39 @@ void Game::play() {
 		BLUE,
 		RED
 	};
+	int round_number = 1;
 	for (Tile bonus_tile : bonus_tile_order) {
+		std::cout << "=======================\n";
+		std::cout << "Round " << round_number << ":\n";
+		std::cout << "Bonus tile colour: " << tile_strings[bonus_tile] << "\n";
 		// Fill factories
 		fill_factories();
 		// First stage
 		picking_stage(bonus_tile);
 		// Second stage
-		placing_stage();
+		placing_stage(bonus_tile);
+
+		round_number++;
+	}
+	declare_winner();
+}
+
+void Game::declare_winner() {
+	std::vector<std::shared_ptr<Player>> sorted_players = m_players;
+	std::sort(sorted_players.begin(), sorted_players.end(),
+	[](std::shared_ptr<Player> a, std::shared_ptr<Player> b) {
+        return a->points() > b->points();
+    });
+
+	std::cout << "=================\nGame over:\n";
+	int pos = 1;
+	for (std::shared_ptr<Player> player : sorted_players) {
+		std::cout << pos << ". " << player_colour_strings[player->colour()] << "   " << player->points() << " points\n";
 	}
 }
 
 void Game::fill_factories() {
-	for (Factory* factory : m_factories) {
+	for (std::shared_ptr<Factory> factory : m_factories) {
 		for (int i = 0; i < 4; ++i) {
 			Tile pulled = m_tile_bag.pullTile();
 			if (pulled != NONE) {
@@ -71,7 +83,7 @@ void Game::fill_factories() {
 }
 
 bool Game::noTilesLeft() {
-	for (Factory* factory : m_factories) {
+	for (std::shared_ptr<Factory> factory : m_factories) {
 		if (!factory->isEmpty()) {
 			return false;
 		}
@@ -83,9 +95,9 @@ void Game::picking_stage(Tile bonus_tile) {
 	cIndex player_turn(m_starting_player + 1, m_players.size());
 	// Double negative, I won't apologise
 	bool centreTaken = false;
+	printFactories();
 	while (!noTilesLeft()) {
-		printFactories();
-		Player* player = m_players[player_turn.getIndex()];
+		std::shared_ptr<Player> player = m_players[player_turn.getIndex()];
 		PickingChoice choice = player->pickTile(
 			m_factories,
 			m_centre,
@@ -100,12 +112,13 @@ void Game::picking_stage(Tile bonus_tile) {
 		}
 		player->resolvePickingChoice(choice, bonus_tile, m_centre);
 		player_turn++;
+		printFactories();
 	}
 }
 
-bool Game::playerHasTiles() {
-	for (Player* player : m_players) {
-		if (player->hasTiles())
+bool Game::playerNotFinished() {
+	for (std::shared_ptr<Player> player : m_players) {
+		if (!player->finishedPlacing())
 			return true;
 	}
 	return false;
@@ -132,16 +145,23 @@ void Game::takeRewardTiles(std::vector<Tile> tiles) {
 	}
 }
 
-void Game::placing_stage() {
+void Game::placing_stage(Tile bonus_tile) {
+	std::cout << "\n========================\nPLACING STAGE\n";
+	for (std::shared_ptr<Player> player : m_players) {
+		player->resetDonePlacing();
+	}
 	cIndex player_turn(m_starting_player + 1, m_players.size());
-	while (playerHasTiles()) {
-		m_players[player_turn.getIndex()]->placeTile();
+	while (playerNotFinished()) {
+		std::shared_ptr<Player> current_player = m_players[player_turn.getIndex()];
+		PlacingChoice choice = current_player->placeTile(bonus_tile);
+		current_player->resolvePlacingChoice(choice, bonus_tile, m_tile_bag);
+		std::cout << current_player->toString();
 		player_turn++;
 	}
 }
 
 void Game::printFactories() {
-	std::cout << "\n\n\nFACTORIES\n-----------------\n";
+	std::cout << "\n\nFACTORIES\n-----------------\n";
 	for (unsigned int i = 0; i < m_factories.size(); ++i) {
 		std::cout << "Factory " << i << ": " << m_factories[i]->toString() << "\n";
 	}

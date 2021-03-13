@@ -2,6 +2,7 @@
 #define GAME
 
 #include <vector>
+#include <memory>
 #include "players/Player.hpp"
 #include "game_elements/Bag.hpp"
 #include "game_elements/Factory.hpp"
@@ -21,11 +22,12 @@ private:
 	// Turn steps
 	void fill_factories();
 	void picking_stage(Tile bonus_tile);
-	void placing_stage();
+	void placing_stage(Tile bonus_tile);
+	void declare_winner();
 
 	// Helper functions
 	bool noTilesLeft();
-	bool playerHasTiles();
+	bool playerNotFinished();
 
 	// Reward tiles
 	std::vector<Tile> m_reward_tiles;
@@ -34,12 +36,12 @@ private:
 	Bag m_tile_bag;
 
 	// Central tiles
-	std::vector<Factory*> m_factories;
-	Factory* m_centre;
+	std::vector<std::shared_ptr<Factory>> m_factories;
+	std::shared_ptr<Factory> m_centre;
 
 	// Member variable for players
 	int m_starting_player;
-	std::vector<Player*> m_players;
+	std::vector<std::shared_ptr<Player>> m_players;
 };
 
 #endif

@@ -8,7 +8,7 @@ void Factory::addTiles(std::vector<Tile> tiles) {
 	m_tiles.insert(m_tiles.end(), tiles.begin(), tiles.end());
 }
 
-void Factory::removeTiles(Tile tile_taken, Tile bonus_type, Factory* centre) {
+void Factory::removeTiles(Tile tile_taken, Tile bonus_type, std::shared_ptr<Factory> centre) {
 	std::vector<Tile> new_list;
 	// We can't take the bonus type of tile
 	if (tile_taken == bonus_type) return;
@@ -24,7 +24,7 @@ void Factory::removeTiles(Tile tile_taken, Tile bonus_type, Factory* centre) {
 			}
 		}
 	}
-	if (this != centre) {
+	if (this != centre.get()) {
 		// We're a factory around the edge
 		m_tiles.clear();
 		// Empty and add to centre

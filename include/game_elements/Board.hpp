@@ -28,6 +28,8 @@ public:
 	void keepTiles(std::vector<Tile> to_keep);
 
 	std::vector<PlacingChoice> getAllPlacingChoices();
+
+	std::string toString();
 private:
 	int bonusPiecesAwarded();
 	int bonusPointsAwarded();

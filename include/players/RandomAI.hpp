@@ -13,12 +13,12 @@ public:
 
 	// Decision overrides
 	virtual PickingChoice pickTile(
-		std::vector<Factory*> factories,
-		Factory* centre,
+		std::vector<std::shared_ptr<Factory>> factories,
+		std::shared_ptr<Factory> centre,
 		Tile bonus,
 		bool centrePoison
 	) override;
-	virtual void placeTile() override;
+	virtual PlacingChoice placeTile(Tile bonus) override;
 	virtual void pickBonusPieces(int number) override;
 private:
 };
