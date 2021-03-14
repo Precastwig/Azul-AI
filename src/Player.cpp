@@ -1,8 +1,9 @@
 #include "players/Player.hpp"
+#include "Game.hpp"
 #include <algorithm>
 
-Player::Player(PlayerColour colour, Game* game)
-	:  m_done_placing(false), m_board(), m_game(game), m_col(colour), m_points(0) {
+Player::Player(PlayerColour colour, std::shared_ptr<Bag> piecestores)
+	:  m_done_placing(false), m_board(), m_piece_stores(piecestores), m_col(colour), m_points(0) {
 };
 
 void Player::addPoints(int points) {
@@ -87,6 +88,16 @@ void Player::createAllVariationsOfChoice(
 	}
 }
 
+void Player::pickBonusPieces(int number) {
+	std::vector<Tile> choices = chooseBonusPieces(m_piece_stores->rewardTiles(), number);
+	// Add the tiles to our piece list
+	for (Tile tile : choices) {
+		m_num_of_each_tile[tile]++;
+	}
+	// Remove the tiles from the bonus board
+	m_piece_stores->takeRewardTiles(choices);
+}
+
 std::vector<PlacingChoice> Player::getAllowedPlacingChoices(Tile bonus) {
 	std::vector<PlacingChoice> all_choices = m_board.getAllPlacingChoices();
 	std::vector<PlacingChoice> valid_choices;
@@ -118,14 +129,14 @@ std::vector<PlacingChoice> Player::getAllowedPlacingChoices(Tile bonus) {
 	return valid_choices;
 }
 
-void Player::resolvePlacingChoice(PlacingChoice choice, Tile bonus, Bag bag) {
+void Player::resolvePlacingChoice(PlacingChoice choice, Tile bonus) {
 	if (!m_done_placing) {
 		// Remove the cost from current number of tiles
 		m_num_of_each_tile[choice.cost.colour] -= choice.cost.num_colour;
 		m_num_of_each_tile[bonus] -= choice.cost.num_bonus;
 		// Put the used tiles in the bin
-		bag.toBin(choice.cost.colour, choice.cost.num_colour - 1);
-		bag.toBin(bonus, choice.cost.num_bonus);
+		m_piece_stores->toBin(choice.cost.colour, choice.cost.num_colour - 1);
+		m_piece_stores->toBin(bonus, choice.cost.num_bonus);
 		// Place the tile on the board (this scores us points)
 		m_board.placeTile(choice, this);
 	} else {

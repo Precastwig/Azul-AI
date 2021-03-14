@@ -16,7 +16,7 @@ struct PickingChoice {
 
 class Player {
 public:
-	Player(PlayerColour colour, Game* game);
+	Player(PlayerColour colour, std::shared_ptr<Bag> piecestores);
 	virtual ~Player() = default;
 
 	// Virtuals that need overriding either by AI or human player variant
@@ -27,9 +27,10 @@ public:
 		bool centrePoison
 	) = 0;
 	virtual PlacingChoice placeTile(Tile bonus) = 0;
-	virtual void pickBonusPieces(int number) = 0;
+	virtual std::vector<Tile> chooseBonusPieces(std::vector<Tile> choices, int number) = 0;
 
 	// Other helpers
+	void pickBonusPieces(int number);
 	bool hasTiles();
 	void addPoints(int points);
 	void minusPoisonPoints();
@@ -42,7 +43,7 @@ public:
 
 	// Resolvers
 	void resolvePickingChoice(PickingChoice choice, Tile bonus, std::shared_ptr<Factory> centre);
-	void resolvePlacingChoice(PlacingChoice choice, Tile bonus, Bag bag);
+	void resolvePlacingChoice(PlacingChoice choice, Tile bonus);
 
 	bool finishedPlacing() {
 		return m_done_placing;
@@ -68,7 +69,7 @@ protected:
 	Board m_board;
 private:
 
-	const Game* m_game;
+	std::shared_ptr<Bag> m_piece_stores;
 	std::vector<int> m_num_of_each_tile = {0,0,0,0,0,0};
 	const PlayerColour m_col;
 	int m_points;

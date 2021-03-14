@@ -9,31 +9,41 @@
 
 class Game {
 public:
+	// Constructor/Destructor
 	Game(int num_players);
 	~Game();
 
+	// Initiates the play sequence
 	void play();
-
-	void takeRewardTiles(std::vector<Tile> tiles);
-	std::vector<Tile> rewardTiles();
 private:
+	// Prints the factories to stdout
 	void printFactories();
-
-	// Turn steps
-	void fill_factories();
-	void picking_stage(Tile bonus_tile);
-	void placing_stage(Tile bonus_tile);
+	// Print some info to stdout declaring the winner of the game
 	void declare_winner();
 
+	//-------------------------------------------------------------------
+	// Turn step functions
+
+	// Pulls tiles from the bag and places on the factories until each
+	// factory contains 4, or the bag runs out
+	void fill_factories();
+	// Players take turns picking tiles from factories until all are empty
+	void picking_stage(Tile bonus_tile);
+	// Players take turns placing tiles on their personal boards until they choose to stop (or can't place any more tiles)
+	void placing_stage(Tile bonus_tile);
+
 	// Helper functions
+
+	// Check if all factories are empty
 	bool noTilesLeft();
+	// Check that there is a player that still wishes to place tiles
 	bool playerNotFinished();
 
-	// Reward tiles
-	std::vector<Tile> m_reward_tiles;
+	//-------------------------------------------------------------------
+	// Member variables
 
 	// Tile sources
-	Bag m_tile_bag;
+	std::shared_ptr<Bag> m_bag;
 
 	// Central tiles
 	std::vector<std::shared_ptr<Factory>> m_factories;

@@ -3,10 +3,12 @@
 #include <algorithm>
 #include <iostream>
 
-Game::Game(int num_players) : m_tile_bag() {
+Game::Game(int num_players) {
+	// Create the bag
+	m_bag = std::make_shared<Bag>();
 	// Create the players
 	for (int i = 0; i < num_players; ++i) {
-		std::shared_ptr<Player> randomai = std::make_shared<RandomAI>(all_player_colours[i], this);
+		std::shared_ptr<Player> randomai = std::make_shared<RandomAI>(all_player_colours[i], m_bag);
 		m_players.push_back(randomai);
 	}
 
@@ -19,12 +21,6 @@ Game::Game(int num_players) : m_tile_bag() {
 		m_factories.push_back(std::make_shared<Factory>());
 	}
 	m_centre = std::make_shared<Factory>();
-
-	// Fill the reward tiles
-	for (int i = 0; i < 10; ++i) {
-		Tile pulled = m_tile_bag.pullTile();
-		m_reward_tiles.push_back(pulled);
-	}
 }
 
 Game::~Game() {
@@ -75,7 +71,7 @@ void Game::declare_winner() {
 void Game::fill_factories() {
 	for (std::shared_ptr<Factory> factory : m_factories) {
 		for (int i = 0; i < 4; ++i) {
-			Tile pulled = m_tile_bag.pullTile();
+			Tile pulled = m_bag->pullTile();
 			if (pulled != NONE) {
 				factory->place(pulled);
 			}
@@ -125,27 +121,6 @@ bool Game::playerNotFinished() {
 	return false;
 }
 
-std::vector<Tile> Game::rewardTiles() {
-	return m_reward_tiles;
-}
-
-void Game::takeRewardTiles(std::vector<Tile> tiles) {
-	for (Tile tile : tiles) {
-		auto tile_iter = std::find(m_reward_tiles.begin(), m_reward_tiles.end(), tile);
-		if (tile_iter != m_reward_tiles.end()) {
-			// We find the tile, remove from the reward tiles and replace from bag
-			m_reward_tiles.erase(tile_iter);
-			Tile replacement = m_tile_bag.pullTile();
-			if (replacement != NONE) {
-				m_reward_tiles.push_back(replacement);
-			}
-		} else {
-			// if it's not in there something's gone wrong!
-			// Error?
-		}
-	}
-}
-
 void Game::placing_stage(Tile bonus_tile) {
 	std::cout << "\n========================\nPLACING STAGE\n";
 	for (std::shared_ptr<Player> player : m_players) {
@@ -155,7 +130,7 @@ void Game::placing_stage(Tile bonus_tile) {
 	while (playerNotFinished()) {
 		std::shared_ptr<Player> current_player = m_players[player_turn.getIndex()];
 		PlacingChoice choice = current_player->placeTile(bonus_tile);
-		current_player->resolvePlacingChoice(choice, bonus_tile, m_tile_bag);
+		current_player->resolvePlacingChoice(choice, bonus_tile);
 		std::cout << current_player->toString();
 		player_turn++;
 	}

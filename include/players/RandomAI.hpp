@@ -6,7 +6,7 @@
 // A player object that just makes random decisions
 class RandomAI : public Player {
 public:
-	RandomAI(PlayerColour colour, Game* game) : Player(colour, game) {
+	RandomAI(PlayerColour colour, std::shared_ptr<Bag> piecestores) : Player(colour, piecestores) {
 		srand (time(NULL));
 	};
 	~RandomAI() = default;
@@ -19,7 +19,7 @@ public:
 		bool centrePoison
 	) override;
 	virtual PlacingChoice placeTile(Tile bonus) override;
-	virtual void pickBonusPieces(int number) override;
+	virtual std::vector<Tile> chooseBonusPieces(std::vector<Tile> choices, int num) override;
 private:
 };
 
