@@ -1,7 +1,7 @@
-#include "players/RandomAI.hpp"
+#include "players/HumanCommandLine.hpp"
 #include <iostream>
 
-PickingChoice RandomAI::pickTile(
+PickingChoice HumanCommandLine::pickTile(
 	std::vector<std::shared_ptr<Factory>> factories,
 	std::shared_ptr<Factory> centre,
 	Tile bonus,
@@ -12,11 +12,32 @@ PickingChoice RandomAI::pickTile(
 		centre,
 		bonus
 	);
-	int random_index = rand() % choices.size();
- 	return choices[random_index];
+	while (1) {
+		int chosen_factory = -1;
+		std::cout << "Choose a factory\n";
+		while (chosen_factory < 0 || chosen_factory > factories.size()) {
+			// + 1 for the centre
+			std::cin >> chosen_factory;
+		}
+		std::cout << "Choose a colour\n";
+		for (int i = 0; i < tile_strings.size() - 1; i++) {
+			std::cout << i << tile_strings[i] << "\n";
+		}
+		int chosen_colour_int = -1;
+		while (chosen_colour_int < 0 || chosen_colour_int > 5) {
+			std::cin >> chosen_colour_int;
+		}
+		Tile chosen_colour = (Tile)chosen_colour_int;
+		for (PickingChoice choice : choices) {
+			if (choice.factory == factories[chosen_factory] &&
+				choice.tile == chosen_colour) {
+				return choice;
+			}
+		}
+	}
 }
 
-PlacingChoice RandomAI::placeTile(Tile bonus) {
+PlacingChoice HumanCommandLine::placeTile(Tile bonus) {
 	std::vector<PlacingChoice> choices = getAllowedPlacingChoices(bonus);
 	if (choices.size() == 0) {
 		m_done_placing = true;
@@ -26,7 +47,7 @@ PlacingChoice RandomAI::placeTile(Tile bonus) {
 	return choices[random_index];
 }
 
-std::vector<Tile> RandomAI::chooseBonusPieces(std::vector<Tile> choices, int number) {
+std::vector<Tile> HumanCommandLine::chooseBonusPieces(std::vector<Tile> choices, int number) {
 	std::cout << "\nChoosing bonus pieces!\n";
 	std::string s;
 	std::cin >> s;
