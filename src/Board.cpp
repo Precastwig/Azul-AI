@@ -1,5 +1,6 @@
 #include "game_elements/Board.hpp"
 #include "players/Player.hpp"
+#include <algorithm>
 
 Board::Board()
 {
@@ -24,6 +25,7 @@ Board::Board()
 	for (int i = 0; i < 4; ++i) {
 		m_full_numbers.push_back(false);
 	}
+	m_colours_not_in_centre = all_tiles;
 }
 
 void Board::count(
@@ -118,9 +120,18 @@ int Board::bonusPointsAwarded() {
 	return 0;
 }
 
+std::vector<Tile> Board::getUnusedColoursInCentre() {
+	return m_colours_not_in_centre;
+}
+
 void Board::placeTile(PlacingChoice choice, Player* me) {
 	// Place the tile
 	m_tiles[choice.star][choice.index.getIndex()] = true;
+
+	if (choice.star == CENTRE_STAR) {
+		// We need to log what colour we're placing
+		m_colours_not_in_centre.erase(std::remove(m_colours_not_in_centre.begin(), m_colours_not_in_centre.end(), choice.cost.colour));
+	}
 
 	// Count points gained
 	int points = 0;

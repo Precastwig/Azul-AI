@@ -28,6 +28,7 @@ public:
 	void keepTiles(std::vector<Tile> to_keep);
 
 	std::vector<PlacingChoice> getAllPlacingChoices();
+	std::vector<Tile> getUnusedColoursInCentre();
 
 	std::string toString();
 private:
@@ -50,6 +51,7 @@ private:
 	// The tile spaces
 	std::vector<Star> m_tiles;
 	std::vector<Tile> m_keep;
+	std::vector<Tile> m_colours_not_in_centre;
 };
 
 #endif

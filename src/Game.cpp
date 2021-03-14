@@ -68,6 +68,7 @@ void Game::declare_winner() {
 	int pos = 1;
 	for (std::shared_ptr<Player> player : sorted_players) {
 		std::cout << pos << ". " << player_colour_strings[player->colour()] << "   " << player->points() << " points\n";
+		pos++;
 	}
 }
 

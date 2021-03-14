@@ -91,20 +91,29 @@ std::vector<PlacingChoice> Player::getAllowedPlacingChoices(Tile bonus) {
 	std::vector<PlacingChoice> all_choices = m_board.getAllPlacingChoices();
 	std::vector<PlacingChoice> valid_choices;
 	for (PlacingChoice choice : all_choices) {
-		int max_bonus = 0;
-		if (choice.cost.colour != bonus) {
-			max_bonus = m_num_of_each_tile[bonus];
+		std::vector<Tile> potentialCostColours;
+		if (choice.cost.colour == NONE) {
+			potentialCostColours = m_board.getUnusedColoursInCentre();
+		} else {
+			potentialCostColours.push_back(choice.cost.colour);
 		}
-		int num_relevent_colour = 0;
-		if (choice.cost.colour != NONE) {
-			num_relevent_colour = m_num_of_each_tile[choice.cost.colour];
+
+		for (Tile costColour : potentialCostColours) {
+			int max_bonus = 0;
+			if (costColour != bonus) {
+				max_bonus = m_num_of_each_tile[bonus];
+			}
+
+			choice.cost.colour = costColour;
+
+			int num_relevent_colour = m_num_of_each_tile[costColour];
+			createAllVariationsOfChoice(
+				choice,
+				valid_choices,
+				max_bonus,
+				num_relevent_colour
+			);
 		}
-		createAllVariationsOfChoice(
-			choice,
-			valid_choices,
-			max_bonus,
-			num_relevent_colour
-		);
 	}
 	return valid_choices;
 }
