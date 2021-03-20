@@ -43,3 +43,25 @@ std::vector<Tile> RandomAI::chooseBonusPieces(std::vector<Tile> choices, int num
 	}
 	return return_list;
 }
+
+std::vector<Tile> RandomAI::discardDownToFour() {
+	std::vector<Tile> return_list;
+	// Magic number, it's the number of tiles
+	for (int i = 0; i < 6; i++) {
+		if (return_list.size() == 4) {
+			return return_list;
+		} else {
+			int num_kept = return_list.size();
+			int num = m_num_of_each_tile[i];
+			if (num + num_kept > 4) {
+				// Save some, but not all
+				num = 4 - num_kept;
+			}
+			// Save num of the current type
+			for (; num > 0; num--) {
+				return_list.push_back(all_tiles[i]);
+			}
+		}
+	}
+	return return_list;
+}

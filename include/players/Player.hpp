@@ -16,10 +16,10 @@ struct PickingChoice {
 
 class Player {
 public:
-	Player(PlayerColour colour, std::shared_ptr<Bag> piecestores);
+	Player(PlayerColour colour, std::shared_ptr<Bag> bag);
 	virtual ~Player() = default;
 
-	// Virtuals that need overriding either by AI or human player variant
+	// Virtuals that need overriding because an in-game choice is needed
 	virtual PickingChoice pickTile(
 		std::vector<std::shared_ptr<Factory>> factories,
 		std::shared_ptr<Factory> centre,
@@ -28,6 +28,7 @@ public:
 	) = 0;
 	virtual PlacingChoice placeTile(Tile bonus) = 0;
 	virtual std::vector<Tile> chooseBonusPieces(std::vector<Tile> choices, int number) = 0;
+	virtual std::vector<Tile> discardDownToFour() = 0;
 
 	// Other helpers
 	void pickBonusPieces(int number);
@@ -50,10 +51,12 @@ public:
 	};
 	void resetDonePlacing() {
 		m_done_placing = false;
+		m_discarded = false;
 	};
 
 	std::string toString();
 protected:
+	std::vector<Location> getLocationsFromChoiceList(std::vector<PlacingChoice> choices);
 	std::vector<PickingChoice> getAllPickingChoices(
 		std::vector<std::shared_ptr<Factory>> factories,
 		std::shared_ptr<Factory> centre,
@@ -66,11 +69,12 @@ protected:
 		int max_relevent_colour
 	);
 	bool m_done_placing;
+	bool m_discarded;
 	Board m_board;
+	std::vector<int> m_num_of_each_tile = {0,0,0,0,0,0};
 private:
 
-	std::shared_ptr<Bag> m_piece_stores;
-	std::vector<int> m_num_of_each_tile = {0,0,0,0,0,0};
+	std::shared_ptr<Bag> m_bag;
 	const PlayerColour m_col;
 	int m_points;
 };

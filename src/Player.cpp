@@ -1,9 +1,10 @@
 #include "players/Player.hpp"
 #include "Game.hpp"
 #include <algorithm>
+#include <set>
 
-Player::Player(PlayerColour colour, std::shared_ptr<Bag> piecestores)
-	:  m_done_placing(false), m_board(), m_piece_stores(piecestores), m_col(colour), m_points(0) {
+Player::Player(PlayerColour colour, std::shared_ptr<Bag> bag)
+	:  m_done_placing(false), m_discarded(false), m_board(), m_bag(bag), m_col(colour), m_points(0) {
 };
 
 void Player::addPoints(int points) {
@@ -89,13 +90,13 @@ void Player::createAllVariationsOfChoice(
 }
 
 void Player::pickBonusPieces(int number) {
-	std::vector<Tile> choices = chooseBonusPieces(m_piece_stores->rewardTiles(), number);
+	std::vector<Tile> choices = chooseBonusPieces(m_bag->rewardTiles(), number);
 	// Add the tiles to our piece list
 	for (Tile tile : choices) {
 		m_num_of_each_tile[tile]++;
 	}
 	// Remove the tiles from the bonus board
-	m_piece_stores->takeRewardTiles(choices);
+	m_bag->takeRewardTiles(choices);
 }
 
 std::vector<PlacingChoice> Player::getAllowedPlacingChoices(Tile bonus) {
@@ -135,31 +136,27 @@ void Player::resolvePlacingChoice(PlacingChoice choice, Tile bonus) {
 		m_num_of_each_tile[choice.cost.colour] -= choice.cost.num_colour;
 		m_num_of_each_tile[bonus] -= choice.cost.num_bonus;
 		// Put the used tiles in the bin
-		m_piece_stores->toBin(choice.cost.colour, choice.cost.num_colour - 1);
-		m_piece_stores->toBin(bonus, choice.cost.num_bonus);
+		m_bag->toBin(choice.cost.colour, choice.cost.num_colour - 1);
+		m_bag->toBin(bonus, choice.cost.num_bonus);
 		// Place the tile on the board (this scores us points)
 		m_board.placeTile(choice, this);
-	} else {
+	} else if (!m_discarded) {
 		// Remove the tiles down to 4
-		int total = 0;
-		// Magic number, it's the number of tiles
-		// There should be some choice being made here, and this logic
-		// soup should be in a function
-		for (int i = 0; i < 6; i++) {
-			if (total >= 4) {
-				m_num_of_each_tile[i] = 0;
-			} else {
-				int num = m_num_of_each_tile[i];
-				if (num + total > 4) {
-					// Save some
-					m_num_of_each_tile[i] = 4 - total;
-					total = 4;
-				} else {
-					total += num;
-				}
-			}
+		std::vector<Tile> keep = discardDownToFour();
+		m_discarded = true;
+		// Only do this once
+		for (Tile tile : keep) {
+			m_num_of_each_tile[tile]++;
 		}
 	}
+}
+
+std::vector<Location> Player::getLocationsFromChoiceList(std::vector<PlacingChoice> choices) {
+	std::set<Location> return_list;
+	for (PlacingChoice choice : choices) {
+		return_list.insert(choice.star);
+	}
+	return std::vector<Location>(return_list.begin(), return_list.end());
 }
 
 void Player::resolvePickingChoice(
@@ -182,6 +179,7 @@ void Player::resolvePickingChoice(
 
 std::string Player::toString() {
 	std::string str = "Player: " + player_colour_strings[m_col] + "\n";
+	str += "Points: " + std::to_string(m_points) + "\n";
 	for (int i = 0; i < 6; i++) {
 		str += tile_strings[i] + ": " + std::to_string(m_num_of_each_tile[i]) + "\n";
 	}

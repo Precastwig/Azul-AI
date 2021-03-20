@@ -12,6 +12,7 @@ PickingChoice HumanCommandLine::pickTile(
 		centre,
 		bonus
 	);
+	factories.push_back(centre);
 	while (1) {
 		int chosen_factory = -1;
 		std::cout << "Choose a factory\n";
@@ -21,7 +22,7 @@ PickingChoice HumanCommandLine::pickTile(
 		}
 		std::cout << "Choose a colour\n";
 		for (int i = 0; i < tile_strings.size() - 1; i++) {
-			std::cout << i << tile_strings[i] << "\n";
+			std::cout << i << ". " << tile_strings[i] << "\n";
 		}
 		int chosen_colour_int = -1;
 		while (chosen_colour_int < 0 || chosen_colour_int > 5) {
@@ -38,13 +39,38 @@ PickingChoice HumanCommandLine::pickTile(
 }
 
 PlacingChoice HumanCommandLine::placeTile(Tile bonus) {
+	std::cout << m_board.toString();
 	std::vector<PlacingChoice> choices = getAllowedPlacingChoices(bonus);
-	if (choices.size() == 0) {
+	if (choices.size() == 0 || m_done_placing) {
+		if (!m_done_placing) {
+			std::cout << "You have no more placing choices\n";
+		}
+		// You have to finish placing
 		m_done_placing = true;
 		return PlacingChoice();
 	}
-	int random_index = rand() % choices.size();
-	return choices[random_index];
+	std::vector<Location> location_choices = getLocationsFromChoiceList(choices);
+	while (1) {
+		std::cout << "Choose a location to place:\n";
+		for (int i = 0; i < location_choices.size(); i++) {
+			std::cout << i << ". " << location_strings[location_choices[i]] << "\n";
+		}
+		int star_choice = -1;
+		std::cin >> star_choice;
+		if (star_choice < 0 || star_choice >= location_choices.size()) {
+			std::cout << "Not a choice\n";
+			continue;
+		}
+
+		std::cout << "Choose a placement\n" << m_board.toString((Location)star_choice);
+		int num_choice = -1;
+		std::cin >> num_choice;
+		for (PlacingChoice choice : choices) {
+			if (choice.star == star_choice && choice.index == num_choice) {
+				return choice;
+			}
+		}
+	}
 }
 
 std::vector<Tile> HumanCommandLine::chooseBonusPieces(std::vector<Tile> choices, int number) {
@@ -63,4 +89,8 @@ std::vector<Tile> HumanCommandLine::chooseBonusPieces(std::vector<Tile> choices,
 		}
 	}
 	return return_list;
+}
+
+std::vector<Tile> HumanCommandLine::discardDownToFour() {
+
 }

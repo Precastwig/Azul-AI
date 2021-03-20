@@ -10,7 +10,7 @@
 class Game {
 public:
 	// Constructor/Destructor
-	Game(int num_players);
+	Game();
 	~Game();
 
 	// Initiates the play sequence

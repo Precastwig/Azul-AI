@@ -14,6 +14,10 @@ public:
 		m_index = i;
 	};
 
+	bool operator==(const int& i) const {
+		return m_index == i;
+	}
+
 	cIndex operator-(const int& i) const {
 		cIndex returnVal(m_index, m_max);
 		for (int k = 0; k < i; ++k) {

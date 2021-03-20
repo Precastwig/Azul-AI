@@ -182,20 +182,40 @@ void Board::keepTiles(std::vector<Tile> to_keep) {
 		m_keep = to_keep;
 }
 
+std::string Board::toString(Location star) {
+	std::string top = "";
+	std::string middle = "|1|2|3|4|5|6|";
+	std::string bottom = "|";
+	top += location_strings[star];
+	for (int j = 0; j < 6; j++) {
+		if (m_tiles[star][j]) {
+			bottom += "X|";
+		} else {
+			bottom += " |";
+		}
+	}
+	return top + "\n" + middle + "\n" + bottom + "\n";
+}
+
 std::string Board::toString() {
-	std::string str = "";
+	std::string top = "";
+	std::string middle = "";
+	std::string bottom = "|";
 	for (unsigned int i = 0; i < m_tiles.size(); i++) {
-		str += location_strings[i] + "\n";
-		str += "|1|2|3|4|5|6|\n";
-		str += "|";
+		top += "|" + location_strings[i];
+		int numspaces = 11 - location_strings[i].size();
+		for (;numspaces > 0; numspaces--) {
+			top += " ";
+		}
+		middle += "|1|2|3|4|5|6";
 		for (int j = 0; j < 6; j++) {
 			if (m_tiles[i][j]) {
-				str += "X|";
+				bottom += "X|";
 			} else {
-				str += " |";
+				bottom += " |";
 			}
 		}
-		str += "\n\n";
 	}
-	return str;
+	middle += "|";
+	return top + "\n" + middle + "\n" + bottom + "\n\n";
 }

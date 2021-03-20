@@ -30,6 +30,7 @@ public:
 	std::vector<PlacingChoice> getAllPlacingChoices();
 	std::vector<Tile> getUnusedColoursInCentre();
 
+	std::string toString(Location star);
 	std::string toString();
 private:
 	int bonusPiecesAwarded();

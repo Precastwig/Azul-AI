@@ -1,22 +1,24 @@
 #include "Game.hpp"
 #include "players/RandomAI.hpp"
+#include "players/HumanCommandLine.hpp"
 #include <algorithm>
 #include <iostream>
 
-Game::Game(int num_players) {
+Game::Game() {
 	// Create the bag
 	m_bag = std::make_shared<Bag>();
-	// Create the players
-	for (int i = 0; i < num_players; ++i) {
-		std::shared_ptr<Player> randomai = std::make_shared<RandomAI>(all_player_colours[i], m_bag);
-		m_players.push_back(randomai);
-	}
+	// Create the players, for now one randomAI and one humancmd
+
+	std::shared_ptr<Player> randomai = std::make_shared<RandomAI>(all_player_colours[0], m_bag);
+	std::shared_ptr<Player> player = std::make_shared<HumanCommandLine>(all_player_colours[1], m_bag);
+	m_players.push_back(randomai);
+	m_players.push_back(player);
 
 	// Randomise the starting player
 	m_starting_player = rand() % m_players.size();
 
 	// Create the factories
-	int num_factories = (num_players * 2) + 1;
+	int num_factories = (m_players.size() * 2) + 1;
 	for (int i = 0; i < num_factories; ++i) {
 		m_factories.push_back(std::make_shared<Factory>());
 	}
