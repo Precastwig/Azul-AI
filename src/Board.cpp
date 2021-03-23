@@ -168,6 +168,7 @@ std::vector<PlacingChoice> Board::getAllPlacingChoices() {
 				} else {
 					choice.cost.colour = all_tiles[star];
 				}
+				choice.cost.num_colour = i + 1;
 				choice.index = cIndex(i + 1, 6);
 				choices.push_back(choice);
 			}

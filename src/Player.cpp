@@ -2,6 +2,7 @@
 #include "Game.hpp"
 #include <algorithm>
 #include <set>
+#include <iostream>
 
 Player::Player(PlayerColour colour, std::shared_ptr<Bag> bag)
 	:  m_done_placing(false), m_discarded(false), m_board(), m_bag(bag), m_col(colour), m_points(0) {
@@ -101,6 +102,15 @@ void Player::pickBonusPieces(int number) {
 
 std::vector<PlacingChoice> Player::getAllowedPlacingChoices(Tile bonus) {
 	std::vector<PlacingChoice> all_choices = m_board.getAllPlacingChoices();
+	int choice = -1;
+	// std::cout << "Press 1 to output all choices\n";
+	// std::cin >> choice;
+	// if (choice == 1) {
+	// 	for (PlacingChoice choice : all_choices) {
+	// 		std::cout << location_strings[choice.star] << " " << tile_strings[choice.cost.colour] << ": " << choice.cost.num_colour << " Bonus: " << choice.cost.num_bonus << "\n";
+	// 	}
+	// }
+
 	std::vector<PlacingChoice> valid_choices;
 	for (PlacingChoice choice : all_choices) {
 		std::vector<Tile> potentialCostColours;
@@ -127,6 +137,15 @@ std::vector<PlacingChoice> Player::getAllowedPlacingChoices(Tile bonus) {
 			);
 		}
 	}
+	// choice = -1;
+	// std::cout << "Press 1 to output all filtered choices\n";
+	// std::cin >> choice;
+	// if (choice == 1) {
+	// 	for (PlacingChoice choice : valid_choices) {
+	// 		std::cout << location_strings[choice.star] << " " << tile_strings[choice.cost.colour] << ": " << choice.cost.num_colour << " Bonus: " << choice.cost.num_bonus << "\n";
+	// 	}
+	// }
+
 	return valid_choices;
 }
 
@@ -157,6 +176,16 @@ std::vector<Location> Player::getLocationsFromChoiceList(std::vector<PlacingChoi
 		return_list.insert(choice.star);
 	}
 	return std::vector<Location>(return_list.begin(), return_list.end());
+}
+
+std::vector<PlacingChoice> Player::filterChoicesFromLocation(std::vector<PlacingChoice> choices, Location location) {
+	std::vector<PlacingChoice> return_list;
+	for (PlacingChoice choice : choices) {
+		if (choice.star == location) {
+			return_list.push_back(choice);
+		}
+	}
+	return return_list;
 }
 
 void Player::resolvePickingChoice(

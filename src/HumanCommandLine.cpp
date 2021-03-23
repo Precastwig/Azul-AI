@@ -39,7 +39,7 @@ PickingChoice HumanCommandLine::pickTile(
 }
 
 PlacingChoice HumanCommandLine::placeTile(Tile bonus) {
-	std::cout << m_board.toString();
+	std::cout << toString();
 	std::vector<PlacingChoice> choices = getAllowedPlacingChoices(bonus);
 	if (choices.size() == 0 || m_done_placing) {
 		if (!m_done_placing) {
@@ -55,21 +55,30 @@ PlacingChoice HumanCommandLine::placeTile(Tile bonus) {
 		for (int i = 0; i < location_choices.size(); i++) {
 			std::cout << i << ". " << location_strings[location_choices[i]] << "\n";
 		}
-		int star_choice = -1;
-		std::cin >> star_choice;
-		if (star_choice < 0 || star_choice >= location_choices.size()) {
+		int star_choice_index = -1;
+		std::cin >> star_choice_index;
+		if (star_choice_index < 0 || star_choice_index >= location_choices.size()) {
 			std::cout << "Not a choice\n";
 			continue;
 		}
 
-		std::cout << "Choose a placement\n" << m_board.toString((Location)star_choice);
-		int num_choice = -1;
-		std::cin >> num_choice;
+		Location star_choice = location_choices[star_choice_index];
+
+		std::cout << "Choose a placement:\n" << m_board.toString(star_choice);
+		std::vector<PlacingChoice> filteredChoices = filterChoicesFromLocation(choices, star_choice);
 		for (PlacingChoice choice : choices) {
-			if (choice.star == star_choice && choice.index == num_choice) {
-				return choice;
+			if (choice.star == star_choice) {
+				std::cout << choice.index.getIndex() + 1 << ", col:" << choice.cost.num_colour << ", bonus:" << choice.cost.num_bonus << "\n";
 			}
 		}
+		std::cout << "\n";
+		int num_choice_index = -1;
+		std::cin >> num_choice_index;
+		if (num_choice_index < 0 || num_choice_index >= filteredChoices.size()) {
+			std::cout << "Not a choice\n";
+			continue;
+		}
+		return filteredChoices[num_choice_index];
 	}
 }
 

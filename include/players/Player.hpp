@@ -57,6 +57,7 @@ public:
 	std::string toString();
 protected:
 	std::vector<Location> getLocationsFromChoiceList(std::vector<PlacingChoice> choices);
+	std::vector<PlacingChoice> filterChoicesFromLocation(std::vector<PlacingChoice> choices, Location location);
 	std::vector<PickingChoice> getAllPickingChoices(
 		std::vector<std::shared_ptr<Factory>> factories,
 		std::shared_ptr<Factory> centre,
