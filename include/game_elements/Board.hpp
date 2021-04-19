@@ -2,22 +2,24 @@
 #define BOARD
 
 #include <vector>
+#include <memory>
 #include "utils/helper_enums.hpp"
 #include "utils/cIndex.hpp"
 
 // Pre declarations
 class Player;
 
-struct Cost {
-	Tile colour;
-	int num_colour;
-	int num_bonus;
-};
-
 struct PlacingChoice {
-	Location star;
+	std::shared_ptr<Location> star;
 	Cost cost;
 	cIndex index;
+	bool operator==(PlacingChoice c) {
+		return (star == c.star &&
+				index.getIndex() == c.index.getIndex() &&
+				cost.colour == c.cost.colour &&
+				cost.num_colour == c.cost.num_colour &&
+				cost.num_bonus == c.cost.num_bonus);
+	};
 };
 
 class Board {
@@ -30,12 +32,11 @@ public:
 	std::vector<PlacingChoice> getAllPlacingChoices();
 	std::vector<Tile> getUnusedColoursInCentre();
 
-	std::string toString(Location star);
+	std::string toString(std::shared_ptr<Location> star);
 	std::string toString();
 private:
 	int bonusPiecesAwarded();
 	int bonusPointsAwarded();
-	void count(Direction dir, Location space, cIndex index, int& score);
 
 	// The bonus tiles
 	// One window per colour (5 and 6)
@@ -46,11 +47,10 @@ private:
 	std::vector<bool> m_columns;
 
 	// The bonus points
-	std::vector<bool> m_full_stars;
 	std::vector<bool> m_full_numbers;
 
 	// The tile spaces
-	std::vector<Star> m_tiles;
+	std::vector<std::shared_ptr<Location>> m_stars;
 	std::vector<Tile> m_keep;
 	std::vector<Tile> m_colours_not_in_centre;
 };

@@ -10,7 +10,7 @@ PickingChoice RandomAI::pickTile(
 	std::vector<PickingChoice> choices = getAllPickingChoices(
 		factories,
 		centre,
-		bonus
+		bonus.colour()
 	);
 	int random_index = rand() % choices.size();
  	return choices[random_index];
@@ -59,7 +59,7 @@ std::vector<Tile> RandomAI::discardDownToFour() {
 			}
 			// Save num of the current type
 			for (; num > 0; num--) {
-				return_list.push_back(all_tiles[i]);
+				return_list.push_back(Tile::all_tiles()[i]);
 			}
 		}
 	}

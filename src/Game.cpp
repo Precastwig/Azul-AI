@@ -9,8 +9,8 @@ Game::Game() {
 	m_bag = std::make_shared<Bag>();
 	// Create the players, for now one randomAI and one humancmd
 
-	std::shared_ptr<Player> randomai = std::make_shared<RandomAI>(all_player_colours[0], m_bag);
-	std::shared_ptr<Player> player = std::make_shared<HumanCommandLine>(all_player_colours[1], m_bag);
+	std::shared_ptr<Player> randomai = std::make_shared<RandomAI>(PlayerColour::all_colours()[0], m_bag);
+	std::shared_ptr<Player> player = std::make_shared<HumanCommandLine>(PlayerColour::all_colours()[1], m_bag);
 	m_players.push_back(randomai);
 	m_players.push_back(player);
 
@@ -20,9 +20,9 @@ Game::Game() {
 	// Create the factories
 	int num_factories = (m_players.size() * 2) + 1;
 	for (int i = 0; i < num_factories; ++i) {
-		m_factories.push_back(std::make_shared<Factory>());
+		m_factories.push_back(std::make_shared<Factory>(i));
 	}
-	m_centre = std::make_shared<Factory>();
+	m_centre = std::make_shared<Factory>(num_factories);
 }
 
 Game::~Game() {
@@ -31,18 +31,18 @@ Game::~Game() {
 void Game::play() {
 	// Six rounds
 	const std::vector<Tile> bonus_tile_order = {
-		PURPLE,
-		GREEN,
-		ORANGE,
-		YELLOW,
-		BLUE,
-		RED
+		Tile(Tile::PURPLE),
+		Tile(Tile::GREEN),
+		Tile(Tile::ORANGE),
+		Tile(Tile::YELLOW),
+		Tile(Tile::BLUE),
+		Tile(Tile::RED)
 	};
 	int round_number = 1;
 	for (Tile bonus_tile : bonus_tile_order) {
 		std::cout << "=======================\n";
 		std::cout << "Round " << round_number << ":\n";
-		std::cout << "Bonus tile colour: " << tile_strings[bonus_tile] << "\n";
+		std::cout << "Bonus tile colour: " << bonus_tile.toString() << "\n";
 		// Fill factories
 		fill_factories();
 		// First stage
@@ -65,7 +65,7 @@ void Game::declare_winner() {
 	std::cout << "=================\nGame over:\n";
 	int pos = 1;
 	for (std::shared_ptr<Player> player : sorted_players) {
-		std::cout << pos << ". " << player_colour_strings[player->colour()] << "   " << player->points() << " points\n";
+		std::cout << pos << ". " << player->colour().toString() << "   " << player->points() << " points\n";
 		pos++;
 	}
 }
@@ -74,7 +74,7 @@ void Game::fill_factories() {
 	for (std::shared_ptr<Factory> factory : m_factories) {
 		for (int i = 0; i < 4; ++i) {
 			Tile pulled = m_bag->pullTile();
-			if (pulled != NONE) {
+			if (pulled != Tile::NONE) {
 				factory->place(pulled);
 			}
 		}

@@ -78,7 +78,7 @@ std::string Factory::toString() {
 		return "Empty";
 	}
 	for (Tile t : m_tiles) {
-		str += tile_strings[t] + " ";
+		str += t.toString() + " ";
 	}
 	return str;
 }

@@ -9,6 +9,8 @@
 class Game;
 
 struct PickingChoice {
+	PickingChoice(Tile::Type colour) : tile(colour) {};
+	PickingChoice(Tile t) : tile(t) {};
 	std::shared_ptr<Factory> factory;
 	Tile tile;
 	bool with_bonus;
@@ -16,7 +18,7 @@ struct PickingChoice {
 
 class Player {
 public:
-	Player(PlayerColour colour, std::shared_ptr<Bag> bag);
+	Player(PlayerColour playercolour, std::shared_ptr<Bag> bag);
 	virtual ~Player() = default;
 
 	// Virtuals that need overriding because an in-game choice is needed
@@ -33,12 +35,13 @@ public:
 	// Other helpers
 	void pickBonusPieces(int number);
 	bool hasTiles();
+	int numTiles();
 	void addPoints(int points);
 	void minusPoisonPoints();
 	int points() {
 		return m_points;
 	};
-	PlayerColour const colour() const {
+	PlayerColour colour() {
 		return m_col;
 	};
 
@@ -56,12 +59,12 @@ public:
 
 	std::string toString();
 protected:
-	std::vector<Location> getLocationsFromChoiceList(std::vector<PlacingChoice> choices);
-	std::vector<PlacingChoice> filterChoicesFromLocation(std::vector<PlacingChoice> choices, Location location);
+	std::vector<std::shared_ptr<Location>> getLocationsFromChoiceList(std::vector<PlacingChoice> choices);
+	std::vector<PlacingChoice> filterChoicesFromLocation(std::vector<PlacingChoice> choices, std::shared_ptr<Location> location);
 	std::vector<PickingChoice> getAllPickingChoices(
 		std::vector<std::shared_ptr<Factory>> factories,
 		std::shared_ptr<Factory> centre,
-		Tile bonus
+		Tile::Type bonus
 	);
 	std::vector<PlacingChoice> getAllowedPlacingChoices(Tile bonus);
 	void createAllVariationsOfChoice(
@@ -76,7 +79,7 @@ protected:
 private:
 
 	std::shared_ptr<Bag> m_bag;
-	const PlayerColour m_col;
+	PlayerColour m_col;
 	int m_points;
 };
 

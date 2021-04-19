@@ -9,7 +9,7 @@
 class Bag {
 public:
 	Bag() {
-		for (Tile toAdd : all_tiles) {
+		for (Tile toAdd : Tile::all_tiles()) {
 			// Add 22 of each colour
 			for (int i = 0; i < 22; ++i) {
 				m_tile_bag.push_back(toAdd);
@@ -27,7 +27,7 @@ public:
 			// Refill the bag if empty
 			if (m_tile_bin.size() == 0) {
 				// Uh Oh
-				return NONE;
+				return Tile::NONE;
 			}
 			binToBag();
 		}
@@ -59,7 +59,7 @@ public:
 				// We find the tile, remove from the reward tiles and replace from bag
 				m_reward_tiles.erase(tile_iter);
 				Tile replacement = pullTile();
-				if (replacement != NONE) {
+				if (replacement != Tile::NONE) {
 					m_reward_tiles.push_back(replacement);
 				}
 			} else {

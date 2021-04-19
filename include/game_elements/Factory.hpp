@@ -7,7 +7,7 @@
 
 class Factory {
 public:
-	Factory() : m_tiles() {};
+	Factory(const int id) : m_id(id), m_tiles() {};
 	~Factory() = default;
 
 	// Add tiles to the factory
@@ -24,7 +24,9 @@ public:
 	bool isOnlyBonus(Tile bonus) const;
 
 	std::string toString();
+	int id() {return m_id;};
 private:
+	const int m_id;
 	std::vector<Tile> m_tiles;
 };
 
