@@ -6,16 +6,20 @@
 #include "players/Player.hpp"
 #include "game_elements/Bag.hpp"
 #include "game_elements/Factory.hpp"
+#include <SFML/Graphics.hpp>
 
-class Game {
+using namespace sf;
+
+class Game : public Drawable {
 public:
 	// Constructor/Destructor
 	Game();
 	~Game();
 
+	virtual void draw (RenderTarget &target, RenderStates states) const override;
+
 	// Initiates the play sequence
 	void play();
-private:
 	// Prints the factories to stdout
 	void printFactories();
 	// Print some info to stdout declaring the winner of the game
@@ -39,6 +43,7 @@ private:
 	// Check that there is a player that still wishes to place tiles
 	bool playerNotFinished();
 
+private:
 	//-------------------------------------------------------------------
 	// Member variables
 

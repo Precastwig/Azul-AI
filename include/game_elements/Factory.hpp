@@ -4,11 +4,16 @@
 #include "utils/helper_enums.hpp"
 #include <stdlib.h>
 #include <memory>
+#include <SFML/Graphics.hpp>
 
-class Factory {
+using namespace sf;
+
+class Factory : public Drawable {
 public:
 	Factory(const int id) : m_id(id), m_tiles() {};
 	~Factory() = default;
+
+	virtual void draw (RenderTarget &target, RenderStates states) const override;
 
 	// Add tiles to the factory
 	void place(Tile tile);

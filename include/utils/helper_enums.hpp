@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <utils/cIndex.hpp>
+#include <game_elements/Tile.hpp>
 
 class PlayerColour {
 public:
@@ -37,59 +38,6 @@ private:
 		"Wood",
 		"Black",
 		"Grey"
-	};
-};
-
-class Tile {
-public:
-	enum Type {
-		ORANGE,
-		RED,
-		BLUE,
-		YELLOW,
-		GREEN,
-		PURPLE,
-		NONE
-	};
-	static std::vector<Tile> all_tiles() {
-		return {
-			Tile(ORANGE),
-			Tile(RED),
-			Tile(BLUE),
-			Tile(YELLOW),
-			Tile(GREEN),
-			Tile(PURPLE)
-		};
-	}
-	Tile(Type t) : m_t(t) {};
-	const std::string toString() {
-		return strings[m_t];
-	}
-	const bool operator==(Tile t) {
-		return m_t == t.m_t;
-	}
-	const bool operator==(Type t) {
-		return m_t == t;
-	}
-	const bool operator!=(Tile t) {
-		return m_t != t.m_t;
-	}
-	const bool operator!=(Type t) {
-		return m_t != t;
-	}
-	const Type colour() {
-		return m_t;
-	}
-private:
-	Type m_t;
-	std::vector<std::string> strings = {
-		"Orange",
-		"Red",
-		"Blue",
-		"Yellow",
-		"Green",
-		"Purple",
-		"None"
 	};
 };
 

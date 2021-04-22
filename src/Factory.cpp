@@ -1,5 +1,13 @@
 #include "game_elements/Factory.hpp"
 
+void Factory::draw(RenderTarget &target, RenderStates states) const {
+	for (Tile tile : m_tiles) {
+		// tile.setOrigin(400,400);
+		// tile.setPosition()
+		target.draw(tile, states);
+	}
+}
+
 void Factory::place(Tile tile) {
 	m_tiles.push_back(tile);
 }

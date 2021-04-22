@@ -28,6 +28,13 @@ Game::Game() {
 Game::~Game() {
 }
 
+void Game::draw (RenderTarget &target, RenderStates states) const {
+	m_centre->draw(target, states);
+	for (std::shared_ptr<Factory> factory : m_factories) {
+		factory->draw(target, states);
+	}
+}
+
 void Game::play() {
 	// Six rounds
 	const std::vector<Tile> bonus_tile_order = {
