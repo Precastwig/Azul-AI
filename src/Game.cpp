@@ -19,10 +19,14 @@ Game::Game() {
 
 	// Create the factories
 	int num_factories = (m_players.size() * 2) + 1;
+	double angle = 0.0;
+	sf::Vector2f middle(500,500);
 	for (int i = 0; i < num_factories; ++i) {
-		m_factories.push_back(std::make_shared<Factory>(i));
+		sf::Vector2f factoryPos = Factory::calculateNewPos(middle, 300, angle);
+		m_factories.push_back(std::make_shared<Factory>(i, factoryPos, 60));
+		angle += (2 * M_PI / num_factories);
 	}
-	m_centre = std::make_shared<Factory>(num_factories);
+	m_centre = std::make_shared<Factory>(num_factories, middle, 60);
 }
 
 Game::~Game() {

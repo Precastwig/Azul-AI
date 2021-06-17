@@ -8,10 +8,10 @@
 
 using namespace sf;
 
-static float DEFAULT_TILE_SIZE = 75;
-static float DEFAULT_ANGLE = 0.785398; // 45 degrees
+static float DEFAULT_TILE_SIZE_X = 50;
+static float DEFAULT_TILE_SIZE_Y = 30;
 
-class Tile : public Shape {
+class Tile : public ConvexShape {
 public:
 	enum Type {
 		ORANGE,
@@ -32,28 +32,16 @@ public:
 			Tile(PURPLE)
 		};
 	}
-	Tile(Type t) : m_t(t), m_size(Vector2f(DEFAULT_TILE_SIZE,DEFAULT_TILE_SIZE)), m_angle(DEFAULT_ANGLE) {
+	Tile(Type t) : m_t(t), m_size(Vector2f(DEFAULT_TILE_SIZE_X,DEFAULT_TILE_SIZE_Y)) {
+		setPointCount(4);
+		setPoint(0, Vector2f(0,DEFAULT_TILE_SIZE_Y));
+		setPoint(1, Vector2f(-DEFAULT_TILE_SIZE_X,0));
+		setPoint(2, Vector2f(0, -DEFAULT_TILE_SIZE_Y));
+		setPoint(3, Vector2f(DEFAULT_TILE_SIZE_X, 0));
+		setRotation(rand() % 180);
 		setupColour();
 		update();
 	};
-	// Tile(Type t, Vector2f size, float angle) : m_t(t), m_size(size), m_angle(angle) {
-	// 	setupColour();
-	// 	update();
-	// };
-
-	virtual std::size_t getPointCount() const override {
-		return 4;
-	}
-
-	virtual Vector2f getPoint(std::size_t index) const override {
-		switch (index) {
-			default:
-			case 0: return Vector2f(0,0);
-			case 1: return Vector2f(m_size.x,0);
-			case 2: return Vector2f((m_size.y * cos(m_angle)) + m_size.x,(m_size.y * sin(m_angle)));
-			case 3: return m_size.y * Vector2f(cos(m_angle),sin(m_angle));
-		}
-	}
 
 	const std::string toString() {
 		return strings[m_t];
@@ -94,7 +82,6 @@ private:
 	}
 	Type m_t;
 	Vector2f m_size = Vector2f(0,0);
-	float m_angle = 0;
 	std::vector<std::string> strings = {
 		"Orange",
 		"Red",

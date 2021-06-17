@@ -8,12 +8,18 @@
 
 using namespace sf;
 
-class Factory : public Drawable {
+class Factory : public CircleShape {
 public:
-	Factory(const int id) : m_id(id), m_tiles() {};
+	Factory(const int id, const sf::Vector2f position, const float size) : m_id(id), m_position(position), m_size(size), m_tiles(), m_background() {
+		m_background.setRadius(size * 2);
+		m_background.setPosition(position - sf::Vector2f(size*2, size*2));
+		m_background.setFillColor(Color(255,203,208));
+	};
 	~Factory() = default;
 
 	virtual void draw (RenderTarget &target, RenderStates states) const override;
+
+	static sf::Vector2f calculateNewPos(const sf::Vector2f& oldPos, const float& size, const double& angle);
 
 	// Add tiles to the factory
 	void place(Tile tile);
@@ -32,7 +38,11 @@ public:
 	int id() {return m_id;};
 private:
 	const int m_id;
+	const sf::Vector2f m_position;
+	const float m_size;
+	// Drawable elements
 	std::vector<Tile> m_tiles;
+	sf::CircleShape m_background;
 };
 
 #endif

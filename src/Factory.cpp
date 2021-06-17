@@ -1,11 +1,19 @@
 #include "game_elements/Factory.hpp"
+#include <cmath>
 
 void Factory::draw(RenderTarget &target, RenderStates states) const {
+	target.draw(m_background, states);
+	double angle = 0.0; // Radians
 	for (Tile tile : m_tiles) {
-		// tile.setOrigin(400,400);
-		// tile.setPosition()
+		sf::Vector2f newPos = Factory::calculateNewPos(m_position, m_size, angle);
+		tile.setPosition(newPos);
 		target.draw(tile, states);
+		angle += (2 * M_PI / m_tiles.size());
 	}
+}
+
+sf::Vector2f Factory::calculateNewPos(const sf::Vector2f& oldPos, const float& size, const double& angle) {
+	return sf::Vector2f(oldPos.x + (size * std::cos(angle)), oldPos.y + (size * std::sin(angle)));
 }
 
 void Factory::place(Tile tile) {

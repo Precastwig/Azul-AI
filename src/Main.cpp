@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 	                window.close();
 	        }
 	        // Clear screen
-	        window.clear();
+	        window.clear(Color(179, 157, 114));
 	        // Draw the string
 	        window.draw(game);
 	        // Update the window
