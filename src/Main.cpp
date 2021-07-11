@@ -51,6 +51,12 @@ int main(int argc, char *argv[]) {
 	            // Close window: exit
 	            if (event.type == sf::Event::Closed)
 	                window.close();
+
+				if (event.type == sf::Event::MouseButtonPressed) {
+					if (event.mouseButton.button == sf::Mouse::Left) {
+						game.onClick(event.mouseButton.x, event.mouseButton.y);
+					}
+				}
 	        }
 	        // Clear screen
 	        window.clear(Color(179, 157, 114));

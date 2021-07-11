@@ -12,7 +12,7 @@ class Factory : public CircleShape {
 public:
 	Factory(const int id, const sf::Vector2f position, const float size) : m_id(id), m_position(position), m_size(size), m_tiles(), m_background() {
 		m_background.setRadius(size * 2);
-		m_background.setPosition(position - sf::Vector2f(size*2, size*2));
+		m_background.setPosition(position - sf::Vector2f(size*2, size*2 ));
 		m_background.setFillColor(Color(255,203,208));
 	};
 	~Factory() = default;

@@ -32,6 +32,10 @@ Game::Game() {
 Game::~Game() {
 }
 
+void Game::onClick(int xPos, int yPos) {
+	// Find the object that we've clicked on and call its onClick event
+}
+
 void Game::draw (RenderTarget &target, RenderStates states) const {
 	m_centre->draw(target, states);
 	for (std::shared_ptr<Factory> factory : m_factories) {

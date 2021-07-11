@@ -18,6 +18,8 @@ public:
 
 	virtual void draw (RenderTarget &target, RenderStates states) const override;
 
+	void onClick(int xPos, int yPos);
+
 	// Initiates the play sequence
 	void play();
 	// Prints the factories to stdout
