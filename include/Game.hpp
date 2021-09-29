@@ -20,6 +20,8 @@ public:
 
 	void onClick(int xPos, int yPos);
 
+	Tile getBonus();
+
 	// Initiates the play sequence
 	void play();
 	// Prints the factories to stdout
@@ -35,6 +37,7 @@ public:
 	void fill_factories();
 	// Players take turns picking tiles from factories until all are empty
 	void picking_stage(Tile bonus_tile);
+	void pick_tile(PickingChoice picked);
 	// Players take turns placing tiles on their personal boards until they choose to stop (or can't place any more tiles)
 	void placing_stage(Tile bonus_tile);
 
@@ -48,6 +51,15 @@ public:
 private:
 	//-------------------------------------------------------------------
 	// Member variables
+	// Six rounds
+	const std::vector<Tile> m_bonus_tile_order = {
+		Tile(Tile::PURPLE),
+		Tile(Tile::GREEN),
+		Tile(Tile::ORANGE),
+		Tile(Tile::YELLOW),
+		Tile(Tile::BLUE),
+		Tile(Tile::RED)
+	};
 
 	// Tile sources
 	std::shared_ptr<Bag> m_bag;
@@ -56,7 +68,12 @@ private:
 	std::vector<std::shared_ptr<Factory>> m_factories;
 	std::shared_ptr<Factory> m_centre;
 
+	// Current round info
+	bool m_centre_taken;
+	Tile m_bonus_tile;
+
 	// Member variable for players
+	cIndex m_current_player;
 	int m_starting_player;
 	std::vector<std::shared_ptr<Player>> m_players;
 };

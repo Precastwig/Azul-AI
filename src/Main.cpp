@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include "Game.hpp"
+#include "Logger.hpp"
 #include <iostream>
 
 enum gui_modes {
@@ -8,7 +9,7 @@ enum gui_modes {
 };
 
 // Prints a bunch of info to the command line
-bool DEBUG_MODE = true;
+Logger g_logger;
 
 int main(int argc, char *argv[]) {
 	gui_modes guiMode = QT;
@@ -20,7 +21,7 @@ int main(int argc, char *argv[]) {
 		} else if (arg == "-qt") {
 			guiMode = QT;
 		} else if (arg == "-debug") {
-			DEBUG_MODE = true;
+			g_logger.enable();
 		}
 	}
 	Game game;

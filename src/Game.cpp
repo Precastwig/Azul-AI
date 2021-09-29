@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <iostream>
 
-Game::Game() {
+Game::Game() : m_centre_taken(false), m_bonus_tile(m_bonus_tile_order[0]) {
 	// Create the bag
 	m_bag = std::make_shared<Bag>();
 	// Create the players, for now one randomAI and one humancmd
@@ -16,6 +16,7 @@ Game::Game() {
 
 	// Randomise the starting player
 	m_starting_player = rand() % m_players.size();
+	m_current_player = cIndex(m_starting_player, m_players.size());
 
 	// Create the factories
 	int num_factories = (m_players.size() * 2) + 1;
@@ -34,6 +35,14 @@ Game::~Game() {
 
 void Game::onClick(int xPos, int yPos) {
 	// Find the object that we've clicked on and call its onClick event
+	for (std::shared_ptr<Factory> factory : m_factories) {
+		if (factory->contains(xPos, yPos)) {
+			factory->onClick(xPos, yPos, *this);
+		}
+	}
+	if (m_centre->contains(xPos, yPos)) {
+		m_centre->onClick(xPos, yPos, *this);
+	}
 }
 
 void Game::draw (RenderTarget &target, RenderStates states) const {
@@ -44,17 +53,8 @@ void Game::draw (RenderTarget &target, RenderStates states) const {
 }
 
 void Game::play() {
-	// Six rounds
-	const std::vector<Tile> bonus_tile_order = {
-		Tile(Tile::PURPLE),
-		Tile(Tile::GREEN),
-		Tile(Tile::ORANGE),
-		Tile(Tile::YELLOW),
-		Tile(Tile::BLUE),
-		Tile(Tile::RED)
-	};
 	int round_number = 1;
-	for (Tile bonus_tile : bonus_tile_order) {
+	for (Tile bonus_tile : m_bonus_tile_order) {
 		std::cout << "=======================\n";
 		std::cout << "Round " << round_number << ":\n";
 		std::cout << "Bonus tile colour: " << bonus_tile.toString() << "\n";
@@ -130,12 +130,28 @@ void Game::picking_stage(Tile bonus_tile) {
 	}
 }
 
+void Game::pick_tile(PickingChoice picked) {
+	std::shared_ptr<Player> player = m_players[m_current_player.getIndex()];
+	if (!m_centre_taken && picked.factory == m_centre) {
+		// Someone has taken from the centre
+		m_centre_taken = true;
+		player->minusPoisonPoints();
+		m_starting_player = m_current_player.getIndex();
+	}
+	player->resolvePickingChoice(picked, m_bonus_tile, m_centre);
+	m_current_player++;
+}
+
 bool Game::playerNotFinished() {
 	for (std::shared_ptr<Player> player : m_players) {
 		if (!player->finishedPlacing())
 			return true;
 	}
 	return false;
+}
+
+Tile Game::getBonus() {
+	return m_bonus_tile;
 }
 
 void Game::placing_stage(Tile bonus_tile) {
