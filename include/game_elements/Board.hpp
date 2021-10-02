@@ -27,10 +27,10 @@ public:
 	Board();
 
 	void placeTile(PlacingChoice choice, Player* me);
-	void keepTiles(std::vector<Tile> to_keep);
+	void keepTiles(std::vector<std::shared_ptr<Tile>> to_keep);
 
 	std::vector<PlacingChoice> getAllPlacingChoices();
-	std::vector<Tile> getUnusedColoursInCentre();
+	std::vector<Tile::Type> getUnusedColoursInCentre();
 
 	std::string toString(std::shared_ptr<Location> star);
 	std::string toString();
@@ -51,8 +51,8 @@ private:
 
 	// The tile spaces
 	std::vector<std::shared_ptr<Location>> m_stars;
-	std::vector<Tile> m_keep;
-	std::vector<Tile> m_colours_not_in_centre;
+	std::vector<std::shared_ptr<Tile>> m_keep;
+	std::vector<Tile::Type> m_colours_not_in_centre;
 };
 
 #endif

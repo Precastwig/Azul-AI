@@ -16,8 +16,8 @@ public:
 		bool centrePoison
 	) override;
 	virtual PlacingChoice placeTile(Tile bonus) override;
-	virtual std::vector<Tile> chooseBonusPieces(std::vector<Tile> choices, int num) override;
-	virtual std::vector<Tile> discardDownToFour() override;
+	virtual std::vector<std::shared_ptr<Tile>> chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices, int number) override;
+	virtual std::vector<std::shared_ptr<Tile>> discardDownToFour() override;
 private:
 };
 

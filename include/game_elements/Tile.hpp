@@ -15,6 +15,16 @@ using namespace sf;
 static float DEFAULT_TILE_SIZE_X = 50;
 static float DEFAULT_TILE_SIZE_Y = 30;
 
+static std::vector<std::string> strings = {
+	"Orange",
+	"Red",
+	"Blue",
+	"Yellow",
+	"Green",
+	"Purple",
+	"None"
+};
+
 class Tile : public ConvexShape {
 public:
 	enum Type {
@@ -26,14 +36,14 @@ public:
 		PURPLE,
 		NONE
 	};
-	static std::vector<Tile> all_tiles() {
+	static std::vector<Tile::Type> all_tile_types() {
 		return {
-			Tile(ORANGE),
-			Tile(RED),
-			Tile(BLUE),
-			Tile(YELLOW),
-			Tile(GREEN),
-			Tile(PURPLE)
+			ORANGE,
+			RED,
+			BLUE,
+			YELLOW,
+			GREEN,
+			PURPLE
 		};
 	}
 	Tile(Type t) : m_t(t), m_size(Vector2f(DEFAULT_TILE_SIZE_X,DEFAULT_TILE_SIZE_Y)) {
@@ -52,9 +62,9 @@ public:
 		std::vector<Vector2f> vertices = getVertices();
 	    int pos = 0;
 	    int neg = 0;
-		g_logger.log(Logger::INFO, "Contains");
-		g_logger.log(Logger::INFO, "Position:");
-		g_logger.log(Logger::INFO, getPosition());
+		// g_logger.log(Logger::INFO, "Contains");
+		// g_logger.log(Logger::INFO, "Position:");
+		// g_logger.log(Logger::INFO, getPosition());
 
 	    for (unsigned int i = 0; i < vertices.size(); i++){
 			if (vertices[i] == tp) {
@@ -80,6 +90,9 @@ public:
 	}
 	const std::string toString() {
 		return strings[m_t];
+	}
+	static std::string toString(Type t) {
+		return strings[t];
 	}
 	const bool operator==(Tile t) {
 		return m_t == t.m_t;
@@ -124,15 +137,6 @@ private:
 	}
 	Type m_t;
 	Vector2f m_size = Vector2f(0,0);
-	std::vector<std::string> strings = {
-		"Orange",
-		"Red",
-		"Blue",
-		"Yellow",
-		"Green",
-		"Purple",
-		"None"
-	};
 };
 
 #endif

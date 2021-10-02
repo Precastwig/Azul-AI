@@ -13,12 +13,7 @@ void Player::addPoints(int points) {
 }
 
 bool Player::hasTiles() {
-	for (int colour : m_num_of_each_tile) {
-		if (colour > 0) {
-			return true;
-		}
-	}
-	return false;
+	return !m_stored_tiles.empty();
 }
 
 std::vector<PickingChoice> Player::getAllPickingChoices(
@@ -33,22 +28,22 @@ std::vector<PickingChoice> Player::getAllPickingChoices(
 	factories.push_back(centre);
 	// Loop through factories
 	for (std::shared_ptr<Factory> factory : factories) {
-		std::vector<Tile> addedFromFactory;
-		for (Tile tile : factory->tiles()) {
+		std::vector<std::shared_ptr<Tile>> addedFromFactory;
+		for (std::shared_ptr<Tile> tile : factory->tiles()) {
 			// Don't add bonus tiles or tile types that have already been added
 			// (for this factory)
 			if (factory->isOnlyBonus(bonus)) {
-				PickingChoice choice(Tile::NONE);
+				PickingChoice choice(Tile::Type::NONE);
 				// Then picking the bonus is alllowed
 				choice.with_bonus = true;
 				choice.factory = factory;
 				choices.push_back(choice);
 			} else {
-				if (tile != bonus &&
+				if (tile->colour() != bonus &&
 					std::find(addedFromFactory.begin(), addedFromFactory.end(), tile) == addedFromFactory.end()) {
 					// We add
 					addedFromFactory.push_back(tile);
-					PickingChoice choice(tile);
+					PickingChoice choice(tile->colour());
 					choice.with_bonus = factory->hasBonus(bonus);
 					choice.factory = factory;
 					choices.push_back(choice);
@@ -60,11 +55,7 @@ std::vector<PickingChoice> Player::getAllPickingChoices(
 }
 
 void Player::minusPoisonPoints() {
-	int num_tiles = 0;
-	for (int n : m_num_of_each_tile) {
-		num_tiles += n;
-	}
-	m_points -= num_tiles;
+	m_points -= m_stored_tiles.size();
 	if (m_points < 0) {
 		m_points = 0;
 	}
@@ -94,13 +85,21 @@ void Player::createAllVariationsOfChoice(
 }
 
 void Player::pickBonusPieces(int number) {
-	std::vector<Tile> choices = chooseBonusPieces(m_bag->rewardTiles(), number);
+	std::vector<std::shared_ptr<Tile>> choices = chooseBonusPieces(m_bag->rewardTiles(), number);
 	// Add the tiles to our piece list
-	for (Tile tile : choices) {
-		m_num_of_each_tile[tile.colour()]++;
-	}
+	m_stored_tiles.insert(m_stored_tiles.end(), choices.begin(), choices.end());
 	// Remove the tiles from the bonus board
 	m_bag->takeRewardTiles(choices);
+}
+
+int Player::howManyColourStored(Tile::Type t) {
+	int count = 0;
+	for (auto tile : m_stored_tiles) {
+		if (tile->colour() == t) {
+			count++;
+		}
+	}
+	return count;
 }
 
 std::vector<PlacingChoice> Player::getAllowedPlacingChoices(Tile bonus) {
@@ -116,7 +115,7 @@ std::vector<PlacingChoice> Player::getAllowedPlacingChoices(Tile bonus) {
 
 	std::vector<PlacingChoice> valid_choices;
 	for (PlacingChoice choice : all_choices) {
-		std::vector<Tile> potentialCostColours;
+		std::vector<Tile::Type> potentialCostColours;
 		if (choice.cost.colour == Tile::NONE) {
 			potentialCostColours = m_board.getUnusedColoursInCentre();
 		} else {
@@ -126,12 +125,12 @@ std::vector<PlacingChoice> Player::getAllowedPlacingChoices(Tile bonus) {
 		for (Tile costTile : potentialCostColours) {
 			int max_bonus = 0;
 			if (costTile != bonus) {
-				max_bonus = m_num_of_each_tile[bonus.colour()];
+				max_bonus = howManyColourStored(bonus.colour());
 			}
 
 			choice.cost.colour = costTile.colour();
 
-			int num_relevent_colour = m_num_of_each_tile[costTile.colour()];
+			int num_relevent_colour = howManyColourStored(costTile.colour());
 			createAllVariationsOfChoice(
 				choice,
 				valid_choices,
@@ -152,33 +151,45 @@ std::vector<PlacingChoice> Player::getAllowedPlacingChoices(Tile bonus) {
 	return valid_choices;
 }
 
-void Player::resolvePlacingChoice(PlacingChoice choice, Tile bonus) {
+void Player::resolvePlacingChoice(PlacingChoice choice, Tile::Type bonus) {
 	if (!m_done_placing) {
 		// Remove the cost from current number of tiles
-		m_num_of_each_tile[choice.cost.colour] -= choice.cost.num_colour;
-		m_num_of_each_tile[bonus.colour()] -= choice.cost.num_bonus;
+		std::vector<std::shared_ptr<Tile>> newStoredTiles;
+		std::vector<std::shared_ptr<Tile>> toBin;
+		bool firstTile = true;
+		for (std::shared_ptr<Tile> t : m_stored_tiles) {
+			if (t->colour() == choice.cost.colour && choice.cost.num_colour > 0) {
+				// We're placing this tile, put it in the bin, removing the first one forever
+				if (firstTile) {
+					firstTile = false;
+				} else {
+					toBin.push_back(t);
+				}
+				choice.cost.num_colour--;
+			} else if (t->colour() == bonus && choice.cost.num_bonus > 0) {
+				choice.cost.num_bonus--;
+				toBin.push_back(t);
+			} else {
+				// We're not placing this tile, so keep it
+				newStoredTiles.push_back(t);
+			}
+		}
+		// Keep the remaining tiles
+		m_stored_tiles = newStoredTiles;
 		// Put the used tiles in the bin
-		m_bag->toBin(choice.cost.colour, choice.cost.num_colour - 1);
-		m_bag->toBin(bonus, choice.cost.num_bonus);
+		m_bag->toBin(toBin);
 		// Place the tile on the board (this scores us points)
 		m_board.placeTile(choice, this);
 	} else if (!m_discarded) {
 		// Remove the tiles down to 4
-		std::vector<Tile> keep = discardDownToFour();
+		m_stored_tiles =  discardDownToFour();
 		m_discarded = true;
 		// Only do this once
-		for (Tile tile : keep) {
-			m_num_of_each_tile[tile.colour()]++;
-		}
 	}
 }
 
 int Player::numTiles() {
-	int total = 0;
-	for (unsigned int i = 0; i < m_num_of_each_tile.size(); i++) {
-		total += m_num_of_each_tile[i];
-	}
-	return total;
+	return m_stored_tiles.size();
 }
 
 std::vector<std::shared_ptr<Location>> Player::getLocationsFromChoiceList(std::vector<PlacingChoice> choices) {
@@ -201,27 +212,17 @@ std::vector<PlacingChoice> Player::filterChoicesFromLocation(std::vector<Placing
 
 void Player::resolvePickingChoice(
 	PickingChoice choice,
-	Tile bonus,
+	Tile::Type bonus,
 	std::shared_ptr<Factory> centre) {
-	// Add to our counts
-	if (choice.factory->hasBonus(bonus)) {
-		m_num_of_each_tile[bonus.colour()]++;
-	}
-
-	if (choice.tile != Tile::NONE) {
-		// This part should probably be a function on the PickingChoice object
-		// Oh well
-		m_num_of_each_tile[choice.tile.colour()] += choice.factory->numberOf(choice.tile);
-		// Remove from factory
-	}
-	choice.factory->removeTiles(choice.tile, bonus, centre);
+	std::vector<std::shared_ptr<Tile>> pickedTiles = choice.factory->removeTiles(choice.tile_colour, bonus, centre);
+	m_stored_tiles.insert(m_stored_tiles.end(), pickedTiles.begin(), pickedTiles.end());
 }
 
 std::string Player::toString() {
 	std::string str = "Player: " + m_col.toString() + "\n";
 	str += "Points: " + std::to_string(m_points) + "\n";
-	for (Tile tile : Tile::all_tiles()) {
-		str += tile.toString() + ": " + std::to_string(m_num_of_each_tile[tile.colour()]) + "\n";
+	for (Tile::Type tile : Tile::all_tile_types()) {
+		str += Tile::toString(tile) + ": " + std::to_string(howManyColourStored(tile)) + "\n";
 	}
 	if (m_done_placing) {
 		str += "\nFinished placing\n";

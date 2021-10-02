@@ -14,12 +14,7 @@ extern Logger g_logger;
 
 class Factory : public Drawable {
 public:
-	Factory(const int id, const sf::Vector2f position, const float size) : m_id(id), m_size(size), m_tiles(), m_background() {
-		m_background.setOrigin(size*2,size*2);
-		m_background.setRadius(size * 2);
-		m_background.setPosition(position);
-		m_background.setFillColor(Color(255,203,208));
-	};
+	Factory(const int id, const sf::Vector2f position, const float size);
 	~Factory() = default;
 
 	virtual void draw (RenderTarget &target, RenderStates states) const override;
@@ -30,17 +25,17 @@ public:
 	void onClick(int x, int y, Game& game);
 
 	// Add tiles to the factory
-	void place(Tile tile);
-	void addTiles(std::vector<Tile> tiles);
-	// Remove tiles from the factory
-	void removeTiles(Tile tile_taken, Tile bonus_type, std::shared_ptr<Factory> centre);
+	void place(std::shared_ptr<Tile> tile);
+	void addTiles(std::vector<std::shared_ptr<Tile>> tiles);
+	// Remove tiles from the factory, returns the removed tiles
+	std::vector<std::shared_ptr<Tile>> removeTiles(Tile::Type colour_taken, Tile::Type bonus_type, std::shared_ptr<Factory> centre);
 
 	// Getter functions
-	std::vector<Tile> tiles() const;
+	std::vector<std::shared_ptr<Tile>> tiles() const;
 	bool isEmpty() const;
-	int numberOf(Tile tile) const;
-	bool hasBonus(Tile bonus) const;
-	bool isOnlyBonus(Tile bonus) const;
+	int numberOf(Tile::Type tile) const;
+	bool hasBonus(Tile::Type bonus) const;
+	bool isOnlyBonus(Tile::Type bonus) const;
 
 	std::string toString();
 	int id() {return m_id;};
@@ -48,7 +43,7 @@ private:
 	const int m_id;
 	const float m_size;
 	// Drawable elements
-	std::vector<Tile> m_tiles;
+	std::vector<std::shared_ptr<Tile>> m_tiles;
 	sf::CircleShape m_background;
 };
 

@@ -1,6 +1,5 @@
 #include "players/HumanCommandLine.hpp"
 #include <iostream>
-#include <set>
 
 PickingChoice HumanCommandLine::pickTile(
 	std::vector<std::shared_ptr<Factory>> factories,
@@ -37,7 +36,7 @@ PickingChoice HumanCommandLine::pickTile(
 		// 	}
 		// }
 		for (unsigned int i = 0; i < choices.size(); ++i) {
-			std::cout << i << ". " << choices[i].tile.toString() << " factory " << choices[i].factory->id() << "\n";
+			std::cout << i << ". " << Tile::toString(choices[i].tile_colour) << " factory " << choices[i].factory->id() << "\n";
 		}
 		unsigned int i = 0;
 		std::cin >> i;
@@ -91,19 +90,19 @@ PlacingChoice HumanCommandLine::placeTile(Tile bonus) {
 	}
 }
 
-std::vector<Tile> HumanCommandLine::chooseBonusPieces(std::vector<Tile> choices, int number) {
-	std::vector<Tile> return_list;
+std::vector<std::shared_ptr<Tile>> HumanCommandLine::chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices, int number) {
+	std::vector<std::shared_ptr<Tile>> return_list;
 	while (number > 0) {
 		std::cout << "\nChoose " << number << " bonus pieces\n";
-		std::vector<Tile> availableColours;
-		for (Tile c : choices) {
+		std::vector<std::shared_ptr<Tile>> availableColours;
+		for (std::shared_ptr<Tile> c : choices) {
 			if (std::find(availableColours.begin(), availableColours.end(), c) == availableColours.end()) {
 				availableColours.push_back(c);
 			}
 		}
 		// Could do this differently, but oh well
-		for (Tile c : availableColours) {
-			std::cout << c.toString();
+		for (std::shared_ptr<Tile> c : availableColours) {
+			std::cout << c->toString();
 		}
 		int i = -1;
 		std::cin >> i;
@@ -115,21 +114,29 @@ std::vector<Tile> HumanCommandLine::chooseBonusPieces(std::vector<Tile> choices,
 	return return_list;
 }
 
-std::vector<Tile> HumanCommandLine::discardDownToFour() {
-	std::vector<Tile> tilesToLose;
+std::vector<std::shared_ptr<Tile>> HumanCommandLine::discardDownToFour() {
+	std::vector<std::shared_ptr<Tile>> tilesToLose;
 	int num = numTiles();
 	while (num > 4) {
 		std::cout << "Discard tiles until four are left\n";
-		std::vector<Tile> allTiles = Tile::all_tiles();
-		for (unsigned int i = 0; i < allTiles.size(); ++i) {
-			std::cout << i << ". " << allTiles[i].toString() << " " << m_num_of_each_tile[i] << "\n";
+		std::vector<Tile::Type> allTiles = Tile::all_tile_types();
+		for (Tile::Type tile : allTiles) {
+			std::cout << Tile::toString(tile) << ": " << howManyColourStored(tile) << "\n";
 		}
-		unsigned int i = -1;
+		int i = -1;
 		std::cin >> i;
-		if (i >= 0 && i < allTiles.size()) {
+		Tile::Type chosenColour = (Tile::Type)i;
+		if (i >= 0 && i < allTiles.size() && howManyColourStored(chosenColour) > 0) {
 			// acceptable choice
-			tilesToLose.push_back(allTiles[i]);
+			for (auto tile : m_stored_tiles) {
+				if (tile->colour() == chosenColour) {
+					tilesToLose.push_back(tile);
+					break;
+				}
+			}
 			num--;
+		} else {
+			std::cout << "Invalid choice, try again\n";
 		}
 	}
 	return tilesToLose;

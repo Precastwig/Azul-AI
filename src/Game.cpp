@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <iostream>
 
-Game::Game() : m_centre_taken(false), m_bonus_tile(m_bonus_tile_order[0]) {
+Game::Game() : m_centre_taken(false), m_bonus_type(m_bonus_tile_order[0]) {
 	// Create the bag
 	m_bag = std::make_shared<Bag>();
 	// Create the players, for now one randomAI and one humancmd
@@ -54,16 +54,17 @@ void Game::draw (RenderTarget &target, RenderStates states) const {
 
 void Game::play() {
 	int round_number = 1;
-	for (Tile bonus_tile : m_bonus_tile_order) {
+	for (Tile::Type bonus_tile : m_bonus_tile_order) {
+		m_bonus_type = bonus_tile;
 		std::cout << "=======================\n";
 		std::cout << "Round " << round_number << ":\n";
-		std::cout << "Bonus tile colour: " << bonus_tile.toString() << "\n";
+		std::cout << "Bonus tile colour: " << Tile::toString(m_bonus_type) << "\n";
 		// Fill factories
 		fill_factories();
 		// First stage
-		picking_stage(bonus_tile);
+		picking_stage();
 		// Second stage
-		placing_stage(bonus_tile);
+		placing_stage();
 
 		round_number++;
 	}
@@ -87,12 +88,7 @@ void Game::declare_winner() {
 
 void Game::fill_factories() {
 	for (std::shared_ptr<Factory> factory : m_factories) {
-		for (int i = 0; i < 4; ++i) {
-			Tile pulled = m_bag->pullTile();
-			if (pulled != Tile::NONE) {
-				factory->place(pulled);
-			}
-		}
+		m_bag->fillFactory(factory);
 	}
 }
 
@@ -105,7 +101,7 @@ bool Game::noTilesLeft() {
 	return m_centre->isEmpty();
 }
 
-void Game::picking_stage(Tile bonus_tile) {
+void Game::picking_stage() {
 	cIndex player_turn(m_starting_player + 1, m_players.size());
 	// Double negative, I won't apologise
 	bool centreTaken = false;
@@ -115,7 +111,7 @@ void Game::picking_stage(Tile bonus_tile) {
 		PickingChoice choice = player->pickTile(
 			m_factories,
 			m_centre,
-			bonus_tile,
+			m_bonus_type,
 			!centreTaken
 		);
 		if (!centreTaken && choice.factory == m_centre) {
@@ -124,7 +120,7 @@ void Game::picking_stage(Tile bonus_tile) {
 			player->minusPoisonPoints();
 			m_starting_player = player_turn.getIndex();
 		}
-		player->resolvePickingChoice(choice, bonus_tile, m_centre);
+		player->resolvePickingChoice(choice, m_bonus_type, m_centre);
 		player_turn++;
 		printFactories();
 	}
@@ -138,7 +134,7 @@ void Game::pick_tile(PickingChoice picked) {
 		player->minusPoisonPoints();
 		m_starting_player = m_current_player.getIndex();
 	}
-	player->resolvePickingChoice(picked, m_bonus_tile, m_centre);
+	player->resolvePickingChoice(picked, m_bonus_type, m_centre);
 	m_current_player++;
 }
 
@@ -150,11 +146,11 @@ bool Game::playerNotFinished() {
 	return false;
 }
 
-Tile Game::getBonus() {
-	return m_bonus_tile;
+Tile::Type Game::getBonus() {
+	return m_bonus_type;
 }
 
-void Game::placing_stage(Tile bonus_tile) {
+void Game::placing_stage() {
 	std::cout << "\n========================\nPLACING STAGE\n";
 	for (std::shared_ptr<Player> player : m_players) {
 		player->resetDonePlacing();
@@ -162,8 +158,8 @@ void Game::placing_stage(Tile bonus_tile) {
 	cIndex player_turn(m_starting_player + 1, m_players.size());
 	while (playerNotFinished()) {
 		std::shared_ptr<Player> current_player = m_players[player_turn.getIndex()];
-		PlacingChoice choice = current_player->placeTile(bonus_tile);
-		current_player->resolvePlacingChoice(choice, bonus_tile);
+		PlacingChoice choice = current_player->placeTile(m_bonus_type);
+		current_player->resolvePlacingChoice(choice, m_bonus_type);
 		std::cout << current_player->toString();
 		player_turn++;
 	}

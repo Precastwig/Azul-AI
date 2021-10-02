@@ -20,7 +20,7 @@ Board::Board()
 	for (int i = 0; i < 4; ++i) {
 		m_full_numbers.push_back(false);
 	}
-	m_colours_not_in_centre = Tile::all_tiles();
+	m_colours_not_in_centre = Tile::all_tile_types();
 }
 
 int Board::bonusPiecesAwarded() {
@@ -90,7 +90,7 @@ int Board::bonusPointsAwarded() {
 	return points;
 }
 
-std::vector<Tile> Board::getUnusedColoursInCentre() {
+std::vector<Tile::Type> Board::getUnusedColoursInCentre() {
 	return m_colours_not_in_centre;
 }
 
@@ -141,7 +141,7 @@ std::vector<PlacingChoice> Board::getAllPlacingChoices() {
 	return choices;
 }
 
-void Board::keepTiles(std::vector<Tile> to_keep) {
+void Board::keepTiles(std::vector<std::shared_ptr<Tile>> to_keep) {
 	if (m_keep.size() <= 4)
 		m_keep = to_keep;
 }

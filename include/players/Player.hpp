@@ -9,10 +9,10 @@
 class Game;
 
 struct PickingChoice {
-	PickingChoice(Tile::Type colour) : tile(colour) {};
-	PickingChoice(Tile t) : tile(t) {};
+	// PickingChoice(Tile::Type colour) : tile(colour) {};
+	PickingChoice(Tile::Type t) : tile_colour(t) {};
 	std::shared_ptr<Factory> factory;
-	Tile tile;
+	Tile::Type tile_colour;
 	bool with_bonus;
 };
 
@@ -29,8 +29,8 @@ public:
 		bool centrePoison
 	) = 0;
 	virtual PlacingChoice placeTile(Tile bonus) = 0;
-	virtual std::vector<Tile> chooseBonusPieces(std::vector<Tile> choices, int number) = 0;
-	virtual std::vector<Tile> discardDownToFour() = 0;
+	virtual std::vector<std::shared_ptr<Tile>> chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices, int number) = 0;
+	virtual std::vector<std::shared_ptr<Tile>> discardDownToFour() = 0;
 
 	// Other helpers
 	void pickBonusPieces(int number);
@@ -46,8 +46,8 @@ public:
 	};
 
 	// Resolvers
-	void resolvePickingChoice(PickingChoice choice, Tile bonus, std::shared_ptr<Factory> centre);
-	void resolvePlacingChoice(PlacingChoice choice, Tile bonus);
+	void resolvePickingChoice(PickingChoice choice, Tile::Type bonus, std::shared_ptr<Factory> centre);
+	void resolvePlacingChoice(PlacingChoice choice, Tile::Type bonus);
 
 	bool finishedPlacing() {
 		return m_done_placing;
@@ -72,12 +72,18 @@ protected:
 		int max_bonus,
 		int max_relevent_colour
 	);
-	bool m_done_placing;
-	bool m_discarded;
-	Board m_board;
-	std::vector<int> m_num_of_each_tile = {0,0,0,0,0,0};
-private:
 
+	int howManyColourStored(Tile::Type t);
+
+	// Flag for when the player hass passed
+	bool m_done_placing;
+	// Flag for when the player has discarded down to 4 tiles remaining
+	bool m_discarded;
+	// The board
+	Board m_board;
+	// The tiles taken to be placed on the board
+	std::vector<std::shared_ptr<Tile>> m_stored_tiles;
+private:
 	std::shared_ptr<Bag> m_bag;
 	PlayerColour m_col;
 	int m_points;
