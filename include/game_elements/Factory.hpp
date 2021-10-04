@@ -10,9 +10,10 @@
 using namespace sf;
 
 class Game;
+class Factory;
 extern Logger g_logger;
 
-class Factory : public Drawable {
+class Factory : public std::enable_shared_from_this<Factory>, Drawable {
 public:
 	Factory(const int id, const sf::Vector2f position, const float size);
 	~Factory() = default;
@@ -36,6 +37,7 @@ public:
 	int numberOf(Tile::Type tile) const;
 	bool hasBonus(Tile::Type bonus) const;
 	bool isOnlyBonus(Tile::Type bonus) const;
+	void positionTiles() const;
 
 	std::string toString();
 	int id() {return m_id;};

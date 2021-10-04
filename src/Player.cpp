@@ -151,7 +151,7 @@ std::vector<PlacingChoice> Player::getAllowedPlacingChoices(Tile bonus) {
 	return valid_choices;
 }
 
-void Player::resolvePlacingChoice(PlacingChoice choice, Tile::Type bonus) {
+void Player::resolvePlacingChoice(PlacingChoice& choice, Tile::Type bonus) {
 	if (!m_done_placing) {
 		// Remove the cost from current number of tiles
 		std::vector<std::shared_ptr<Tile>> newStoredTiles;
@@ -211,7 +211,7 @@ std::vector<PlacingChoice> Player::filterChoicesFromLocation(std::vector<Placing
 }
 
 void Player::resolvePickingChoice(
-	PickingChoice choice,
+	PickingChoice& choice,
 	Tile::Type bonus,
 	std::shared_ptr<Factory> centre) {
 	std::vector<std::shared_ptr<Tile>> pickedTiles = choice.factory->removeTiles(choice.tile_colour, bonus, centre);

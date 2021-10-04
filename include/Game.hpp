@@ -37,7 +37,7 @@ public:
 	void fill_factories();
 	// Players take turns picking tiles from factories until all are empty
 	void picking_stage();
-	void pick_tile(PickingChoice picked);
+	void pick_tile(PickingChoice& picked);
 	// Players take turns placing tiles on their personal boards until they choose to stop (or can't place any more tiles)
 	void placing_stage();
 

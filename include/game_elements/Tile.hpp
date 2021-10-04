@@ -137,6 +137,7 @@ private:
 	}
 	Type m_t;
 	Vector2f m_size = Vector2f(0,0);
+	sf::ConvexShape m_shape;
 };
 
 #endif

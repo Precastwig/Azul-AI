@@ -126,15 +126,16 @@ void Game::picking_stage() {
 	}
 }
 
-void Game::pick_tile(PickingChoice picked) {
-	std::shared_ptr<Player> player = m_players[m_current_player.getIndex()];
+void Game::pick_tile(PickingChoice& picked) {
+	// m_current_player.getIndex();
+	// std::shared_ptr<Player> player = m_players[0];
 	if (!m_centre_taken && picked.factory == m_centre) {
 		// Someone has taken from the centre
 		m_centre_taken = true;
-		player->minusPoisonPoints();
+		// player->minusPoisonPoints();
 		m_starting_player = m_current_player.getIndex();
 	}
-	player->resolvePickingChoice(picked, m_bonus_type, m_centre);
+	// player->resolvePickingChoice(picked, m_bonus_type, m_centre);
 	m_current_player++;
 }
 

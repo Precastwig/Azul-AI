@@ -46,8 +46,8 @@ public:
 	};
 
 	// Resolvers
-	void resolvePickingChoice(PickingChoice choice, Tile::Type bonus, std::shared_ptr<Factory> centre);
-	void resolvePlacingChoice(PlacingChoice choice, Tile::Type bonus);
+	void resolvePickingChoice(PickingChoice& choice, Tile::Type bonus, std::shared_ptr<Factory> centre);
+	void resolvePlacingChoice(PlacingChoice& choice, Tile::Type bonus);
 
 	bool finishedPlacing() {
 		return m_done_placing;

@@ -7,6 +7,9 @@ Factory::Factory(const int id, const sf::Vector2f position, const float size) : 
 	m_background.setRadius(size * 2);
 	m_background.setPosition(position);
 	m_background.setFillColor(Color(255,203,208));
+};
+
+void Factory::positionTiles() const {
 	double angle = 0.0; // Radians
 	for (std::shared_ptr<Tile> tile : m_tiles) {
 		sf::Vector2f newPos = Factory::calculateNewPos(m_background.getPosition(), m_size, angle);
@@ -15,7 +18,7 @@ Factory::Factory(const int id, const sf::Vector2f position, const float size) : 
 		// g_logger.log(Logger::INFO, tile.getPosition());
 		angle += (2 * M_PI / m_tiles.size());
 	}
-};
+}
 
 void Factory::draw(RenderTarget &target, RenderStates states) const {
 	target.draw(m_background, states);
@@ -32,10 +35,12 @@ sf::Vector2f Factory::calculateNewPos(const sf::Vector2f& oldPos, const float& s
 
 void Factory::place(std::shared_ptr<Tile> tile) {
 	m_tiles.push_back(tile);
+	positionTiles();
 }
 
 void Factory::addTiles(std::vector<std::shared_ptr<Tile>> tiles) {
 	m_tiles.insert(m_tiles.end(), tiles.begin(), tiles.end());
+	positionTiles();
 }
 
 bool Factory::contains(int x, int y) {
@@ -73,7 +78,8 @@ void Factory::onClick(int x, int y, Game& game) {
 			} else {
 				PickingChoice choice(tile->colour());
 				choice.with_bonus = hasBonus(game.getBonus());
-				choice.factory = std::shared_ptr<Factory>(this);
+				choice.factory = shared_from_this();
+				std::cout << choice.factory;
 				game.pick_tile(choice);
 			}
 		}
@@ -103,7 +109,7 @@ std::vector<std::shared_ptr<Tile>> Factory::removeTiles(Tile::Type colour_taken,
 			taken_tiles.push_back(tile);
 		}
 	}
-	
+
 	if (this != centre.get()) {
 		// We're a factory around the edge
 		m_tiles.clear();
@@ -113,6 +119,7 @@ std::vector<std::shared_ptr<Tile>> Factory::removeTiles(Tile::Type colour_taken,
 		// We're the centre! Retain the leftover list
 		m_tiles = new_factory_list;
 	}
+	positionTiles();
 	return taken_tiles;
 }
 
