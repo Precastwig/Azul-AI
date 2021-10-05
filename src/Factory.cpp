@@ -13,9 +13,7 @@ void Factory::positionTiles() const {
 	double angle = 0.0; // Radians
 	for (std::shared_ptr<Tile> tile : m_tiles) {
 		sf::Vector2f newPos = Factory::calculateNewPos(m_background.getPosition(), m_size, angle);
-		// g_logger.log(Logger::INFO, newPos);
 		tile->setPosition(newPos);
-		// g_logger.log(Logger::INFO, tile.getPosition());
 		angle += (2 * M_PI / m_tiles.size());
 	}
 }
@@ -23,8 +21,6 @@ void Factory::positionTiles() const {
 void Factory::draw(RenderTarget &target, RenderStates states) const {
 	target.draw(m_background, states);
 	for (std::shared_ptr<Tile> tile : m_tiles) {
-		// g_logger.log(Logger::INFO, newPos);
-		// g_logger.log(Logger::INFO, tile.getPosition());
 		target.draw(*tile, states);
 	}
 }
@@ -45,14 +41,11 @@ void Factory::addTiles(std::vector<std::shared_ptr<Tile>> tiles) {
 
 bool Factory::contains(int x, int y) {
 	sf::Vector2f pos = m_background.getPosition();
-	float distance = hypot((x - pos.x), (y - pos.y)); //Checks the distance between the mouse and each circle's center
+	float distance = hypot((x - pos.x), (y - pos.y));
+	//Checks the distance between the mouse and each circle's center
 	// double distance = sqrt(pow(pos.x - x, 2) + pow(pos.y - y, 2));
 	if (distance <= m_background.getRadius()) {
 		g_logger.log(Logger::INFO, "Clicked inside factory");
-		// g_logger.log(Logger::INFO, "Factory: " + std::to_string(pos.x) + ", " + std::to_string(pos.y));
-		// g_logger.log(Logger::INFO, "Radius: " + std::to_string( m_background.getRadius()));
-		// g_logger.log(Logger::INFO, "Click: " + std::to_string(x) + ", " + std::to_string(y));
-
 		return true;
 	}
 	// g_logger.log(Logger::INFO, distance);
@@ -79,7 +72,6 @@ void Factory::onClick(int x, int y, Game& game) {
 				PickingChoice choice(tile->colour());
 				choice.with_bonus = hasBonus(game.getBonus());
 				choice.factory = shared_from_this();
-				std::cout << choice.factory;
 				game.pick_tile(choice);
 			}
 		}

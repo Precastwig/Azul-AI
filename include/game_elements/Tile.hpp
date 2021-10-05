@@ -70,13 +70,9 @@ public:
 			if (vertices[i] == tp) {
 				return true;
 			}
-
 			// Form a segment between two points
 			Vector2f point1 = vertices[i];
 			Vector2f point2 = vertices[(i+1)%vertices.size()];
-
-			g_logger.log(Logger::INFO, point1);
-			g_logger.log(Logger::INFO, point2);
 			// Compute the cross product
 			int cross = (tp.x - point1.x)*(point2.y - point1.y) - (tp.y - point1.y)*(point2.x - point1.x);
 			if (cross > 0) pos++;

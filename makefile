@@ -6,6 +6,7 @@ clean:
 	rm -rf *.o
 
 board:
+	@$(COMPILER) -std=c++11 -c -g src/Button.cpp -Iinclude/ -o bin/button.o
 	@$(COMPILER) -std=c++11 -c -g src/Bag.cpp -Iinclude/ -o bin/bag.o
 	@$(COMPILER) -std=c++11 -c -g src/Factory.cpp -Iinclude/ -o bin/factory.o
 	@$(COMPILER) -std=c++11 -c -g src/Board.cpp -Iinclude/ -o bin/board.o
@@ -21,5 +22,5 @@ board:
 # 	@echo "Built main.o"
 
 all: clean board
-	@$(COMPILER) -std=c++11 -o azul bin/bag.o bin/factory.o bin/board.o bin/player.o bin/randomAI.o bin/HumanCommandLine.o bin/game.o bin/main.o -lsfml-graphics -lsfml-window -lsfml-system
+	@$(COMPILER) -std=c++11 -o azul bin/button.o bin/bag.o bin/factory.o bin/board.o bin/player.o bin/randomAI.o bin/HumanCommandLine.o bin/game.o bin/main.o -lsfml-graphics -lsfml-window -lsfml-system
 	@echo "Linked all into executable"

@@ -218,6 +218,10 @@ void Player::resolvePickingChoice(
 	m_stored_tiles.insert(m_stored_tiles.end(), pickedTiles.begin(), pickedTiles.end());
 }
 
+std::string Player::toShortString() {
+	return m_col.toString() + ": " + std::to_string(m_points);
+}
+
 std::string Player::toString() {
 	std::string str = "Player: " + m_col.toString() + "\n";
 	str += "Points: " + std::to_string(m_points) + "\n";

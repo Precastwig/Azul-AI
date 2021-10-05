@@ -57,6 +57,7 @@ public:
 		m_discarded = false;
 	};
 
+	std::string toShortString();
 	std::string toString();
 protected:
 	std::vector<std::shared_ptr<Location>> getLocationsFromChoiceList(std::vector<PlacingChoice> choices);
