@@ -1,6 +1,7 @@
 #ifndef BOARD
 #define BOARD
 
+#include <string>
 #include <vector>
 #include <memory>
 #include "utils/helper_enums.hpp"
@@ -20,15 +21,25 @@ struct PlacingChoice {
 				cost.num_colour == c.cost.num_colour &&
 				cost.num_bonus == c.cost.num_bonus);
 	};
+	std::string to_string() {
+		return "Factory " + star->toString() + " " + std::to_string(index.getIndex());
+	};
 };
 
 class Board {
 public:
 	Board();
 
+	static std::vector<Tile::Type> getAdjacentStarColours(Tile::Type starCol);
+
 	void placeTile(PlacingChoice choice, Player* me);
 	void keepTiles(std::vector<std::shared_ptr<Tile>> to_keep);
 
+	// This is always talking about the column clockwise around the given colour
+	int tilesNeededToGetStatue(Location::Types loc);
+	int tilesNeededToGetWindow(Location::Types loc);
+
+	std::vector<PlacingChoice> getPlacingChoicesOfCol(Tile::Type col);
 	std::vector<PlacingChoice> getAllPlacingChoices();
 	std::vector<Tile::Type> getUnusedColoursInCentre();
 

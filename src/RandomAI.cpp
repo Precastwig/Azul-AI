@@ -1,4 +1,5 @@
 #include "players/RandomAI.hpp"
+#include <SFML/System/Time.hpp>
 #include <iostream>
 
 PickingChoice RandomAI::pickTile(
@@ -13,6 +14,9 @@ PickingChoice RandomAI::pickTile(
 		bonus.colour()
 	);
 	int random_index = rand() % choices.size();
+	std::cout << "RANDOM BOT " + m_col.toString() + " IS PICKING A FACTORY";
+	commandLineWait();
+	std::cout << choices[random_index].to_string() + "\n";
  	return choices[random_index];
 }
 
@@ -23,6 +27,9 @@ PlacingChoice RandomAI::placeTile(Tile bonus) {
 		return PlacingChoice();
 	}
 	int random_index = rand() % choices.size();
+	std::cout << "RANDOM BOT " + m_col.toString() + " IS PLACING A TILE";
+	commandLineWait();
+	std::cout << choices[random_index].to_string() + "\n";
 	return choices[random_index];
 }
 

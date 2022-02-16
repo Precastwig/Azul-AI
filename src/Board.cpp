@@ -1,6 +1,8 @@
 #include "game_elements/Board.hpp"
 #include "players/Player.hpp"
 #include <algorithm>
+#include <iterator>
+#include <vector>
 
 Board::Board()
 {
@@ -21,6 +23,22 @@ Board::Board()
 		m_full_numbers.push_back(false);
 	}
 	m_colours_not_in_centre = Tile::all_tile_types();
+}
+
+std::vector<Tile::Type> Board::getAdjacentStarColours(Tile::Type starCol) {
+	std::vector<Tile::Type> returnList;
+	if (starCol == Tile::ORANGE) {
+		returnList.push_back(Tile::PURPLE);
+	} else {
+		returnList.push_back((Tile::Type)(starCol-1));
+	}
+
+	if (starCol == Tile::PURPLE) {
+		returnList.push_back(Tile::ORANGE);
+	} else {
+		returnList.push_back((Tile::Type)(starCol+1));
+	}
+	return returnList;
 }
 
 int Board::bonusPiecesAwarded() {
@@ -123,6 +141,16 @@ void Board::placeTile(PlacingChoice choice, Player* me) {
 	}
 }
 
+std::vector<PlacingChoice> Board::getPlacingChoicesOfCol(Tile::Type col) {
+	std::vector<PlacingChoice> allChoices = getAllPlacingChoices();
+	std::vector<PlacingChoice> returnList;
+	std::copy_if(allChoices.begin(), allChoices.end(), std::back_inserter(returnList), 
+		[col](PlacingChoice choice){
+			return choice.cost.colour == col;
+		});
+	return returnList;
+}
+
 std::vector<PlacingChoice> Board::getAllPlacingChoices() {
 	std::vector<PlacingChoice> choices;
 	for (std::shared_ptr<Location> star : m_stars) {
@@ -139,6 +167,25 @@ std::vector<PlacingChoice> Board::getAllPlacingChoices() {
 		}
 	}
 	return choices;
+}
+
+int Board::tilesNeededToGetStatue(Location::Types star) {
+	// Check 3/4 of tilcol
+	int tilesNeededForColumn = (m_stars[star]->tile(1)) ? 1 : 0;
+	tilesNeededForColumn += (m_stars[star]->tile(2)) ? 2 : 0;
+	if (tilesNeededForColumn == 0) {
+		return 0;
+	}
+	Location::Types nextStar = Location::clockwise_location(star);
+	tilesNeededForColumn += (m_stars[nextStar]->tile(3)) ? 3 : 0;
+	tilesNeededForColumn += (m_stars[nextStar]->tile(4)) ? 4 : 0;
+	return tilesNeededForColumn;
+}
+
+int Board::tilesNeededToGetWindow(Location::Types loc) {
+	int tilesNeeded = (m_stars[loc]->tile(5)) ? 5 : 0;
+	tilesNeeded += (m_stars[loc]->tile(6)) ? 6 : 0;
+	return tilesNeeded;
 }
 
 void Board::keepTiles(std::vector<std::shared_ptr<Tile>> to_keep) {

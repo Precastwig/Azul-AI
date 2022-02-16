@@ -1,8 +1,11 @@
 #include "players/Player.hpp"
 #include "Game.hpp"
 #include <algorithm>
+#include <memory>
 #include <set>
 #include <iostream>
+#include <chrono>
+#include <thread>
 
 Player::Player(PlayerColour playercolour, std::shared_ptr<Bag> bag)
 	:  m_done_placing(false), m_discarded(false), m_board(), m_bag(bag), m_col(playercolour), m_points(0) {
@@ -54,6 +57,15 @@ std::vector<PickingChoice> Player::getAllPickingChoices(
 	return choices;
 }
 
+void Player::commandLineWait() {
+	for (unsigned int i = 0; i < 5; ++i) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		std::cout << ".";
+		fflush(stdout);
+	}
+	std::cout << "\n";
+}
+
 void Player::minusPoisonPoints() {
 	m_points -= m_stored_tiles.size();
 	if (m_points < 0) {
@@ -92,9 +104,9 @@ void Player::pickBonusPieces(int number) {
 	m_bag->takeRewardTiles(choices);
 }
 
-int Player::howManyColourStored(Tile::Type t) {
+int Player::howManyColourStored(Tile::Type t, std::vector<std::shared_ptr<Tile>> stored) {
 	int count = 0;
-	for (auto tile : m_stored_tiles) {
+	for (auto tile : stored) {
 		if (tile->colour() == t) {
 			count++;
 		}
@@ -104,14 +116,6 @@ int Player::howManyColourStored(Tile::Type t) {
 
 std::vector<PlacingChoice> Player::getAllowedPlacingChoices(Tile bonus) {
 	std::vector<PlacingChoice> all_choices = m_board.getAllPlacingChoices();
-	// int choice = -1;
-	// std::cout << "Press 1 to output all choices\n";
-	// std::cin >> choice;
-	// if (choice == 1) {
-	// 	for (PlacingChoice choice : all_choices) {
-	// 		std::cout << location_strings[choice.star] << " " << tile_strings[choice.cost.colour] << ": " << choice.cost.num_colour << " Bonus: " << choice.cost.num_bonus << "\n";
-	// 	}
-	// }
 
 	std::vector<PlacingChoice> valid_choices;
 	for (PlacingChoice choice : all_choices) {
@@ -125,12 +129,12 @@ std::vector<PlacingChoice> Player::getAllowedPlacingChoices(Tile bonus) {
 		for (Tile costTile : potentialCostColours) {
 			int max_bonus = 0;
 			if (costTile != bonus) {
-				max_bonus = howManyColourStored(bonus.colour());
+				max_bonus = howManyColourStored(bonus.colour(), m_stored_tiles);
 			}
 
 			choice.cost.colour = costTile.colour();
 
-			int num_relevent_colour = howManyColourStored(costTile.colour());
+			int num_relevent_colour = howManyColourStored(costTile.colour(), m_stored_tiles);
 			createAllVariationsOfChoice(
 				choice,
 				valid_choices,
@@ -226,7 +230,7 @@ std::string Player::toString() {
 	std::string str = "Player: " + m_col.toString() + "\n";
 	str += "Points: " + std::to_string(m_points) + "\n";
 	for (Tile::Type tile : Tile::all_tile_types()) {
-		str += Tile::toString(tile) + ": " + std::to_string(howManyColourStored(tile)) + "\n";
+		str += Tile::toString(tile) + ": " + std::to_string(howManyColourStored(tile, m_stored_tiles)) + "\n";
 	}
 	if (m_done_placing) {
 		str += "\nFinished placing\n";

@@ -78,6 +78,30 @@ public:
 	static int num_locations() {
 		return all_locations().size();
 	}
+	static Types location_from_col(Tile::Type col) {
+		switch (col) {
+			case Tile::ORANGE:
+				return ORANGE_STAR;
+			case Tile::BLUE:
+				return BLUE_STAR;
+			case Tile::GREEN:
+				return GREEN_STAR;
+			case Tile::PURPLE:
+				return PURPLE_STAR;
+			case Tile::RED:
+				return RED_STAR;
+			case Tile::YELLOW:
+				return YELLOW_STAR;
+			default:
+				return ORANGE_STAR;
+		}
+	}
+	static Types clockwise_location(Types location) {
+		if (location == PURPLE_STAR) {
+			return ORANGE_STAR;
+		}
+		return (Types)(location + 1);
+	}
 
 	// Constructor
 	Location(Types l) : m_l(l) {

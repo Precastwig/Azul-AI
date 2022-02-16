@@ -14,6 +14,10 @@ struct PickingChoice {
 	std::shared_ptr<Factory> factory;
 	Tile::Type tile_colour;
 	bool with_bonus;
+
+	std::string to_string() {
+		return "Factory " + std::to_string(factory->id()) + ": " + Tile::toString(tile_colour);
+	};
 };
 
 class Player {
@@ -57,6 +61,9 @@ public:
 		m_discarded = false;
 	};
 
+	// A weird cmd line only thing to look like it's thinking
+	void commandLineWait();
+
 	std::string toShortString();
 	std::string toString();
 protected:
@@ -74,7 +81,7 @@ protected:
 		int max_relevent_colour
 	);
 
-	int howManyColourStored(Tile::Type t);
+	int howManyColourStored(Tile::Type t, std::vector<std::shared_ptr<Tile>> stored);
 
 	// Flag for when the player hass passed
 	bool m_done_placing;
@@ -84,9 +91,9 @@ protected:
 	Board m_board;
 	// The tiles taken to be placed on the board
 	std::vector<std::shared_ptr<Tile>> m_stored_tiles;
-private:
-	std::shared_ptr<Bag> m_bag;
 	PlayerColour m_col;
+	std::shared_ptr<Bag> m_bag;
+private:
 	int m_points;
 };
 

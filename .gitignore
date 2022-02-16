@@ -1,2 +1,7 @@
 azul
 *.o
+CMakeLists.txt
+azul.code-workspace
+build/
+.vscode/
+.cache/

@@ -9,14 +9,14 @@ Game::Game() : m_centre_taken(false), m_bonus_type(m_bonus_tile_order[0]) {
 	m_bag = std::make_shared<Bag>();
 	// Create the players, for now one randomAI and one humancmd
 
-	std::shared_ptr<Player> randomai = std::make_shared<RandomAI>(PlayerColour::all_colours()[0], m_bag);
-	std::shared_ptr<Player> player = std::make_shared<HumanCommandLine>(PlayerColour::all_colours()[1], m_bag);
-	m_players.push_back(randomai);
-	m_players.push_back(player);
+	std::shared_ptr<Player> player1 = std::make_shared<HumanCommandLine>(PlayerColour::all_colours()[0], m_bag);
+	std::shared_ptr<Player> player2 = std::make_shared<RandomAI>(PlayerColour::all_colours()[1], m_bag);
+	m_players.push_back(player1);
+	m_players.push_back(player2);
 
 	// Randomise the starting player
 	m_starting_player = rand() % m_players.size();
-	m_current_player = cIndex(m_starting_player, m_players.size());
+	m_current_player = cIndex(m_starting_player + 1, m_players.size());
 
 	// Create the factories
 	int num_factories = (m_players.size() * 2) + 1;
@@ -28,6 +28,8 @@ Game::Game() : m_centre_taken(false), m_bonus_type(m_bonus_tile_order[0]) {
 		angle += (2 * M_PI / num_factories);
 	}
 	m_centre = std::make_shared<Factory>(num_factories, middle, 60);
+
+	m_buttons.push_back(std::make_shared<Button>("Hello", middle));
 }
 
 Game::~Game() {
@@ -35,6 +37,9 @@ Game::~Game() {
 
 void Game::onClick(int xPos, int yPos) {
 	// Find the object that we've clicked on and call its onClick event
+	for (auto button : m_buttons) {
+		button->onClick(xPos, yPos);
+	}
 	for (std::shared_ptr<Factory> factory : m_factories) {
 		if (factory->contains(xPos, yPos)) {
 			factory->onClick(xPos, yPos, *this);
@@ -49,6 +54,9 @@ void Game::draw (RenderTarget &target, RenderStates states) const {
 	m_centre->draw(target, states);
 	for (std::shared_ptr<Factory> factory : m_factories) {
 		factory->draw(target, states);
+	}
+	for (auto button : m_buttons) {
+		button->draw(target, states);
 	}
 }
 

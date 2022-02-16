@@ -14,29 +14,8 @@ PickingChoice HumanCommandLine::pickTile(
 	);
 	factories.push_back(centre);
 	while (1) {
-		// int chosen_factory = -1;
-		// std::cout << "Choose a factory\n";
-		// while (chosen_factory < 0 || chosen_factory > factories.size()) {
-		// 	// + 1 for the centre
-		// 	std::cin >> chosen_factory;
-		// }
-		// std::cout << "Choose a colour\n";
-		// for (int i = 0; i < tile_strings.size() - 1; i++) {
-		// 	std::cout << i << ". " << tile_strings[i] << "\n";
-		// }
-		// int chosen_colour_int = -1;
-		// while (chosen_colour_int < 0 || chosen_colour_int > 5) {
-		// 	std::cin >> chosen_colour_int;
-		// }
-		// Tile chosen_colour = (Tile)chosen_colour_int;
-		// for (PickingChoice choice : choices) {
-		// 	if (choice.factory == factories[chosen_factory] &&
-		// 		choice.tile == chosen_colour) {
-		// 		return choice;
-		// 	}
-		// }
 		for (unsigned int i = 0; i < choices.size(); ++i) {
-			std::cout << i << ". " << Tile::toString(choices[i].tile_colour) << " factory " << choices[i].factory->id() << "\n";
+			std::cout << i << ". " << choices[i].to_string() << "\n";
 		}
 		unsigned int i = 0;
 		std::cin >> i;
@@ -121,12 +100,12 @@ std::vector<std::shared_ptr<Tile>> HumanCommandLine::discardDownToFour() {
 		std::cout << "Discard tiles until four are left\n";
 		std::vector<Tile::Type> allTiles = Tile::all_tile_types();
 		for (Tile::Type tile : allTiles) {
-			std::cout << Tile::toString(tile) << ": " << howManyColourStored(tile) << "\n";
+			std::cout << Tile::toString(tile) << ": " << howManyColourStored(tile, m_stored_tiles) << "\n";
 		}
 		int i = -1;
 		std::cin >> i;
 		Tile::Type chosenColour = (Tile::Type)i;
-		if (i >= 0 && i < allTiles.size() && howManyColourStored(chosenColour) > 0) {
+		if (i >= 0 && i < allTiles.size() && howManyColourStored(chosenColour, m_stored_tiles) > 0) {
 			// acceptable choice
 			for (auto tile : m_stored_tiles) {
 				if (tile->colour() == chosenColour) {

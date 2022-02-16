@@ -6,6 +6,7 @@
 #include "players/Player.hpp"
 #include "game_elements/Bag.hpp"
 #include "game_elements/Factory.hpp"
+#include "game_elements/Button.hpp"
 #include <SFML/Graphics.hpp>
 
 using namespace sf;
@@ -76,6 +77,8 @@ private:
 	cIndex m_current_player;
 	int m_starting_player;
 	std::vector<std::shared_ptr<Player>> m_players;
+	std::vector<std::shared_ptr<Button>> m_buttons;
+	std::vector<std::shared_ptr<sf::Texture>> m_textures;
 };
 
 #endif
