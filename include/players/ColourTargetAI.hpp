@@ -22,6 +22,9 @@ public:
 	virtual std::vector<std::shared_ptr<Tile>> chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices, int num) override;
 	// Returns which tiles the player would like to keep
 	virtual std::vector<std::shared_ptr<Tile>> discardDownToFour() override;
+	virtual bool isAI() override {
+		return true;
+	}
 private:
     std::vector<double> generatePickingWeightsFromBoard();
 	std::vector<double> generatePickingWeightsFromBoardImpl(std::vector<double>* currentWeights);

@@ -24,8 +24,8 @@ int main(int argc, char *argv[]) {
 			g_logger.enable();
 		}
 	}
-	Game game;
 	if (guiMode == COMMAND_LINE) {
+		Game game;
 		game.play();
 	} else if (guiMode == QT) {
 		// Unsupported for now
@@ -35,14 +35,14 @@ int main(int argc, char *argv[]) {
 		settings.antialiasingLevel = 8;
 		sf::RenderWindow window(sf::VideoMode(window_width, window_height), "Azul: Summer Pavillion", sf::Style::Default, settings);
 		// Create a graphical text to display
-	   sf::Font font;
-	   if (!font.loadFromFile("/usr/share/fonts/truetype/ubuntu-font-family/UbuntuMono-R.ttf"))
-		   return EXIT_FAILURE;
-	   sf::Text text("Hello SFML", font, 50);
-
-	   // Game stuff
-	   game.fill_factories();
-	   // Start the game loop
+	   	sf::Font font;
+	   	if (!font.loadFromFile("/usr/share/fonts/truetype/ubuntu-font-family/UbuntuMono-R.ttf"))
+			return EXIT_FAILURE;
+	   	sf::Text text("Hello SFML", font, 50);
+		Game game;
+	   	// Game stuff
+	   	game.fill_factories();
+	   	// Start the game loop
 	    while (window.isOpen())
 	    {
 	        // Process events
@@ -59,6 +59,7 @@ int main(int argc, char *argv[]) {
 					}
 				}
 	        }
+			game.performAIActions();
 	        // Clear screen
 	        window.clear(Color(179, 157, 114));
 	        // Draw the string

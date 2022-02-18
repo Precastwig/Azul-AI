@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <memory>
+#include <mutex>
 #include "players/Player.hpp"
 #include "game_elements/Bag.hpp"
 #include "game_elements/Factory.hpp"
@@ -21,8 +22,14 @@ public:
 
 	void onClick(int xPos, int yPos);
 
-	Tile::Type getBonus();
+	
+	//-------------------------------------------------------------------
+	// SFML specific functions
+	void performAIActions();
+	void performAIAction(std::shared_ptr<Player> player);
 
+	//-------------------------------------------------------------------
+	// Command line specific functions
 	// Initiates the play sequence
 	void play();
 	// Prints the factories to stdout
@@ -30,7 +37,6 @@ public:
 	// Print some info to stdout declaring the winner of the game
 	void declare_winner();
 
-	//-------------------------------------------------------------------
 	// Turn step functions
 
 	// Pulls tiles from the bag and places on the factories until each
@@ -42,12 +48,18 @@ public:
 	// Players take turns placing tiles on their personal boards until they choose to stop (or can't place any more tiles)
 	void placing_stage();
 
+	//-------------------------------------------------------------------
 	// Helper functions
 
 	// Check if all factories are empty
 	bool noTilesLeft();
 	// Check that there is a player that still wishes to place tiles
 	bool playerNotFinished();
+	// Are we in the picking stage?
+	bool inPickingStage() {return m_picking_stage;};
+	void changePlayerTurn() {m_current_player++;};
+	// Get the current bonus tile type
+	Tile::Type getBonus();
 
 private:
 	//-------------------------------------------------------------------
@@ -70,8 +82,11 @@ private:
 	std::shared_ptr<Factory> m_centre;
 
 	// Current round info
-	bool m_centre_taken;
 	Tile::Type m_bonus_type;
+	// Used only in SFML implementation
+	bool m_centre_taken;
+	bool m_picking_stage;
+	std::mutex m_thread_running;
 
 	// Member variable for players
 	cIndex m_current_player;

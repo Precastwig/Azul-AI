@@ -37,6 +37,7 @@ public:
 	virtual std::vector<std::shared_ptr<Tile>> discardDownToFour() = 0;
 
 	// Other helpers
+	virtual bool isAI() = 0;
 	void pickBonusPieces(int number);
 	bool hasTiles();
 	int numTiles();
@@ -50,7 +51,7 @@ public:
 	};
 
 	// Resolvers
-	void resolvePickingChoice(PickingChoice& choice, Tile::Type bonus, std::shared_ptr<Factory> centre);
+	void resolvePickingChoice(PickingChoice& choice, Tile::Type bonus, std::shared_ptr<Factory> centre, bool& centre_taken, int& startingPlayer, int currentPlayerIndex);
 	void resolvePlacingChoice(PlacingChoice& choice, Tile::Type bonus);
 
 	bool finishedPlacing() {

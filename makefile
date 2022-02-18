@@ -23,5 +23,5 @@ board:
 # 	@echo "Built main.o"
 
 all: clean board
-	@$(COMPILER) -std=c++2a -o azul bin/button.o bin/bag.o bin/factory.o bin/board.o bin/player.o bin/randomAI.o bin/colourTargetAI.o bin/HumanCommandLine.o bin/game.o bin/main.o -lsfml-graphics -lsfml-window -lsfml-system
+	@$(COMPILER) -std=c++2a -o azul bin/button.o bin/bag.o bin/factory.o bin/board.o bin/player.o bin/randomAI.o bin/colourTargetAI.o bin/HumanCommandLine.o bin/game.o bin/main.o -lsfml-graphics -lsfml-window -lsfml-system -pthread
 	@echo "Linked all into executable"

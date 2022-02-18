@@ -3,8 +3,10 @@
 #include "players/HumanCommandLine.hpp"
 #include <algorithm>
 #include <iostream>
+#include <memory>
+#include <thread>
 
-Game::Game() : m_centre_taken(false), m_bonus_type(m_bonus_tile_order[0]) {
+Game::Game() : m_centre_taken(false), m_bonus_type(m_bonus_tile_order[0]), m_picking_stage(true) {
 	// Create the bag
 	m_bag = std::make_shared<Bag>();
 	// Create the players, for now one randomAI and one humancmd
@@ -37,16 +39,19 @@ Game::~Game() {
 
 void Game::onClick(int xPos, int yPos) {
 	// Find the object that we've clicked on and call its onClick event
-	for (auto button : m_buttons) {
-		button->onClick(xPos, yPos);
-	}
-	for (std::shared_ptr<Factory> factory : m_factories) {
-		if (factory->contains(xPos, yPos)) {
-			factory->onClick(xPos, yPos, *this);
+	if (m_thread_running.try_lock()) {
+		for (auto button : m_buttons) {
+			button->onClick(xPos, yPos);
 		}
-	}
-	if (m_centre->contains(xPos, yPos)) {
-		m_centre->onClick(xPos, yPos, *this);
+		for (std::shared_ptr<Factory> factory : m_factories) {
+			if (factory->contains(xPos, yPos)) {
+				factory->onClick(xPos, yPos, *this);
+			}
+		}
+		if (m_centre->contains(xPos, yPos)) {
+			m_centre->onClick(xPos, yPos, *this);
+		}
+		m_thread_running.unlock();
 	}
 }
 
@@ -60,6 +65,38 @@ void Game::draw (RenderTarget &target, RenderStates states) const {
 	}
 }
 
+void performAIActionImpl(Game* game, std::shared_ptr<Player> player) {
+	// Perform the action then move the player forward
+	game->performAIAction(player);
+	game->changePlayerTurn();
+}
+
+void Game::performAIAction(std::shared_ptr<Player> player) {
+	if (inPickingStage()) {
+		PickingChoice choice = player->pickTile(
+			m_factories,
+			m_centre,
+			m_bonus_type,
+			!m_centre_taken
+		);
+		player->resolvePickingChoice(choice, m_bonus_type, m_centre, m_centre_taken, m_starting_player, m_current_player.getIndex());
+	} else { 
+		PlacingChoice choice = player->placeTile(m_bonus_type);
+		player->resolvePlacingChoice(choice, m_bonus_type);
+	}
+	m_thread_running.unlock();
+}
+
+void Game::performAIActions() {
+	std::shared_ptr<Player> player = m_players[m_current_player.getIndex()];
+	// Start the AI actions in another thread as to not lock up the
+	// graphics
+	if (player->isAI() && m_thread_running.try_lock()) {
+		std::thread aiThread(performAIActionImpl, this, player);
+		aiThread.detach();
+	}
+}
+
 void Game::play() {
 	int round_number = 1;
 	for (Tile::Type bonus_tile : m_bonus_tile_order) {
@@ -70,7 +107,9 @@ void Game::play() {
 		// Fill factories
 		fill_factories();
 		// First stage
+		m_picking_stage = true;
 		picking_stage();
+		m_picking_stage = false;
 		// Second stage
 		placing_stage();
 
@@ -122,30 +161,19 @@ void Game::picking_stage() {
 			m_bonus_type,
 			!centreTaken
 		);
-		if (!centreTaken && choice.factory == m_centre) {
-			// Someone has taken the centre!
-			centreTaken = true;
-			player->minusPoisonPoints();
-			m_starting_player = player_turn.getIndex();
-		}
-		player->resolvePickingChoice(choice, m_bonus_type, m_centre);
+		player->resolvePickingChoice(choice, m_bonus_type, m_centre, m_centre_taken, m_starting_player, player_turn.getIndex());
 		player_turn++;
 		printFactories();
 	}
 }
 
 void Game::pick_tile(PickingChoice& picked) {
+	
 	std::shared_ptr<Player> player = m_players[m_current_player.getIndex()];
-	if (!m_centre_taken && picked.factory == m_centre) {
-		// Someone has taken from the centre
-		m_centre_taken = true;
-		player->minusPoisonPoints();
-		m_starting_player = m_current_player.getIndex();
-	}
 	std::string withBonus = (picked.with_bonus) ? "with a bonus tile" : "";
 	g_logger.log(Logger::INFO, player->toShortString() + " has picked " + std::to_string(picked.factory->numberOf(picked.tile_colour)) + " " + Tile::toString(picked.tile_colour) + " " + withBonus);
 
-	player->resolvePickingChoice(picked, m_bonus_type, m_centre);
+	player->resolvePickingChoice(picked, m_bonus_type, m_centre, m_centre_taken, m_starting_player, m_current_player.getIndex());
 	m_current_player++;
 }
 

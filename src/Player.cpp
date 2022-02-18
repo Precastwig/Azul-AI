@@ -143,20 +143,13 @@ std::vector<PlacingChoice> Player::getAllowedPlacingChoices(Tile bonus) {
 			);
 		}
 	}
-	// choice = -1;
-	// std::cout << "Press 1 to output all filtered choices\n";
-	// std::cin >> choice;
-	// if (choice == 1) {
-	// 	for (PlacingChoice choice : valid_choices) {
-	// 		std::cout << location_strings[choice.star] << " " << tile_strings[choice.cost.colour] << ": " << choice.cost.num_colour << " Bonus: " << choice.cost.num_bonus << "\n";
-	// 	}
-	// }n
 
 	return valid_choices;
 }
 
 void Player::resolvePlacingChoice(PlacingChoice& choice, Tile::Type bonus) {
 	if (!m_done_placing) {
+		g_logger.log(Logger::INFO, toString() + " placed tile");
 		// Remove the cost from current number of tiles
 		std::vector<std::shared_ptr<Tile>> newStoredTiles;
 		std::vector<std::shared_ptr<Tile>> toBin;
@@ -217,7 +210,16 @@ std::vector<PlacingChoice> Player::filterChoicesFromLocation(std::vector<Placing
 void Player::resolvePickingChoice(
 	PickingChoice& choice,
 	Tile::Type bonus,
-	std::shared_ptr<Factory> centre) {
+	std::shared_ptr<Factory> centre,
+	bool& centre_taken, 
+	int& startingPlayer,
+	int currentPlayerIndex) {
+	if (!centre_taken && choice.factory == centre) {
+		// Someone has taken from the centre
+		centre_taken = true;
+		minusPoisonPoints();
+		startingPlayer = currentPlayerIndex;
+	}
 	std::vector<std::shared_ptr<Tile>> pickedTiles = choice.factory->removeTiles(choice.tile_colour, bonus, centre);
 	m_stored_tiles.insert(m_stored_tiles.end(), pickedTiles.begin(), pickedTiles.end());
 }
