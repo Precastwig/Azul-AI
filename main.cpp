@@ -1,6 +1,9 @@
 #include <SFML/Graphics.hpp>
 #include "Game.hpp"
+#include "MainMenu.hpp"
 #include "Logger.hpp"
+#include <SFML/System/Vector2.hpp>
+#include <SFML/Window/WindowStyle.hpp>
 #include <iostream>
 
 enum gui_modes {
@@ -28,21 +31,19 @@ int main(int argc, char *argv[]) {
 		Game game;
 		game.play();
 	} else if (guiMode == QT) {
-		// Unsupported for now
-		int window_width = 1000;
-		int window_height = 1000;
+		int window_width = 1920;
+		int window_height = 1080;
 		sf::ContextSettings settings;
 		settings.antialiasingLevel = 8;
-		sf::RenderWindow window(sf::VideoMode(window_width, window_height), "Azul: Summer Pavillion", sf::Style::Default, settings);
-		// Create a graphical text to display
-	   	sf::Font font;
-	   	if (!font.loadFromFile("/usr/share/fonts/truetype/ubuntu-font-family/UbuntuMono-R.ttf"))
-			return EXIT_FAILURE;
-	   	sf::Text text("Hello SFML", font, 50);
-		Game game;
+		sf::RenderWindow window(sf::VideoMode(window_width, window_height), "Azul: Summer Pavillion", sf::Style::Titlebar | sf::Style::Close, settings);
+		Game game(sf::Vector2f(window_width, window_height));
 	   	// Game stuff
 	   	game.fill_factories();
-	   	// Start the game loop
+		bool menuopen = true;
+		MainMenu menu(&window, sf::Vector2f(window_width, window_height));
+	   	menu.m_newgame.m_callback = [&menuopen]() {menuopen = !menuopen;};
+		   
+		// Start the game loop
 	    while (window.isOpen())
 	    {
 	        // Process events
@@ -55,15 +56,25 @@ int main(int argc, char *argv[]) {
 
 				if (event.type == sf::Event::MouseButtonPressed) {
 					if (event.mouseButton.button == sf::Mouse::Left) {
-						game.onClick(event.mouseButton.x, event.mouseButton.y);
+						if (menuopen) {
+							// Give to the menu
+							menu.onClick(event.mouseButton.x, event.mouseButton.y);
+						} else {
+							game.onClick(event.mouseButton.x, event.mouseButton.y);
+						}
 					}
 				}
 	        }
-			game.performAIActions();
 	        // Clear screen
-	        window.clear(Color(179, 157, 114));
-	        // Draw the string
-	        window.draw(game);
+	        window.clear(Color(194, 240, 242));
+	        // Draw the relevent thing
+			if (menuopen) {
+				window.draw(menu);
+			} else {
+				// This is non locking, so shouldn't halt UI
+				game.performAIActions();
+	        	window.draw(game);
+			}
 	        // Update the window
 	        window.display();
 	    }

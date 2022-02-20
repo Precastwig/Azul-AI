@@ -66,6 +66,7 @@ public:
 	void commandLineWait();
 
 	std::string toShortString();
+	std::string toStringNoBoard();
 	std::string toString();
 protected:
 	std::vector<std::shared_ptr<Location>> getLocationsFromChoiceList(std::vector<PlacingChoice> choices);

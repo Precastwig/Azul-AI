@@ -1,6 +1,7 @@
 #ifndef GAME
 #define GAME
 
+#include <SFML/System/Vector2.hpp>
 #include <vector>
 #include <memory>
 #include <mutex>
@@ -8,6 +9,7 @@
 #include "game_elements/Bag.hpp"
 #include "game_elements/Factory.hpp"
 #include "game_elements/Button.hpp"
+#include "game_elements/PlayerVisualizer.hpp"
 #include <SFML/Graphics.hpp>
 
 using namespace sf;
@@ -15,7 +17,7 @@ using namespace sf;
 class Game : public Drawable {
 public:
 	// Constructor/Destructor
-	Game();
+	Game(sf::Vector2f size = sf::Vector2f());
 	~Game();
 
 	virtual void draw (RenderTarget &target, RenderStates states) const override;
@@ -55,9 +57,6 @@ public:
 	bool noTilesLeft();
 	// Check that there is a player that still wishes to place tiles
 	bool playerNotFinished();
-	// Are we in the picking stage?
-	bool inPickingStage() {return m_picking_stage;};
-	void changePlayerTurn() {m_current_player++;};
 	// Get the current bonus tile type
 	Tile::Type getBonus();
 
@@ -94,6 +93,7 @@ private:
 	std::vector<std::shared_ptr<Player>> m_players;
 	std::vector<std::shared_ptr<Button>> m_buttons;
 	std::vector<std::shared_ptr<sf::Texture>> m_textures;
+	std::vector<std::unique_ptr<PlayerVisualizer>> m_player_visualizers;
 };
 
 #endif

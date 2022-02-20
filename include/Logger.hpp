@@ -40,6 +40,7 @@ private:
 		if (l == ERROR) {
 			return "\033[;31mERROR: ";
 		}
+		return "";
 	}
 	bool m_enabled = false;
 };

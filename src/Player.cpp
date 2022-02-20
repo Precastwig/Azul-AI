@@ -228,12 +228,17 @@ std::string Player::toShortString() {
 	return m_col.toString() + ": " + std::to_string(m_points);
 }
 
-std::string Player::toString() {
+std::string Player::toStringNoBoard() {
 	std::string str = "Player: " + m_col.toString() + "\n";
 	str += "Points: " + std::to_string(m_points) + "\n";
 	for (Tile::Type tile : Tile::all_tile_types()) {
 		str += Tile::toString(tile) + ": " + std::to_string(howManyColourStored(tile, m_stored_tiles)) + "\n";
 	}
+	return str;
+}
+
+std::string Player::toString() {
+	std::string str = toStringNoBoard();
 	if (m_done_placing) {
 		str += "\nFinished placing\n";
 	} else {
