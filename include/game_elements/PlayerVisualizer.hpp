@@ -16,8 +16,9 @@ public:
     PlayerVisualizer(std::shared_ptr<Player> player, sf::Vector2f location, sf::Vector2f size);
 
     virtual void draw (sf::RenderTarget &target, sf::RenderStates states) const override;
-    void updateString();
+    void update(std::shared_ptr<Player> currentPlayer);
 private:
+    void updateString();
     // The thing we're visualizing
     std::shared_ptr<Player> m_player;
     // Visualization elements

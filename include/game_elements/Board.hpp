@@ -1,11 +1,13 @@
 #ifndef BOARD
 #define BOARD
 
+#include <SFML/Graphics/Drawable.hpp>
 #include <string>
 #include <vector>
 #include <memory>
 #include "utils/helper_enums.hpp"
 #include "utils/cIndex.hpp"
+#include "game_elements/Location.hpp"
 
 // Pre declarations
 class Player;
@@ -26,9 +28,11 @@ struct PlacingChoice {
 	};
 };
 
-class Board {
+class Board : sf::Drawable {
 public:
 	Board();
+
+	virtual void draw (sf::RenderTarget &target, sf::RenderStates states) const override;
 
 	static std::vector<Tile::Type> getAdjacentStarColours(Tile::Type starCol);
 

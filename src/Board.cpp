@@ -25,6 +25,21 @@ Board::Board()
 	m_colours_not_in_centre = Tile::all_tile_types();
 }
 
+void Board::draw (sf::RenderTarget &target, sf::RenderStates states) const {
+	// Oh god.
+	// Draw each "star" of placing choices, they're not really placing choices
+	for (std::shared_ptr<Location> loc : m_stars) {
+		loc->draw(target, states);
+	}
+	
+	// Draw windows/statues/columns
+
+
+	// on hover, show all placing choices for that space,
+	// Then on click, bring that submenu up permanently
+	// Then allow user to click on each of them
+}
+
 std::vector<Tile::Type> Board::getAdjacentStarColours(Tile::Type starCol) {
 	std::vector<Tile::Type> returnList;
 	if (starCol == Tile::ORANGE) {

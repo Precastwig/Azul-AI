@@ -38,17 +38,17 @@ public:
 	void printFactories();
 	// Print some info to stdout declaring the winner of the game
 	void declare_winner();
+	// Players take turns placing tiles on their personal boards until they choose to stop (or can't place any more tiles)
+	void placing_stage();
+	// Players take turns picking tiles from factories until all are empty
+	void picking_stage();
 
 	// Turn step functions
 
 	// Pulls tiles from the bag and places on the factories until each
 	// factory contains 4, or the bag runs out
 	void fill_factories();
-	// Players take turns picking tiles from factories until all are empty
-	void picking_stage();
 	void pick_tile(PickingChoice& picked);
-	// Players take turns placing tiles on their personal boards until they choose to stop (or can't place any more tiles)
-	void placing_stage();
 
 	//-------------------------------------------------------------------
 	// Helper functions
@@ -59,6 +59,12 @@ public:
 	bool playerNotFinished();
 	// Get the current bonus tile type
 	Tile::Type getBonus();
+	
+
+	// Debug functions
+	void flipStage() {
+		m_picking_stage = !m_picking_stage;
+	}
 
 private:
 	//-------------------------------------------------------------------
@@ -80,8 +86,12 @@ private:
 	std::vector<std::shared_ptr<Factory>> m_factories;
 	std::shared_ptr<Factory> m_centre;
 
+	// Boards, these are non-owning pointers
+	std::vector<Board*> m_boards;
+
 	// Current round info
 	Tile::Type m_bonus_type;
+	Button m_debug_switchstage;
 	// Used only in SFML implementation
 	bool m_centre_taken;
 	bool m_picking_stage;
@@ -91,8 +101,7 @@ private:
 	cIndex m_current_player;
 	int m_starting_player;
 	std::vector<std::shared_ptr<Player>> m_players;
-	std::vector<std::shared_ptr<Button>> m_buttons;
-	std::vector<std::shared_ptr<sf::Texture>> m_textures;
+	//std::vector<std::shared_ptr<sf::Texture>> m_textures;
 	std::vector<std::unique_ptr<PlayerVisualizer>> m_player_visualizers;
 };
 

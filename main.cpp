@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 		bool menuopen = true;
 		MainMenu menu(&window, sf::Vector2f(window_width, window_height));
 	   	menu.m_newgame.m_callback = [&menuopen]() {menuopen = !menuopen;};
-		   
+	
 		// Start the game loop
 	    while (window.isOpen())
 	    {

@@ -1,13 +1,15 @@
 #include "Game.hpp"
+#include "game_elements/Button.hpp"
 #include "players/RandomAI.hpp"
 #include "players/HumanCommandLine.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <algorithm>
+#include <cstddef>
 #include <iostream>
 #include <memory>
 #include <thread>
 
-Game::Game(sf::Vector2f size) : m_centre_taken(false), m_bonus_type(m_bonus_tile_order[0]), m_picking_stage(true) {
+Game::Game(sf::Vector2f size) : m_debug_switchstage("Switch stage"), m_centre_taken(false), m_bonus_type(m_bonus_tile_order[0]), m_picking_stage(true) {
 	// Create the bag
 	m_bag = std::make_shared<Bag>();
 	// Create the players, for now one randomAI and one humancmd
@@ -16,6 +18,10 @@ Game::Game(sf::Vector2f size) : m_centre_taken(false), m_bonus_type(m_bonus_tile
 	std::shared_ptr<Player> player2 = std::make_shared<RandomAI>(PlayerColour::all_colours()[1], m_bag);
 	m_players.push_back(player1);
 	m_players.push_back(player2);
+
+	for (std::shared_ptr<Player> p : m_players) {
+		m_boards.push_back(p->getBoardPtr());
+	}
 
 	// Randomise the starting player
 	m_starting_player = rand() % m_players.size();
@@ -44,6 +50,12 @@ Game::Game(sf::Vector2f size) : m_centre_taken(false), m_bonus_type(m_bonus_tile
 		angle += (2 * M_PI / num_factories);
 	}
 	m_centre = std::make_shared<Factory>(num_factories, middle, 60);
+	m_debug_switchstage.setPosition(positions[2]);
+	m_debug_switchstage.m_callback = [&]() {
+		this->flipStage();
+	};
+	// Alternately could use bind?
+	//	std::bind(&Game::flipStage, std::ref(*this));
 }
 
 Game::~Game() {
@@ -53,9 +65,6 @@ void Game::onClick(int xPos, int yPos) {
 	// The user should only be able to interact if the AI isn't currently running
 	if (m_thread_running.try_lock()) {
 		// Find the object that we've clicked on and call its onClick event
-		for (auto button : m_buttons) {
-			button->onClick(xPos, yPos);
-		}
 		for (std::shared_ptr<Factory> factory : m_factories) {
 			if (factory->contains(xPos, yPos)) {
 				factory->onClick(xPos, yPos, *this);
@@ -64,21 +73,30 @@ void Game::onClick(int xPos, int yPos) {
 		if (m_centre->contains(xPos, yPos)) {
 			m_centre->onClick(xPos, yPos, *this);
 		}
+		m_debug_switchstage.onClick(xPos, yPos);
 		m_thread_running.unlock();
 	}
 }
 
 void Game::draw(RenderTarget &target, RenderStates states) const {
-	m_centre->draw(target, states);
-	for (std::shared_ptr<Factory> factory : m_factories) {
-		factory->draw(target, states);
-	}
-	for (auto button : m_buttons) {
-		button->draw(target, states);
+	if (m_picking_stage) {
+		m_centre->draw(target, states);
+		for (std::shared_ptr<Factory> factory : m_factories) {
+			factory->draw(target, states);
+		}
+	} else {
+		// Placing stage
+		// Only show the placing players board for now?
+		m_boards[m_current_player.getIndex()]->draw(target, states);
+		// for (Board* b : m_boards) {
+		// 	b->draw(target, states);
+		// }
 	}
 	for (size_t i = 0; i < m_player_visualizers.size(); ++i) {
 		m_player_visualizers[i]->draw(target, states);
 	}
+
+	m_debug_switchstage.draw(target, states);
 }
 
 void performAIActionWorker(Game* game, std::shared_ptr<Player> player) {
@@ -189,8 +207,16 @@ void Game::pick_tile(PickingChoice& picked) {
 	g_logger.log(Logger::INFO, player->toShortString() + " has picked " + std::to_string(picked.factory->numberOf(picked.tile_colour)) + " " + Tile::toString(picked.tile_colour) + " " + withBonus);
 
 	player->resolvePickingChoice(picked, m_bonus_type, m_centre, m_centre_taken, m_starting_player, m_current_player.getIndex());
-	m_player_visualizers[m_current_player.getIndex()]->updateString();
-	m_current_player++;
+	if (noTilesLeft()) {
+		m_current_player = cIndex(m_starting_player + 1, m_players.size());
+		m_picking_stage = false;
+	} else {
+		m_current_player++;
+	}
+	// Give the player visualizers a chance to show new info
+	for (size_t i = 0; i < m_player_visualizers.size(); ++i) {
+		m_player_visualizers[i]->update(m_players[m_current_player.getIndex()]);
+	}
 }
 
 bool Game::playerNotFinished() {

@@ -49,6 +49,9 @@ public:
 	PlayerColour colour() {
 		return m_col;
 	};
+	Board* getBoardPtr() {
+		return &m_board;
+	}
 
 	// Resolvers
 	void resolvePickingChoice(PickingChoice& choice, Tile::Type bonus, std::shared_ptr<Factory> centre, bool& centre_taken, int& startingPlayer, int currentPlayerIndex);
