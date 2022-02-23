@@ -1,7 +1,7 @@
-#include "players/HumanCommandLine.hpp"
+#include "players/Human.hpp"
 #include <iostream>
 
-PickingChoice HumanCommandLine::pickTile(
+PickingChoice Human::pickTile(
 	std::vector<std::shared_ptr<Factory>> factories,
 	std::shared_ptr<Factory> centre,
 	Tile bonus,
@@ -25,7 +25,7 @@ PickingChoice HumanCommandLine::pickTile(
 	}
 }
 
-PlacingChoice HumanCommandLine::placeTile(Tile bonus) {
+PlacingChoice Human::placeTile(Tile bonus) {
 	std::cout << toString();
 	std::vector<PlacingChoice> choices = getAllowedPlacingChoices(bonus);
 	if (choices.size() == 0 || m_done_placing) {
@@ -69,7 +69,7 @@ PlacingChoice HumanCommandLine::placeTile(Tile bonus) {
 	}
 }
 
-std::vector<std::shared_ptr<Tile>> HumanCommandLine::chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices, int number) {
+std::vector<std::shared_ptr<Tile>> Human::chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices, int number) {
 	std::vector<std::shared_ptr<Tile>> return_list;
 	while (number > 0) {
 		std::cout << "\nChoose " << number << " bonus pieces\n";
@@ -93,7 +93,7 @@ std::vector<std::shared_ptr<Tile>> HumanCommandLine::chooseBonusPieces(std::vect
 	return return_list;
 }
 
-std::vector<std::shared_ptr<Tile>> HumanCommandLine::discardDownToFour() {
+std::vector<std::shared_ptr<Tile>> Human::discardDownToFour() {
 	std::vector<std::shared_ptr<Tile>> tilesToLose;
 	int num = numTiles();
 	while (num > 4) {

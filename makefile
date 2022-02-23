@@ -13,7 +13,7 @@ board:
 	@$(COMPILER) -std=c++2a -c -g src/Player.cpp -Iinclude/ -o bin/player.o
 	@$(COMPILER) -std=c++2a -c -g src/RandomAI.cpp -Iinclude/ -o bin/randomAI.o
 	@$(COMPILER) -std=c++2a -c -g src/ColourTargetAI.cpp -Iinclude/ -o bin/colourTargetAI.o
-	@$(COMPILER) -std=c++2a -c -g src/HumanCommandLine.cpp -Iinclude/ -o bin/HumanCommandLine.o
+	@$(COMPILER) -std=c++2a -c -g src/Human.cpp -Iinclude/ -o bin/Human.o
 	@$(COMPILER) -std=c++2a -c -g src/PlayerVisualizer.cpp -Iinclude/ -o bin/playervisualizer.o
 	@$(COMPILER) -std=c++2a -c -g src/Game.cpp -Iinclude/ -o bin/game.o
 	@$(COMPILER) -std=c++2a -c -g src/MainMenu.cpp -Iinclude/ -o bin/mainmenu.o
@@ -25,5 +25,5 @@ board:
 # 	@echo "Built main.o"
 
 all: clean board
-	@$(COMPILER) -std=c++2a -o azul bin/button.o bin/bag.o bin/factory.o bin/board.o bin/player.o bin/randomAI.o bin/colourTargetAI.o bin/HumanCommandLine.o bin/playervisualizer.o bin/game.o bin/mainmenu.o bin/main.o -lsfml-graphics -lsfml-window -lsfml-system -pthread
+	@$(COMPILER) -std=c++2a -o azul bin/button.o bin/bag.o bin/factory.o bin/board.o bin/player.o bin/randomAI.o bin/colourTargetAI.o bin/Human.o bin/playervisualizer.o bin/game.o bin/mainmenu.o bin/main.o -lsfml-graphics -lsfml-window -lsfml-system -pthread
 	@echo "Linked all into executable"

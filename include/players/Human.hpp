@@ -3,10 +3,10 @@
 
 #include "players/Player.hpp"
 
-class HumanCommandLine : public Player {
+class Human : public Player {
 public:
-	HumanCommandLine(PlayerColour colour, std::shared_ptr<Bag> bag) : Player(colour, bag) {};
-	~HumanCommandLine() = default;
+	Human(PlayerColour colour, std::shared_ptr<Bag> bag) : Player(colour, bag) {};
+	~Human() = default;
 
 	// Decision overrides
 	virtual PickingChoice pickTile(

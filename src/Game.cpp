@@ -1,7 +1,7 @@
 #include "Game.hpp"
 #include "game_elements/Button.hpp"
 #include "players/RandomAI.hpp"
-#include "players/HumanCommandLine.hpp"
+#include "players/Human.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <algorithm>
 #include <cstddef>
@@ -14,7 +14,7 @@ Game::Game(sf::Vector2f size) : m_debug_switchstage("Switch stage"), m_centre_ta
 	m_bag = std::make_shared<Bag>();
 	// Create the players, for now one randomAI and one humancmd
 
-	std::shared_ptr<Player> player1 = std::make_shared<HumanCommandLine>(PlayerColour::all_colours()[0], m_bag);
+	std::shared_ptr<Player> player1 = std::make_shared<Human>(PlayerColour::all_colours()[0], m_bag);
 	std::shared_ptr<Player> player2 = std::make_shared<RandomAI>(PlayerColour::all_colours()[1], m_bag);
 	m_players.push_back(player1);
 	m_players.push_back(player2);
