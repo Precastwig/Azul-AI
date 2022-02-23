@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <memory>
 #include <SFML/Graphics.hpp>
+#include <game_elements/Tile.hpp>
 
 using namespace sf;
 
@@ -22,26 +23,27 @@ public:
 
 	static sf::Vector2f calculateNewPos(const sf::Vector2f& oldPos, const float& size, const double& angle);
 
-	bool contains(int x, int y);
+	void onHover(int x, int y, const TileType& bonus);
 	void onClick(int x, int y, Game& game);
 
 	// Add tiles to the factory
 	void place(std::shared_ptr<Tile> tile);
 	void addTiles(std::vector<std::shared_ptr<Tile>> tiles);
 	// Remove tiles from the factory, returns the removed tiles
-	std::vector<std::shared_ptr<Tile>> removeTiles(Tile::Type colour_taken, Tile::Type bonus_type, std::shared_ptr<Factory> centre);
+	std::vector<std::shared_ptr<Tile>> removeTiles(TileType colour_taken, TileType bonus_type, std::shared_ptr<Factory> centre);
 
 	// Getter functions
 	std::vector<std::shared_ptr<Tile>> tiles() const;
 	bool isEmpty() const;
-	int numberOf(Tile::Type tile) const;
-	bool hasBonus(Tile::Type bonus) const;
-	bool isOnlyBonus(Tile::Type bonus) const;
+	int numberOf(TileType tile) const;
+	bool hasBonus(TileType bonus) const;
+	bool isOnlyBonus(TileType bonus) const;
 	void positionTiles() const;
 
 	std::string toString();
 	int id() {return m_id;};
 private:
+	bool contains(int x, int y);
 	const int m_id;
 	const float m_size;
 	// Drawable elements

@@ -1,14 +1,30 @@
 #include "game_elements/Board.hpp"
 #include "players/Player.hpp"
+#include <SFML/System/Vector2.hpp>
 #include <algorithm>
 #include <iterator>
+#include <memory>
 #include <vector>
 
 Board::Board()
 {
 	// Initialise lists
+	double rotation = M_PI / 6;
+	double spin = (2 * M_PI) * 4 / 6;
+	sf::Vector2f centre(800, 500);
 	for (Location::Types type : Location::all_locations()) {
 		auto star = std::make_shared<Location>(type);
+		sf::Vector2f starPos;
+		if (type == Location::CENTRE_STAR) {
+			starPos = centre;
+			rotation = M_PI / 6;
+		} else {
+			starPos = Factory::calculateNewPos(centre, 195, spin);
+		}
+		star->setPosition(starPos);
+		star->setRotation(rotation);
+		rotation += (2 * M_PI) / (Location::all_locations().size() - 1);
+		spin += (2* M_PI) / (Location::all_locations().size() - 1);
 		m_stars.push_back(star);
 	}
 
@@ -23,6 +39,12 @@ Board::Board()
 		m_full_numbers.push_back(false);
 	}
 	m_colours_not_in_centre = Tile::all_tile_types();
+}
+
+void Board::onHover(int xpos, int ypos) {
+	for (std::shared_ptr<Location> loc : m_stars) {
+		loc->onHover(xpos, ypos);
+	}
 }
 
 void Board::draw (sf::RenderTarget &target, sf::RenderStates states) const {
@@ -40,18 +62,18 @@ void Board::draw (sf::RenderTarget &target, sf::RenderStates states) const {
 	// Then allow user to click on each of them
 }
 
-std::vector<Tile::Type> Board::getAdjacentStarColours(Tile::Type starCol) {
-	std::vector<Tile::Type> returnList;
-	if (starCol == Tile::ORANGE) {
-		returnList.push_back(Tile::PURPLE);
+std::vector<TileType> Board::getAdjacentStarColours(TileType starCol) {
+	std::vector<TileType> returnList;
+	if (starCol == TileType::ORANGE) {
+		returnList.push_back(TileType::PURPLE);
 	} else {
-		returnList.push_back((Tile::Type)(starCol-1));
+		returnList.push_back((TileType)(starCol-1));
 	}
 
-	if (starCol == Tile::PURPLE) {
-		returnList.push_back(Tile::ORANGE);
+	if (starCol == TileType::PURPLE) {
+		returnList.push_back(TileType::ORANGE);
 	} else {
-		returnList.push_back((Tile::Type)(starCol+1));
+		returnList.push_back((TileType)(starCol+1));
 	}
 	return returnList;
 }
@@ -123,7 +145,7 @@ int Board::bonusPointsAwarded() {
 	return points;
 }
 
-std::vector<Tile::Type> Board::getUnusedColoursInCentre() {
+std::vector<TileType> Board::getUnusedColoursInCentre() {
 	return m_colours_not_in_centre;
 }
 
@@ -156,7 +178,7 @@ void Board::placeTile(PlacingChoice choice, Player* me) {
 	}
 }
 
-std::vector<PlacingChoice> Board::getPlacingChoicesOfCol(Tile::Type col) {
+std::vector<PlacingChoice> Board::getPlacingChoicesOfCol(TileType col) {
 	std::vector<PlacingChoice> allChoices = getAllPlacingChoices();
 	std::vector<PlacingChoice> returnList;
 	std::copy_if(allChoices.begin(), allChoices.end(), std::back_inserter(returnList), 

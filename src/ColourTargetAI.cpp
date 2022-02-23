@@ -4,22 +4,22 @@
 #include <vector>
 #include <set>
 
-ColourTargetAI::ColourTargetAI(PlayerColour colour, std::shared_ptr<Bag> bag, Tile::Type target) : Player(colour, bag), m_target_colour(target) {
+ColourTargetAI::ColourTargetAI(PlayerColour colour, std::shared_ptr<Bag> bag, TileType target) : Player(colour, bag), m_target_colour(target) {
     // Need to apply weights to the different colours
     // This will change as ones board fills up
     m_tile_picking_weights = generatePickingWeightsFromBoard();
 }
 
 struct TileAndCount {
-    Tile::Type m_type;
+    TileType m_type;
     int m_count;
 };
 
 std::vector<double> ColourTargetAI::generatePickingWeightsFromBoardImpl(std::vector<double>* currentWeights) {
     std::vector<double> weights = {1,1,1,1,1,1};
     weights[m_target_colour] = 1.5;
-    std::vector<Tile::Type> adjacentTiles = Board::getAdjacentStarColours(m_target_colour);
-     for (Tile::Type adjacentTile : adjacentTiles) {
+    std::vector<TileType> adjacentTiles = Board::getAdjacentStarColours(m_target_colour);
+     for (TileType adjacentTile : adjacentTiles) {
         weights[adjacentTile] = 1.25;
     }
     // We then modify the weights from the defaults based upon:
@@ -30,7 +30,7 @@ std::vector<double> ColourTargetAI::generatePickingWeightsFromBoardImpl(std::vec
     // and evaluate the picking weights from the best ones,
     std::vector<int> smallestNumTilesNeededForBonus = {0,0,0,0,0,0};
     std::vector<int> numWanted = {0,0,0,0,0,0};
-    for (Tile::Type tilecol : Tile::all_tile_types()) {
+    for (TileType tilecol : Tile::all_tile_types()) {
         int sumOfCost = 0;
         std::vector<PlacingChoice> choices = m_board.getPlacingChoicesOfCol(tilecol);
         for (PlacingChoice c : choices) {
@@ -65,7 +65,7 @@ std::vector<double> ColourTargetAI::generatePickingWeightsFromBoardImpl(std::vec
         // according to the currentWeights
         bool rewardTilesUseful = false;
         std::vector<int> rewardTileCount = {0,0,0,0,0,0};
-        for (Tile::Type tilecol : Tile::all_tile_types()) {
+        for (TileType tilecol : Tile::all_tile_types()) {
             int rewardTileCount = howManyColourStored(tilecol, m_bag->rewardTiles());
             // If there are enough reward tiles for our needs then this is valid
             //if (rewardTileCount > 2 && numWanted[tilecol] )
@@ -81,7 +81,7 @@ std::vector<double> ColourTargetAI::generatePickingWeightsFromBoardImpl(std::vec
         return a.m_count < b.m_count;
     };
     std::set<TileAndCount, decltype(comparator)> sortedNumWanted;
-    for (Tile::Type tilecol : Tile::all_tile_types()) {
+    for (TileType tilecol : Tile::all_tile_types()) {
         TileAndCount tac;
         tac.m_type = tilecol;
         tac.m_count = numWanted[tilecol];
@@ -100,7 +100,7 @@ std::vector<double> ColourTargetAI::generatePickingWeightsFromBoard() {
     return generatePickingWeightsFromBoardImpl(&weights);
 }
 
-double ColourTargetAI::evaluatePickingChoice(PickingChoice choice, Tile::Type bonusCol) {
+double ColourTargetAI::evaluatePickingChoice(PickingChoice choice, TileType bonusCol) {
     // More tiles == more good
     int numberOfTilesTaken = choice.factory->numberOf(choice.tile_colour);
     double bonusScore = 0;

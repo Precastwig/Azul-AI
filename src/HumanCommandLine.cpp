@@ -98,13 +98,13 @@ std::vector<std::shared_ptr<Tile>> HumanCommandLine::discardDownToFour() {
 	int num = numTiles();
 	while (num > 4) {
 		std::cout << "Discard tiles until four are left\n";
-		std::vector<Tile::Type> allTiles = Tile::all_tile_types();
-		for (Tile::Type tile : allTiles) {
+		std::vector<TileType> allTiles = Tile::all_tile_types();
+		for (TileType tile : allTiles) {
 			std::cout << Tile::toString(tile) << ": " << howManyColourStored(tile, m_stored_tiles) << "\n";
 		}
 		int i = -1;
 		std::cin >> i;
-		Tile::Type chosenColour = (Tile::Type)i;
+		TileType chosenColour = (TileType)i;
 		if (i >= 0 && i < allTiles.size() && howManyColourStored(chosenColour, m_stored_tiles) > 0) {
 			// acceptable choice
 			for (auto tile : m_stored_tiles) {

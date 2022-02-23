@@ -5,36 +5,23 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "utils/helper_enums.hpp"
-#include "utils/cIndex.hpp"
-#include "game_elements/Location.hpp"
+#include <utils/helper_enums.hpp>
+#include <utils/cIndex.hpp>
+#include <utils/Choices.hpp>
+#include <game_elements/Location.hpp>
 
 // Pre declarations
 class Player;
-
-struct PlacingChoice {
-	std::shared_ptr<Location> star;
-	Cost cost;
-	cIndex index;
-	bool operator==(PlacingChoice c) {
-		return (star == c.star &&
-				index.getIndex() == c.index.getIndex() &&
-				cost.colour == c.cost.colour &&
-				cost.num_colour == c.cost.num_colour &&
-				cost.num_bonus == c.cost.num_bonus);
-	};
-	std::string to_string() {
-		return "Factory " + star->toString() + " " + std::to_string(index.getIndex());
-	};
-};
 
 class Board : sf::Drawable {
 public:
 	Board();
 
+	void onHover(int xpos, int ypos);
+
 	virtual void draw (sf::RenderTarget &target, sf::RenderStates states) const override;
 
-	static std::vector<Tile::Type> getAdjacentStarColours(Tile::Type starCol);
+	static std::vector<TileType> getAdjacentStarColours(TileType starCol);
 
 	void placeTile(PlacingChoice choice, Player* me);
 	void keepTiles(std::vector<std::shared_ptr<Tile>> to_keep);
@@ -43,9 +30,9 @@ public:
 	int tilesNeededToGetStatue(Location::Types loc);
 	int tilesNeededToGetWindow(Location::Types loc);
 
-	std::vector<PlacingChoice> getPlacingChoicesOfCol(Tile::Type col);
+	std::vector<PlacingChoice> getPlacingChoicesOfCol(TileType col);
 	std::vector<PlacingChoice> getAllPlacingChoices();
-	std::vector<Tile::Type> getUnusedColoursInCentre();
+	std::vector<TileType> getUnusedColoursInCentre();
 
 	std::string toString(std::shared_ptr<Location> star);
 	std::string toString();
@@ -67,7 +54,7 @@ private:
 	// The tile spaces
 	std::vector<std::shared_ptr<Location>> m_stars;
 	std::vector<std::shared_ptr<Tile>> m_keep;
-	std::vector<Tile::Type> m_colours_not_in_centre;
+	std::vector<TileType> m_colours_not_in_centre;
 };
 
 #endif

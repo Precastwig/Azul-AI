@@ -2,7 +2,7 @@
 #include <assert.h>
 
 Bag::Bag() {
-	for (Tile::Type toAdd : Tile::all_tile_types()) {
+	for (TileType toAdd : Tile::all_tile_types()) {
 		// Add 22 of each colour
 		for (int i = 0; i < 22; ++i) {
 			auto newTile = std::make_shared<Tile>(toAdd);
@@ -26,6 +26,7 @@ void Bag::fillFactory(std::shared_ptr<Factory> f) {
 			g_logger.log(Logger::WARNING, "Nothing pulled from bag!");
 		}
 	}
+	f->positionTiles();
 }
 
 void Bag::toBin(std::vector<std::shared_ptr<Tile>> tiles) {

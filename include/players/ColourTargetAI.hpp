@@ -8,7 +8,7 @@
 // and attemtps to fill the centre star in the relevent spots
 class ColourTargetAI : public Player {
 public:
-    ColourTargetAI(PlayerColour colour, std::shared_ptr<Bag> bag, Tile::Type target);
+    ColourTargetAI(PlayerColour colour, std::shared_ptr<Bag> bag, TileType target);
     ~ColourTargetAI() = default;
 
     // Overrides from Player
@@ -28,9 +28,9 @@ public:
 private:
     std::vector<double> generatePickingWeightsFromBoard();
 	std::vector<double> generatePickingWeightsFromBoardImpl(std::vector<double>* currentWeights);
-    double evaluatePickingChoice(PickingChoice choice, Tile::Type bonusCol);
+    double evaluatePickingChoice(PickingChoice choice, TileType bonusCol);
     std::vector<double> m_tile_picking_weights;
-    Tile::Type m_target_colour;
+    TileType m_target_colour;
 };
 
 #endif

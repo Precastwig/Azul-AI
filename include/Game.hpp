@@ -6,6 +6,7 @@
 #include <memory>
 #include <mutex>
 #include "players/Player.hpp"
+#include <utils/Choices.hpp>
 #include "game_elements/Bag.hpp"
 #include "game_elements/Factory.hpp"
 #include "game_elements/Button.hpp"
@@ -23,7 +24,7 @@ public:
 	virtual void draw (RenderTarget &target, RenderStates states) const override;
 
 	void onClick(int xPos, int yPos);
-
+	void onHover(int xPos, int yPos);
 	
 	//-------------------------------------------------------------------
 	// SFML specific functions
@@ -58,7 +59,7 @@ public:
 	// Check that there is a player that still wishes to place tiles
 	bool playerNotFinished();
 	// Get the current bonus tile type
-	Tile::Type getBonus();
+	TileType getBonus();
 	
 
 	// Debug functions
@@ -67,16 +68,18 @@ public:
 	}
 
 private:
+	std::vector<Board*> getVisualisedBoards() const;
+
 	//-------------------------------------------------------------------
 	// Member variables
 	// Six rounds
-	std::vector<Tile::Type> m_bonus_tile_order = {
-		Tile::PURPLE,
-		Tile::GREEN,
-		Tile::ORANGE,
-		Tile::YELLOW,
-		Tile::BLUE,
-		Tile::RED
+	std::vector<TileType> m_bonus_tile_order = {
+		TileType::PURPLE,
+		TileType::GREEN,
+		TileType::ORANGE,
+		TileType::YELLOW,
+		TileType::BLUE,
+		TileType::RED
 	};
 
 	// Tile sources
@@ -90,7 +93,7 @@ private:
 	std::vector<Board*> m_boards;
 
 	// Current round info
-	Tile::Type m_bonus_type;
+	TileType m_bonus_type;
 	Button m_debug_switchstage;
 	// Used only in SFML implementation
 	bool m_centre_taken;

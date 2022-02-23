@@ -5,20 +5,9 @@
 #include "game_elements/Factory.hpp"
 #include "game_elements/Board.hpp"
 #include "game_elements/Bag.hpp"
+#include <utils/Choices.hpp>
 
 class Game;
-
-struct PickingChoice {
-	// PickingChoice(Tile::Type colour) : tile(colour) {};
-	PickingChoice(Tile::Type t) : tile_colour(t) {};
-	std::shared_ptr<Factory> factory;
-	Tile::Type tile_colour;
-	bool with_bonus;
-
-	std::string to_string() {
-		return "Factory " + std::to_string(factory->id()) + ": " + Tile::toString(tile_colour);
-	};
-};
 
 class Player {
 public:
@@ -54,8 +43,8 @@ public:
 	}
 
 	// Resolvers
-	void resolvePickingChoice(PickingChoice& choice, Tile::Type bonus, std::shared_ptr<Factory> centre, bool& centre_taken, int& startingPlayer, int currentPlayerIndex);
-	void resolvePlacingChoice(PlacingChoice& choice, Tile::Type bonus);
+	void resolvePickingChoice(PickingChoice& choice, TileType bonus, std::shared_ptr<Factory> centre, bool& centre_taken, int& startingPlayer, int currentPlayerIndex);
+	void resolvePlacingChoice(PlacingChoice& choice, TileType bonus);
 
 	bool finishedPlacing() {
 		return m_done_placing;
@@ -77,7 +66,7 @@ protected:
 	std::vector<PickingChoice> getAllPickingChoices(
 		std::vector<std::shared_ptr<Factory>> factories,
 		std::shared_ptr<Factory> centre,
-		Tile::Type bonus
+		TileType bonus
 	);
 	std::vector<PlacingChoice> getAllowedPlacingChoices(Tile bonus);
 	void createAllVariationsOfChoice(
@@ -86,7 +75,7 @@ protected:
 		int max_relevent_colour
 	);
 
-	int howManyColourStored(Tile::Type t, std::vector<std::shared_ptr<Tile>> stored);
+	int howManyColourStored(TileType t, std::vector<std::shared_ptr<Tile>> stored);
 
 	// Flag for when the player hass passed
 	bool m_done_placing;

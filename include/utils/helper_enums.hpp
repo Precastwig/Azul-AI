@@ -2,10 +2,20 @@
 #define HELPER_ENUMS
 
 #include <SFML/Graphics/Drawable.hpp>
+#include <memory>
 #include <vector>
 #include <string>
 #include <utils/cIndex.hpp>
-#include <game_elements/Tile.hpp>
+
+enum TileType {
+	ORANGE,
+	RED,
+	BLUE,
+	YELLOW,
+	GREEN,
+	PURPLE,
+	NONE
+};
 
 class PlayerColour {
 public:
@@ -43,7 +53,7 @@ private:
 };
 
 struct Cost {
-	Tile::Type colour;
+	TileType colour;
 	int num_colour;
 	int num_bonus;
 };

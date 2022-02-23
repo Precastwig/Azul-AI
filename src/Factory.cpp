@@ -1,5 +1,8 @@
 #include "game_elements/Factory.hpp"
 #include "Game.hpp"
+#include "utils/helper_enums.hpp"
+#include <memory>
+#include <utils/Choices.hpp>
 #include <cmath>
 
 Factory::Factory(const int id, const sf::Vector2f position, const float size) : m_id(id), m_size(size), m_tiles(), m_background() {
@@ -12,6 +15,8 @@ Factory::Factory(const int id, const sf::Vector2f position, const float size) : 
 void Factory::positionTiles() const {
 	double angle = 0.0; // Radians
 	for (std::shared_ptr<Tile> tile : m_tiles) {
+		// Need to do this somewhere
+		tile->setOutlineColor(sf::Color::Black); 
 		sf::Vector2f newPos = Factory::calculateNewPos(m_background.getPosition(), m_size, angle);
 		tile->setPosition(newPos);
 		angle += (2 * M_PI / m_tiles.size());
@@ -31,12 +36,10 @@ sf::Vector2f Factory::calculateNewPos(const sf::Vector2f& oldPos, const float& s
 
 void Factory::place(std::shared_ptr<Tile> tile) {
 	m_tiles.push_back(tile);
-	positionTiles();
 }
 
 void Factory::addTiles(std::vector<std::shared_ptr<Tile>> tiles) {
 	m_tiles.insert(m_tiles.end(), tiles.begin(), tiles.end());
-	positionTiles();
 }
 
 bool Factory::contains(int x, int y) {
@@ -52,7 +55,31 @@ bool Factory::contains(int x, int y) {
 	return false;
 }
 
+void Factory::onHover(int x, int y, const TileType& bonus) {
+	TileType hovertype = TileType::NONE;
+	for (std::shared_ptr<Tile> tile : m_tiles) {
+		if (tile->colour() != bonus && tile->contains(x, y)) {
+			hovertype = tile->colour();
+			break;
+		}
+	}
+	bool one_bonus = false;
+	for (std::shared_ptr<Tile> tile : m_tiles) {
+		if (hovertype == tile->colour() ) {
+			tile->setOutlineThickness(2.0);
+		} else if (hovertype != TileType::NONE && !one_bonus && tile->colour() == bonus) {
+			tile->setOutlineThickness(2.0);
+			one_bonus = true;
+		} else {
+			tile->setOutlineThickness(0.0);
+		}
+	}
+}
+
 void Factory::onClick(int x, int y, Game& game) {
+	if (!contains(x,y)) {
+		return;
+	}
 	for (std::shared_ptr<Tile> tile : m_tiles) {
 		if (tile->contains(x,y)) {
 			g_logger.log(Logger::INFO, "Clicked tile " + tile->toString());
@@ -60,7 +87,7 @@ void Factory::onClick(int x, int y, Game& game) {
 				// We want to allow picking bonus tiles if the factory only contains bonus tiles
 				if (isOnlyBonus(game.getBonus())) {
 					// Allow it
-					PickingChoice choice(Tile::Type::NONE);
+					PickingChoice choice(TileType::NONE);
 					choice.with_bonus = true;
 					choice.factory = std::shared_ptr<Factory>(this);
 					game.pick_tile(choice);
@@ -78,7 +105,7 @@ void Factory::onClick(int x, int y, Game& game) {
 	}
 }
 
-std::vector<std::shared_ptr<Tile>> Factory::removeTiles(Tile::Type colour_taken, Tile::Type bonus_type, std::shared_ptr<Factory> centre) {
+std::vector<std::shared_ptr<Tile>> Factory::removeTiles(TileType colour_taken, TileType bonus_type, std::shared_ptr<Factory> centre) {
 	std::vector<std::shared_ptr<Tile>> new_factory_list;
 	std::vector<std::shared_ptr<Tile>> taken_tiles;
 	// We can't take the bonus type of tile, if someone chooses only bonus,
@@ -107,6 +134,7 @@ std::vector<std::shared_ptr<Tile>> Factory::removeTiles(Tile::Type colour_taken,
 		m_tiles.clear();
 		// Empty and add to centre
 		centre->addTiles(new_factory_list);
+		centre->positionTiles();
 	} else {
 		// We're the centre! Retain the leftover list
 		m_tiles = new_factory_list;
@@ -123,7 +151,7 @@ std::vector<std::shared_ptr<Tile>> Factory::tiles() const {
 	return m_tiles;
 }
 
-int Factory::numberOf(Tile::Type tile) const {
+int Factory::numberOf(TileType tile) const {
 	int ret = 0;
 	for (std::shared_ptr<Tile> t : m_tiles) {
 		if (t->colour() == tile) {
@@ -133,7 +161,7 @@ int Factory::numberOf(Tile::Type tile) const {
 	return ret;
 }
 
-bool Factory::hasBonus(Tile::Type bonus) const {
+bool Factory::hasBonus(TileType bonus) const {
 	for (std::shared_ptr<Tile> tile : m_tiles) {
 		if (tile->colour() == bonus) {
 			return true;
@@ -142,7 +170,7 @@ bool Factory::hasBonus(Tile::Type bonus) const {
 	return false;
 }
 
-bool Factory::isOnlyBonus(Tile::Type bonus) const {
+bool Factory::isOnlyBonus(TileType bonus) const {
 	for (std::shared_ptr<Tile> tile : m_tiles) {
 		if (tile->colour() != bonus) {
 			return false;

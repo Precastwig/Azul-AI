@@ -1,13 +1,18 @@
 #ifndef LOCATION
 #define LOCATION
 
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Text.hpp>
+#include <SFML/System/Vector2.hpp>
+#include <cstddef>
 #include <game_elements/Tile.hpp>
 #include <string>
 #include <memory>
 #include <utils/cIndex.hpp>
 #include <utils/helper_enums.hpp>
+#include "Colours.hpp"
+#include "game_elements/Factory.hpp"
 
 class Location : sf::Drawable {
 public:
@@ -40,19 +45,19 @@ public:
 	static int num_locations() {
 		return all_locations().size();
 	}
-	static Types location_from_col(Tile::Type col) {
+	static Types location_from_col(TileType col) {
 		switch (col) {
-			case Tile::ORANGE:
+			case TileType::ORANGE:
 				return ORANGE_STAR;
-			case Tile::BLUE:
+			case TileType::BLUE:
 				return BLUE_STAR;
-			case Tile::GREEN:
+			case TileType::GREEN:
 				return GREEN_STAR;
-			case Tile::PURPLE:
+			case TileType::PURPLE:
 				return PURPLE_STAR;
-			case Tile::RED:
+			case TileType::RED:
 				return RED_STAR;
-			case Tile::YELLOW:
+			case TileType::YELLOW:
 				return YELLOW_STAR;
 			default:
 				return ORANGE_STAR;
@@ -66,14 +71,47 @@ public:
 	}
 
 	// Constructor
-	Location(Types l) : m_l(l) {
-		for (int j = 0; j < 6; ++j) {
+	Location(Types l) : m_l(l), m_starting_rotation(0.0), m_current_pos() {
+		for (size_t j = 0; j < 6; ++j) {
 			m_filled.push_back(false);
             m_visual_tiles.push_back(std::make_shared<Tile>(get_tile_type()));
+			m_visual_tiles[j]->setOutlineColor(sf::Color::Black);
+			m_visual_tiles[j]->setOutlineThickness(2.0);
+			m_visual_tiles[j]->setFillColor(get_outline_colour());
             m_tile_nums.push_back(sf::Text());
             m_tile_nums[j].setString(std::to_string(j));
+			m_tile_hovered[m_visual_tiles[j]] = false;
 		}
+		updateTilesPos();
 	};
+
+	// Places the star at the centre of the new position
+	void setPosition(sf::Vector2f newPos) {
+		m_current_pos = newPos;
+		updateTilesPos();
+	}
+
+	// Sets the rotation to point the 1 towards the given angle
+	void setRotation(double rotation) {
+		m_starting_rotation = rotation;
+		updateTilesPos();
+	}
+
+	void onHover(int xpos, int ypos) {
+		for (std::shared_ptr<Tile> t : m_visual_tiles) {
+			if (t->contains(xpos, ypos)) {
+				if (!m_tile_hovered[t]) {
+					m_tile_hovered[t] = true;
+					t->setFillColor(get_hover_colour());
+				}
+			} else {
+				if (m_tile_hovered[t]) {
+					m_tile_hovered[t] = false;
+					t->setFillColor(get_outline_colour());
+				}
+			}
+		}
+	}
 
 	virtual void draw (sf::RenderTarget &target, sf::RenderStates states) const override {
 		for (size_t i = 0; i < m_filled.size(); ++i) {
@@ -82,22 +120,46 @@ public:
         }
 	}
 
-	Tile::Type get_tile_type() const {
+	sf::Color get_fill_colour() const {
+		return Colours::tile_to_col(get_tile_type());
+	}
+
+	sf::Color get_outline_colour() const {
+		sf::Color baseCol = get_fill_colour();
+		return sf::Color(
+			baseCol.r,
+			baseCol.b,
+			baseCol.g,
+			125
+		);
+	}
+
+	sf::Color get_hover_colour() const {
+		sf::Color baseCol = get_fill_colour();
+		return sf::Color(
+			baseCol.r,
+			baseCol.b,
+			baseCol.g,
+			200
+		);
+	}
+
+	TileType get_tile_type() const {
 		switch (m_l) {
 			case ORANGE_STAR:
-				return Tile::ORANGE;
+				return TileType::ORANGE;
 			case BLUE_STAR:
-				return Tile::BLUE;
+				return TileType::BLUE;
 			case GREEN_STAR:
-				return Tile::GREEN;
+				return TileType::GREEN;
 			case PURPLE_STAR:
-				return Tile::PURPLE;
+				return TileType::PURPLE;
 			case RED_STAR:
-				return Tile::RED;
+				return TileType::RED;
 			case YELLOW_STAR:
-				return Tile::YELLOW;
+				return TileType::YELLOW;
 			default:
-				return Tile::ORANGE;
+				return TileType::NONE;
 		}
 	}
 	// Const inquisitors
@@ -134,7 +196,7 @@ public:
 	}
 	const Cost getCost(const int& index) {
 		Cost c;
-		c.colour = (Tile::Type)m_l;
+		c.colour = (TileType)m_l;
 		c.num_colour = index + 1;
 		c.num_bonus = 0;
 		return c;
@@ -159,6 +221,15 @@ public:
 		return true;
 	}
 private:
+	void updateTilesPos() {
+		double angle = m_starting_rotation;
+		for (size_t i = 0; i < m_visual_tiles.size(); ++i) {
+			sf::Vector2f tilePos = Factory::calculateNewPos(m_current_pos, 55, angle);
+			m_visual_tiles[i]->setPosition(tilePos);
+			m_visual_tiles[i]->setRotation(angle * 180 / M_PI);
+			angle += (2 * M_PI / m_visual_tiles.size());
+		}
+	}
 	std::vector<std::string> strings = {
 		"ORANGE STAR",
 		"RED STAR",
@@ -181,7 +252,10 @@ private:
 	bool m_scored_fill_points;
 	std::vector<bool> m_filled;
 	std::vector<std::shared_ptr<Tile>> m_visual_tiles;
+	std::map<std::shared_ptr<Tile>, bool> m_tile_hovered;
     std::vector<sf::Text> m_tile_nums;
+	double m_starting_rotation;
+	sf::Vector2f m_current_pos;
 };
 
 #endif

@@ -2,6 +2,7 @@
 #define TILE
 
 #include "Logger.hpp"
+#include "Colours.hpp"
 #include <vector>
 #include <string>
 #include <cmath>
@@ -27,16 +28,7 @@ static std::vector<std::string> strings = {
 
 class Tile : public ConvexShape {
 public:
-	enum Type {
-		ORANGE,
-		RED,
-		BLUE,
-		YELLOW,
-		GREEN,
-		PURPLE,
-		NONE
-	};
-	static std::vector<Tile::Type> all_tile_types() {
+	static std::vector<TileType> all_tile_types() {
 		return {
 			ORANGE,
 			RED,
@@ -46,7 +38,7 @@ public:
 			PURPLE
 		};
 	}
-	Tile(Type t) : m_t(t), m_size(Vector2f(DEFAULT_TILE_SIZE_X,DEFAULT_TILE_SIZE_Y)) {
+	Tile(TileType t) : m_t(t), m_size(Vector2f(DEFAULT_TILE_SIZE_X,DEFAULT_TILE_SIZE_Y)) {
 		setPointCount(4);
 		setPoint(0, Vector2f(0,DEFAULT_TILE_SIZE_Y));
 		setPoint(1, Vector2f(-DEFAULT_TILE_SIZE_X,0));
@@ -87,22 +79,22 @@ public:
 	const std::string toString() {
 		return strings[m_t];
 	}
-	static std::string toString(Type t) {
+	static std::string toString(TileType t) {
 		return strings[t];
 	}
 	const bool operator==(Tile t) {
 		return m_t == t.m_t;
 	}
-	const bool operator==(Type t) {
+	const bool operator==(TileType t) {
 		return m_t == t;
 	}
 	const bool operator!=(Tile t) {
 		return m_t != t.m_t;
 	}
-	const bool operator!=(Type t) {
+	const bool operator!=(TileType t) {
 		return m_t != t;
 	}
-	const Type colour() {
+	const TileType colour() {
 		return m_t;
 	}
 private:
@@ -114,24 +106,9 @@ private:
 			t.transformPoint(getPoint(3))};
 	}
 	void setupColour() {
-		switch (m_t) {
-			default:
-			case ORANGE: setFillColor(Color(235,149,52));
-			break;
-			case RED: setFillColor(Color(235,52,52));
-			break;
-			case BLUE: setFillColor(Color(52,137,235));
-			break;
-			case YELLOW: setFillColor(Color(235,229,52));
-			break;
-			case GREEN: setFillColor(Color(70,235,52));
-			break;
-			case PURPLE: setFillColor(Color(171,52,235));
-			break;
-			case NONE: setFillColor(Color(0,0,0,0));
-		}
+		setFillColor(Colours::tile_to_col(m_t));
 	}
-	Type m_t;
+	TileType m_t;
 	Vector2f m_size = Vector2f(0,0);
 	sf::ConvexShape m_shape;
 };

@@ -66,15 +66,26 @@ void Game::onClick(int xPos, int yPos) {
 	if (m_thread_running.try_lock()) {
 		// Find the object that we've clicked on and call its onClick event
 		for (std::shared_ptr<Factory> factory : m_factories) {
-			if (factory->contains(xPos, yPos)) {
-				factory->onClick(xPos, yPos, *this);
-			}
+			factory->onClick(xPos, yPos, *this);
 		}
-		if (m_centre->contains(xPos, yPos)) {
-			m_centre->onClick(xPos, yPos, *this);
-		}
+		m_centre->onClick(xPos, yPos, *this);
 		m_debug_switchstage.onClick(xPos, yPos);
 		m_thread_running.unlock();
+	}
+}
+
+void Game::onHover(int xPos, int yPos) {
+	if (m_picking_stage) {
+		for (std::shared_ptr<Factory> factory : m_factories) {
+			factory->onHover(xPos, yPos, m_bonus_type);
+		}
+		m_centre->onHover(xPos, yPos, m_bonus_type);
+	} else {
+		for (Board* b : getVisualisedBoards()) {
+			if (b) {
+				b->onHover(xPos, yPos);
+			}
+		}
 	}
 }
 
@@ -87,16 +98,22 @@ void Game::draw(RenderTarget &target, RenderStates states) const {
 	} else {
 		// Placing stage
 		// Only show the placing players board for now?
-		m_boards[m_current_player.getIndex()]->draw(target, states);
-		// for (Board* b : m_boards) {
-		// 	b->draw(target, states);
-		// }
+		for (Board* b : getVisualisedBoards()) {
+			if (b) {
+				b->draw(target, states);
+			}
+		}
+		//m_boards[m_current_player.getIndex()]->draw(target, states);
 	}
 	for (size_t i = 0; i < m_player_visualizers.size(); ++i) {
 		m_player_visualizers[i]->draw(target, states);
 	}
 
 	m_debug_switchstage.draw(target, states);
+}
+
+std::vector<Board*> Game::getVisualisedBoards() const {
+	return {m_boards[m_current_player.getIndex()]};
 }
 
 void performAIActionWorker(Game* game, std::shared_ptr<Player> player) {
@@ -133,7 +150,7 @@ void Game::performAIActions() {
 
 void Game::play() {
 	int round_number = 1;
-	for (Tile::Type bonus_tile : m_bonus_tile_order) {
+	for (TileType bonus_tile : m_bonus_tile_order) {
 		m_bonus_type = bonus_tile;
 		std::cout << "=======================\n";
 		std::cout << "Round " << round_number << ":\n";
@@ -227,7 +244,7 @@ bool Game::playerNotFinished() {
 	return false;
 }
 
-Tile::Type Game::getBonus() {
+TileType Game::getBonus() {
 	return m_bonus_type;
 }
 

@@ -1,5 +1,6 @@
 #include "players/Player.hpp"
 #include "Game.hpp"
+#include "utils/helper_enums.hpp"
 #include <algorithm>
 #include <memory>
 #include <set>
@@ -22,7 +23,7 @@ bool Player::hasTiles() {
 std::vector<PickingChoice> Player::getAllPickingChoices(
 	std::vector<std::shared_ptr<Factory>> factories,
 	std::shared_ptr<Factory> centre,
-	Tile::Type bonus
+	TileType bonus
 )
 {
 	std::vector<PickingChoice> choices;
@@ -36,7 +37,7 @@ std::vector<PickingChoice> Player::getAllPickingChoices(
 			// Don't add bonus tiles or tile types that have already been added
 			// (for this factory)
 			if (factory->isOnlyBonus(bonus)) {
-				PickingChoice choice(Tile::Type::NONE);
+				PickingChoice choice(TileType::NONE);
 				// Then picking the bonus is alllowed
 				choice.with_bonus = true;
 				choice.factory = factory;
@@ -104,7 +105,7 @@ void Player::pickBonusPieces(int number) {
 	m_bag->takeRewardTiles(choices);
 }
 
-int Player::howManyColourStored(Tile::Type t, std::vector<std::shared_ptr<Tile>> stored) {
+int Player::howManyColourStored(TileType t, std::vector<std::shared_ptr<Tile>> stored) {
 	int count = 0;
 	for (auto tile : stored) {
 		if (tile->colour() == t) {
@@ -119,8 +120,8 @@ std::vector<PlacingChoice> Player::getAllowedPlacingChoices(Tile bonus) {
 
 	std::vector<PlacingChoice> valid_choices;
 	for (PlacingChoice choice : all_choices) {
-		std::vector<Tile::Type> potentialCostColours;
-		if (choice.cost.colour == Tile::NONE) {
+		std::vector<TileType> potentialCostColours;
+		if (choice.cost.colour == TileType::NONE) {
 			potentialCostColours = m_board.getUnusedColoursInCentre();
 		} else {
 			potentialCostColours.push_back(choice.cost.colour);
@@ -147,7 +148,7 @@ std::vector<PlacingChoice> Player::getAllowedPlacingChoices(Tile bonus) {
 	return valid_choices;
 }
 
-void Player::resolvePlacingChoice(PlacingChoice& choice, Tile::Type bonus) {
+void Player::resolvePlacingChoice(PlacingChoice& choice, TileType bonus) {
 	if (!m_done_placing) {
 		g_logger.log(Logger::INFO, toString() + " placed tile");
 		// Remove the cost from current number of tiles
@@ -209,7 +210,7 @@ std::vector<PlacingChoice> Player::filterChoicesFromLocation(std::vector<Placing
 
 void Player::resolvePickingChoice(
 	PickingChoice& choice,
-	Tile::Type bonus,
+	TileType bonus,
 	std::shared_ptr<Factory> centre,
 	bool& centre_taken, 
 	int& startingPlayer,
@@ -231,7 +232,7 @@ std::string Player::toShortString() {
 std::string Player::toStringNoBoard() {
 	std::string str = "Player: " + m_col.toString() + "\n";
 	str += "Points: " + std::to_string(m_points) + "\n";
-	for (Tile::Type tile : Tile::all_tile_types()) {
+	for (TileType tile : Tile::all_tile_types()) {
 		str += Tile::toString(tile) + ": " + std::to_string(howManyColourStored(tile, m_stored_tiles)) + "\n";
 	}
 	return str;

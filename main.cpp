@@ -64,6 +64,14 @@ int main(int argc, char *argv[]) {
 						}
 					}
 				}
+
+				if (event.type == sf::Event::MouseMoved) {
+					if (menuopen) {
+						// Menu onhover
+					} else {
+						game.onHover(event.mouseMove.x, event.mouseMove.y);
+					}
+				}
 	        }
 	        // Clear screen
 	        window.clear(Color(194, 240, 242));
