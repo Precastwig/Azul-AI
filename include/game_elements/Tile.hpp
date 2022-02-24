@@ -97,6 +97,9 @@ public:
 	const TileType colour() {
 		return m_t;
 	}
+	void setType(TileType t) {
+		m_t = t;
+	}
 private:
 	const std::vector<Vector2f> getVertices() {
 		Transform t = getTransform();

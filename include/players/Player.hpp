@@ -60,15 +60,14 @@ public:
 	std::string toShortString();
 	std::string toStringNoBoard();
 	std::string toString();
+	std::vector<PlacingChoice> getAllowedPlacingChoices(Tile bonus);
 protected:
 	std::vector<std::shared_ptr<Location>> getLocationsFromChoiceList(std::vector<PlacingChoice> choices);
-	std::vector<PlacingChoice> filterChoicesFromLocation(std::vector<PlacingChoice> choices, std::shared_ptr<Location> location);
 	std::vector<PickingChoice> getAllPickingChoices(
 		std::vector<std::shared_ptr<Factory>> factories,
 		std::shared_ptr<Factory> centre,
 		TileType bonus
 	);
-	std::vector<PlacingChoice> getAllowedPlacingChoices(Tile bonus);
 	void createAllVariationsOfChoice(
 		PlacingChoice base_choice, std::vector<PlacingChoice>& return_list,
 		int max_bonus,

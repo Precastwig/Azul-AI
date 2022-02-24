@@ -1,4 +1,5 @@
 #include "players/Human.hpp"
+#include "utils/Choices.hpp"
 #include <iostream>
 
 PickingChoice Human::pickTile(
@@ -52,7 +53,7 @@ PlacingChoice Human::placeTile(Tile bonus) {
 		std::shared_ptr<Location> star_choice = location_choices[star_choice_index];
 
 		std::cout << "Choose a placement:\n" << m_board.toString(star_choice);
-		std::vector<PlacingChoice> filteredChoices = filterChoicesFromLocation(choices, star_choice);
+		std::vector<PlacingChoice> filteredChoices = PlacingChoice::filterChoicesFromLocation(choices, star_choice->colour());
 		for (PlacingChoice choice : choices) {
 			if (choice.star == star_choice) {
 				std::cout << choice.index.getIndex() + 1 << ", col:" << choice.cost.num_colour << ", bonus:" << choice.cost.num_bonus << "\n";

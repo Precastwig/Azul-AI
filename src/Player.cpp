@@ -198,16 +198,6 @@ std::vector<std::shared_ptr<Location>> Player::getLocationsFromChoiceList(std::v
 	return std::vector<std::shared_ptr<Location>>(return_list.begin(), return_list.end());
 }
 
-std::vector<PlacingChoice> Player::filterChoicesFromLocation(std::vector<PlacingChoice> choices, std::shared_ptr<Location> location) {
-	std::vector<PlacingChoice> return_list;
-	for (PlacingChoice choice : choices) {
-		if (choice.star == location) {
-			return_list.push_back(choice);
-		}
-	}
-	return return_list;
-}
-
 void Player::resolvePickingChoice(
 	PickingChoice& choice,
 	TileType bonus,

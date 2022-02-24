@@ -2,6 +2,7 @@
 #include "game_elements/Button.hpp"
 #include "players/RandomAI.hpp"
 #include "players/Human.hpp"
+#include "utils/helper_enums.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <algorithm>
 #include <cstddef>
@@ -9,7 +10,7 @@
 #include <memory>
 #include <thread>
 
-Game::Game(sf::Vector2f size) : m_debug_switchstage("Switch stage"), m_centre_taken(false), m_bonus_type(m_bonus_tile_order[0]), m_picking_stage(true) {
+Game::Game(sf::Vector2f size) : m_debug_switchstage("Switch stage"), m_centre_taken(false), m_round_num(0), m_picking_stage(true) {
 	// Create the bag
 	m_bag = std::make_shared<Bag>();
 	// Create the players, for now one randomAI and one humancmd
@@ -65,10 +66,16 @@ void Game::onClick(int xPos, int yPos) {
 	// The user should only be able to interact if the AI isn't currently running
 	if (m_thread_running.try_lock()) {
 		// Find the object that we've clicked on and call its onClick event
-		for (std::shared_ptr<Factory> factory : m_factories) {
-			factory->onClick(xPos, yPos, *this);
+		if (m_picking_stage) {
+			for (std::shared_ptr<Factory> factory : m_factories) {
+				factory->onClick(xPos, yPos, *this);
+			}
+			m_centre->onClick(xPos, yPos, *this);
+		} else {
+			for (auto board : getVisualisedBoards()) {
+				board->onClick(xPos, yPos, *this);
+			}
 		}
-		m_centre->onClick(xPos, yPos, *this);
 		m_debug_switchstage.onClick(xPos, yPos);
 		m_thread_running.unlock();
 	}
@@ -77,9 +84,9 @@ void Game::onClick(int xPos, int yPos) {
 void Game::onHover(int xPos, int yPos) {
 	if (m_picking_stage) {
 		for (std::shared_ptr<Factory> factory : m_factories) {
-			factory->onHover(xPos, yPos, m_bonus_type);
+			factory->onHover(xPos, yPos, getBonus());
 		}
-		m_centre->onHover(xPos, yPos, m_bonus_type);
+		m_centre->onHover(xPos, yPos, getBonus());
 	} else {
 		for (Board* b : getVisualisedBoards()) {
 			if (b) {
@@ -126,20 +133,19 @@ void Game::performAIAction(std::shared_ptr<Player> player) {
 		PickingChoice choice = player->pickTile(
 			m_factories,
 			m_centre,
-			m_bonus_type,
+			getBonus(),
 			!m_centre_taken
 		);
 		pick_tile(choice);
 	} else { 
-		PlacingChoice choice = player->placeTile(m_bonus_type);
-		player->resolvePlacingChoice(choice, m_bonus_type);
-		m_current_player++;
+		PlacingChoice choice = player->placeTile(getBonus());
+		place_tile(choice);
 	}
 	m_thread_running.unlock();
 }
 
 void Game::performAIActions() {
-	std::shared_ptr<Player> player = m_players[m_current_player.getIndex()];
+	std::shared_ptr<Player> player = getCurrentPlayer();
 	// Start the AI actions in another thread as to not lock up the
 	// graphics
 	if (player->isAI() && m_thread_running.try_lock()) {
@@ -150,11 +156,11 @@ void Game::performAIActions() {
 
 void Game::play() {
 	int round_number = 1;
-	for (TileType bonus_tile : m_bonus_tile_order) {
-		m_bonus_type = bonus_tile;
+	for (size_t i = 0; i < m_bonus_tile_order.size(); ++i) {
+		m_round_num = i;
 		std::cout << "=======================\n";
 		std::cout << "Round " << round_number << ":\n";
-		std::cout << "Bonus tile colour: " << Tile::toString(m_bonus_type) << "\n";
+		std::cout << "Bonus tile colour: " << Tile::toString(getBonus()) << "\n";
 		// Fill factories
 		fill_factories();
 		// First stage
@@ -209,30 +215,33 @@ void Game::picking_stage() {
 		PickingChoice choice = player->pickTile(
 			m_factories,
 			m_centre,
-			m_bonus_type,
+			getBonus(),
 			!centreTaken
 		);
-		player->resolvePickingChoice(choice, m_bonus_type, m_centre, m_centre_taken, m_starting_player, player_turn.getIndex());
+		player->resolvePickingChoice(choice, getBonus(), m_centre, m_centre_taken, m_starting_player, player_turn.getIndex());
 		player_turn++;
 		printFactories();
 	}
 }
 
 void Game::pick_tile(PickingChoice& picked) {
-	std::shared_ptr<Player> player = m_players[m_current_player.getIndex()];
+	std::shared_ptr<Player> player = getCurrentPlayer();
 	std::string withBonus = (picked.with_bonus) ? "with a bonus tile" : "";
 	g_logger.log(Logger::INFO, player->toShortString() + " has picked " + std::to_string(picked.factory->numberOf(picked.tile_colour)) + " " + Tile::toString(picked.tile_colour) + " " + withBonus);
 
-	player->resolvePickingChoice(picked, m_bonus_type, m_centre, m_centre_taken, m_starting_player, m_current_player.getIndex());
+	player->resolvePickingChoice(picked, getBonus(), m_centre, m_centre_taken, m_starting_player, m_current_player.getIndex());
 	if (noTilesLeft()) {
-		m_current_player = cIndex(m_starting_player + 1, m_players.size());
-		m_picking_stage = false;
+		switchToPlacingStage();
 	} else {
 		m_current_player++;
 	}
 	// Give the player visualizers a chance to show new info
+	updatePlayerVisualizers();
+}
+
+void Game::updatePlayerVisualizers() {
 	for (size_t i = 0; i < m_player_visualizers.size(); ++i) {
-		m_player_visualizers[i]->update(m_players[m_current_player.getIndex()]);
+		m_player_visualizers[i]->update(getCurrentPlayer());
 	}
 }
 
@@ -245,7 +254,57 @@ bool Game::playerNotFinished() {
 }
 
 TileType Game::getBonus() {
-	return m_bonus_type;
+	return m_bonus_tile_order[m_round_num];
+}
+
+std::shared_ptr<Player> Game::getCurrentPlayer() {
+	return m_players[m_current_player.getIndex()];
+}
+
+void Game::switchToPlacingStage() {
+	m_current_player = cIndex(m_starting_player + 1, m_players.size());
+	m_picking_stage = false;
+	for (std::shared_ptr<Player> player : m_players) {
+		player->resetDonePlacing();
+	}
+}
+
+void Game::switchToPickingStage() {
+	m_current_player = cIndex(m_starting_player + 1, m_players.size());
+	m_picking_stage = true;
+	if (m_round_num < m_bonus_tile_order.size()) {
+		m_round_num++;
+	} else {
+		// End the game
+		// Somehow
+	}
+}
+
+void Game::place_tile(PlacingChoice& placed) {
+	// The m_current_player var should be correct at this point
+	// But lets check anyway
+	std::shared_ptr<Player> player = getCurrentPlayer();
+	if (player->finishedPlacing()) {
+		g_logger.log(Logger::ERROR, "Place_tile called when current player has finished placing");
+		m_current_player++;
+		return;
+	}
+
+	player->resolvePlacingChoice(placed, getBonus());
+
+	if (playerNotFinished()) {
+		// This could be better? but I can't think of how right now
+		bool lookingForNextPlayer = true;
+		while (lookingForNextPlayer) {
+			m_current_player++;
+			if (!getCurrentPlayer()->finishedPlacing()) {
+				lookingForNextPlayer = false;
+			}
+		}
+	} else {
+		switchToPickingStage();
+	}
+	updatePlayerVisualizers();
 }
 
 void Game::placing_stage() {
@@ -256,8 +315,8 @@ void Game::placing_stage() {
 	cIndex player_turn(m_starting_player + 1, m_players.size());
 	while (playerNotFinished()) {
 		std::shared_ptr<Player> current_player = m_players[player_turn.getIndex()];
-		PlacingChoice choice = current_player->placeTile(m_bonus_type);
-		current_player->resolvePlacingChoice(choice, m_bonus_type);
+		PlacingChoice choice = current_player->placeTile(getBonus());
+		current_player->resolvePlacingChoice(choice, getBonus());
 		std::cout << current_player->toString();
 		player_turn++;
 	}

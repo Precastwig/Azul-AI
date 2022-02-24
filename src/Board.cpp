@@ -1,30 +1,34 @@
 #include "game_elements/Board.hpp"
 #include "players/Player.hpp"
+#include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <algorithm>
 #include <iterator>
 #include <memory>
 #include <vector>
+#include <game_elements/Location.hpp>
 
 Board::Board()
 {
 	// Initialise lists
-	double rotation = M_PI / 6;
-	double spin = (2 * M_PI) * 4 / 6;
+	double rotation = (11 * M_PI) / 6;
+	double spin = (8 * M_PI) / 6;
+	double incrementval = (2* M_PI) / (Location::all_locations().size() - 1);
 	sf::Vector2f centre(800, 500);
-	for (Location::Types type : Location::all_locations()) {
+	for (LocationType type : Location::all_locations()) {
 		auto star = std::make_shared<Location>(type);
 		sf::Vector2f starPos;
-		if (type == Location::CENTRE_STAR) {
+		if (type == LocationType::CENTRE_STAR) {
 			starPos = centre;
-			rotation = M_PI / 6;
+			rotation = (9 * M_PI) / 6;
 		} else {
 			starPos = Factory::calculateNewPos(centre, 195, spin);
 		}
 		star->setPosition(starPos);
 		star->setRotation(rotation);
-		rotation += (2 * M_PI) / (Location::all_locations().size() - 1);
-		spin += (2* M_PI) / (Location::all_locations().size() - 1);
+		rotation += incrementval;
+		spin += incrementval;
 		m_stars.push_back(star);
 	}
 
@@ -39,6 +43,14 @@ Board::Board()
 		m_full_numbers.push_back(false);
 	}
 	m_colours_not_in_centre = Tile::all_tile_types();
+
+	m_background = sf::RectangleShape(sf::Vector2f(600,600));
+	m_background.setOrigin(sf::Vector2f(
+		m_background.getSize().x / 2.0,
+		m_background.getSize().y / 2.0
+	));
+	m_background.setPosition(centre);
+	m_background.setFillColor(sf::Color::White);
 }
 
 void Board::onHover(int xpos, int ypos) {
@@ -47,8 +59,14 @@ void Board::onHover(int xpos, int ypos) {
 	}
 }
 
+void Board::onClick(int x, int y, Game& game) {
+	for (auto loc : m_stars) {
+		loc->onClick(x, y, game);
+	}
+}
+
 void Board::draw (sf::RenderTarget &target, sf::RenderStates states) const {
-	// Oh god.
+	target.draw(m_background, states);	
 	// Draw each "star" of placing choices, they're not really placing choices
 	for (std::shared_ptr<Location> loc : m_stars) {
 		loc->draw(target, states);
@@ -108,7 +126,7 @@ int Board::bonusPiecesAwarded() {
 			// If the column is covered
 			if (star->tile(2) && star->tile(3)) {
 				// We also need to check if the central pieces are covered
-				std::shared_ptr<Location> centralStar = m_stars[Location::CENTRE_STAR];
+				std::shared_ptr<Location> centralStar = m_stars[LocationType::CENTRE_STAR];
 				if (centralStar->tile(star_index) &&
 					centralStar->tile(star_index - 1)
 				) {
@@ -153,7 +171,7 @@ void Board::placeTile(PlacingChoice choice, Player* me) {
 	// Place the tile
 	choice.star->place(choice.index);
 
-	if (choice.star->colour() == Location::CENTRE_STAR) {
+	if (choice.star->colour() == LocationType::CENTRE_STAR) {
 		// We need to log what colour we're placing
 		m_colours_not_in_centre.erase(std::remove(m_colours_not_in_centre.begin(), m_colours_not_in_centre.end(), choice.cost.colour));
 	}
@@ -206,20 +224,20 @@ std::vector<PlacingChoice> Board::getAllPlacingChoices() {
 	return choices;
 }
 
-int Board::tilesNeededToGetStatue(Location::Types star) {
+int Board::tilesNeededToGetStatue(LocationType star) {
 	// Check 3/4 of tilcol
 	int tilesNeededForColumn = (m_stars[star]->tile(1)) ? 1 : 0;
 	tilesNeededForColumn += (m_stars[star]->tile(2)) ? 2 : 0;
 	if (tilesNeededForColumn == 0) {
 		return 0;
 	}
-	Location::Types nextStar = Location::clockwise_location(star);
+	LocationType nextStar = Location::clockwise_location(star);
 	tilesNeededForColumn += (m_stars[nextStar]->tile(3)) ? 3 : 0;
 	tilesNeededForColumn += (m_stars[nextStar]->tile(4)) ? 4 : 0;
 	return tilesNeededForColumn;
 }
 
-int Board::tilesNeededToGetWindow(Location::Types loc) {
+int Board::tilesNeededToGetWindow(LocationType loc) {
 	int tilesNeeded = (m_stars[loc]->tile(5)) ? 5 : 0;
 	tilesNeeded += (m_stars[loc]->tile(6)) ? 6 : 0;
 	return tilesNeeded;

@@ -17,6 +17,16 @@ enum TileType {
 	NONE
 };
 
+enum LocationType {
+	ORANGE_STAR,
+	RED_STAR,
+	BLUE_STAR,
+	YELLOW_STAR,
+	GREEN_STAR,
+	PURPLE_STAR,
+	CENTRE_STAR
+};
+
 class PlayerColour {
 public:
 	enum Colour {
@@ -53,9 +63,9 @@ private:
 };
 
 struct Cost {
-	TileType colour;
-	int num_colour;
-	int num_bonus;
+	TileType colour = TileType::NONE;
+	int num_colour = 0;
+	int num_bonus = 0;
 };
 
 static const std::vector<int> all_nums_points = {

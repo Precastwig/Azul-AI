@@ -36,6 +36,7 @@ int main(int argc, char *argv[]) {
 		sf::ContextSettings settings;
 		settings.antialiasingLevel = 8;
 		sf::RenderWindow window(sf::VideoMode(window_width, window_height), "Azul: Summer Pavillion", sf::Style::Titlebar | sf::Style::Close, settings);
+		window.setFramerateLimit(120); // 120 seems like plenty
 		Game game(sf::Vector2f(window_width, window_height));
 	   	// Game stuff
 	   	game.fill_factories();

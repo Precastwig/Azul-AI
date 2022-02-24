@@ -2,13 +2,13 @@
 #define BOARD
 
 #include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
 #include <string>
 #include <vector>
 #include <memory>
 #include <utils/helper_enums.hpp>
 #include <utils/cIndex.hpp>
 #include <utils/Choices.hpp>
-#include <game_elements/Location.hpp>
 
 // Pre declarations
 class Player;
@@ -18,6 +18,7 @@ public:
 	Board();
 
 	void onHover(int xpos, int ypos);
+	void onClick(int x, int y, Game& game);
 
 	virtual void draw (sf::RenderTarget &target, sf::RenderStates states) const override;
 
@@ -27,8 +28,8 @@ public:
 	void keepTiles(std::vector<std::shared_ptr<Tile>> to_keep);
 
 	// This is always talking about the column clockwise around the given colour
-	int tilesNeededToGetStatue(Location::Types loc);
-	int tilesNeededToGetWindow(Location::Types loc);
+	int tilesNeededToGetStatue(LocationType loc);
+	int tilesNeededToGetWindow(LocationType loc);
 
 	std::vector<PlacingChoice> getPlacingChoicesOfCol(TileType col);
 	std::vector<PlacingChoice> getAllPlacingChoices();
@@ -55,6 +56,7 @@ private:
 	std::vector<std::shared_ptr<Location>> m_stars;
 	std::vector<std::shared_ptr<Tile>> m_keep;
 	std::vector<TileType> m_colours_not_in_centre;
+	sf::RectangleShape m_background;
 };
 
 #endif

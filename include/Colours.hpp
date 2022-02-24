@@ -26,6 +26,26 @@ public:
 			case TileType::NONE: return (Color(0,0,0,0));
 		}
     }
+
+	static sf::Color board_tile_unfill_col(TileType t) {
+		sf::Color baseCol = tile_to_col(t);
+		return sf::Color(
+			baseCol.r,
+			baseCol.g,
+			baseCol.b,
+			125
+		);
+	}
+
+	static sf::Color board_tile_unfill_hover_col(TileType t) {
+		sf::Color baseCol = tile_to_col(t);
+		return sf::Color(
+			baseCol.r,
+			baseCol.g,
+			baseCol.b,
+			200
+		);
+	}
 };
 
 #endif

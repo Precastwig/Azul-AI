@@ -93,6 +93,7 @@ std::vector<double> ColourTargetAI::generatePickingWeightsFromBoardImpl(std::vec
         weights[tac.m_type] += bonus;
         bonus += 0.05;
     }
+    return weights;
 }
 
 std::vector<double> ColourTargetAI::generatePickingWeightsFromBoard() {

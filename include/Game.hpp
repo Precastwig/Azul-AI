@@ -30,6 +30,8 @@ public:
 	// SFML specific functions
 	void performAIActions();
 	void performAIAction(std::shared_ptr<Player> player);
+	void switchToPlacingStage();
+	void switchToPickingStage();
 
 	//-------------------------------------------------------------------
 	// Command line specific functions
@@ -49,7 +51,9 @@ public:
 	// Pulls tiles from the bag and places on the factories until each
 	// factory contains 4, or the bag runs out
 	void fill_factories();
+
 	void pick_tile(PickingChoice& picked);
+	void place_tile(PlacingChoice& placed);
 
 	//-------------------------------------------------------------------
 	// Helper functions
@@ -60,6 +64,7 @@ public:
 	bool playerNotFinished();
 	// Get the current bonus tile type
 	TileType getBonus();
+	std::shared_ptr<Player> getCurrentPlayer();
 	
 
 	// Debug functions
@@ -69,6 +74,7 @@ public:
 
 private:
 	std::vector<Board*> getVisualisedBoards() const;
+	void updatePlayerVisualizers();
 
 	//-------------------------------------------------------------------
 	// Member variables
@@ -93,7 +99,7 @@ private:
 	std::vector<Board*> m_boards;
 
 	// Current round info
-	TileType m_bonus_type;
+	int m_round_num;
 	Button m_debug_switchstage;
 	// Used only in SFML implementation
 	bool m_centre_taken;

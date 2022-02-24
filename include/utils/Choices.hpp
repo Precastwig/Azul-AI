@@ -17,7 +17,7 @@ struct PickingChoice {
 };
 
 struct PlacingChoice {
-	std::shared_ptr<Location> star;
+	std::shared_ptr<Location> star = nullptr;
 	Cost cost;
 	cIndex index;
 	bool operator==(PlacingChoice c) {
@@ -30,6 +30,16 @@ struct PlacingChoice {
 	std::string to_string() {
 		return "Factory " + star->toString() + " " + std::to_string(index.getIndex());
 	};
+	static std::vector<PlacingChoice> filterChoicesFromLocation(std::vector<PlacingChoice> choices, LocationType location) {
+		std::vector<PlacingChoice> return_list;
+		for (PlacingChoice choice : choices) {
+			if (choice.star->colour() == location) {
+				return_list.push_back(choice);
+			}
+		}
+		return return_list;
+	}
 };
+
 
 #endif
