@@ -179,7 +179,6 @@ bool Factory::isOnlyBonus(TileType bonus) const {
 	return true;
 }
 
-
 std::string Factory::toString() {
 	std::string str = "";
 	if (m_tiles.size() == 0) {

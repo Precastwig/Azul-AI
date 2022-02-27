@@ -8,7 +8,7 @@
 // and attemtps to fill the centre star in the relevent spots
 class ColourTargetAI : public Player {
 public:
-    ColourTargetAI(PlayerColour colour, std::shared_ptr<Bag> bag, TileType target);
+    ColourTargetAI(PlayerColour colour, std::shared_ptr<Bag> bag, sf::Vector2f boardpos, TileType target);
     ~ColourTargetAI() = default;
 
     // Overrides from Player
@@ -21,7 +21,7 @@ public:
 	virtual PlacingChoice placeTile(Tile bonus) override;
 	virtual std::vector<std::shared_ptr<Tile>> chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices, int num) override;
 	// Returns which tiles the player would like to keep
-	virtual std::vector<std::shared_ptr<Tile>> discardDownToFour() override;
+	virtual void discardDownToFour() override;
 	virtual bool isAI() override {
 		return true;
 	}

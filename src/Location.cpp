@@ -25,10 +25,6 @@ void Location::onClick(int x, int y, Game& game) {
             choices = PlacingChoice::filterChoicesFromLocation(choices, colour());
             for (PlacingChoice choice : choices) {
                 if (choice.index.getIndex() == tile->getIndex()) {
-                    if (m_l == LocationType::CENTRE_STAR) {
-                        // We need to set the tile to the correct colour
-                        tile->setTileCol(choice.cost.colour);
-                    }
                     game.place_tile(choice); 
                     return;
                 }

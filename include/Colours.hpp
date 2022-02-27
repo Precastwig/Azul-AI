@@ -46,6 +46,25 @@ public:
 			200
 		);
 	}
+
+	static sf::Color button_default_col() {
+		return sf::Color(
+			255,
+			0,
+			0,
+			125
+		); // Red?
+	}
+
+	static sf::Color grey() {
+		return sf::Color(
+			220,
+			220,
+			220,
+			255	
+		);
+	}
+	
 };
 
 #endif

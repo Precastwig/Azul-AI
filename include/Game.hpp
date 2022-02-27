@@ -7,10 +7,10 @@
 #include <mutex>
 #include "players/Player.hpp"
 #include <utils/Choices.hpp>
-#include "game_elements/Bag.hpp"
-#include "game_elements/Factory.hpp"
-#include "game_elements/Button.hpp"
-#include "game_elements/PlayerVisualizer.hpp"
+#include <game_elements/Bag.hpp>
+#include <game_elements/Factory.hpp>
+#include <ui_elements/Button.hpp>
+#include <game_elements/PlayerVisualizer.hpp>
 #include <SFML/Graphics.hpp>
 
 using namespace sf;
@@ -65,12 +65,6 @@ public:
 	// Get the current bonus tile type
 	TileType getBonus();
 	std::shared_ptr<Player> getCurrentPlayer();
-	
-
-	// Debug functions
-	void flipStage() {
-		m_picking_stage = !m_picking_stage;
-	}
 
 private:
 	std::vector<Board*> getVisualisedBoards() const;
@@ -103,7 +97,6 @@ private:
 	Button m_debug_switchstage;
 	// Used only in SFML implementation
 	bool m_centre_taken;
-	bool m_picking_stage;
 	std::mutex m_thread_running;
 
 	// Member variable for players

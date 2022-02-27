@@ -1,6 +1,7 @@
 #include "players/Player.hpp"
 #include "Game.hpp"
 #include "utils/helper_enums.hpp"
+#include <SFML/System/Vector2.hpp>
 #include <algorithm>
 #include <memory>
 #include <set>
@@ -8,8 +9,8 @@
 #include <chrono>
 #include <thread>
 
-Player::Player(PlayerColour playercolour, std::shared_ptr<Bag> bag)
-	:  m_done_placing(false), m_discarded(false), m_board(), m_bag(bag), m_col(playercolour), m_points(0) {
+Player::Player(PlayerColour playercolour, std::shared_ptr<Bag> bag, sf::Vector2f boardpos)
+	:  m_done_placing(false), m_discarded(false), m_board(boardpos), m_bag(bag), m_col(playercolour), m_points(0) {
 };
 
 void Player::addPoints(int points) {
@@ -180,7 +181,7 @@ void Player::resolvePlacingChoice(PlacingChoice& choice, TileType bonus) {
 		m_board.placeTile(choice, this);
 	} else if (!m_discarded) {
 		// Remove the tiles down to 4
-		m_stored_tiles =  discardDownToFour();
+		discardDownToFour();
 		m_discarded = true;
 		// Only do this once
 	}

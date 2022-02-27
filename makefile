@@ -15,7 +15,7 @@ board:
 	@$(COMPILER) -std=c++2a -c -g src/RandomAI.cpp -Iinclude/ -o bin/randomAI.o
 	@$(COMPILER) -std=c++2a -c -g src/ColourTargetAI.cpp -Iinclude/ -o bin/colourTargetAI.o
 	@$(COMPILER) -std=c++2a -c -g src/Human.cpp -Iinclude/ -o bin/Human.o
-	@$(COMPILER) -std=c++2a -c -g src/PlayerVisualizer.cpp -Iinclude/ -o bin/playervisualizer.o
+	@$(COMPILER) -std=c++2a -c -g src/PlayerVisualizer.cpp -Iinclude/ -o bin/playervisualizer.o -lsfml-system
 	@$(COMPILER) -std=c++2a -c -g src/Game.cpp -Iinclude/ -o bin/game.o
 	@$(COMPILER) -std=c++2a -c -g src/MainMenu.cpp -Iinclude/ -o bin/mainmenu.o
 	@$(COMPILER) -std=c++2a -c -g main.cpp -Iinclude/ -o bin/main.o -lsfml-graphics -lsfml-window -lsfml-system

@@ -2,10 +2,11 @@
 #define HUMANCOMMANDLINE
 
 #include "players/Player.hpp"
+#include <SFML/System/Vector2.hpp>
 
 class Human : public Player {
 public:
-	Human(PlayerColour colour, std::shared_ptr<Bag> bag) : Player(colour, bag) {};
+	Human(PlayerColour colour, std::shared_ptr<Bag> bag, sf::Vector2f boardpos) : Player(colour, bag, boardpos) {};
 	~Human() = default;
 
 	// Decision overrides
@@ -17,7 +18,7 @@ public:
 	) override;
 	virtual PlacingChoice placeTile(Tile bonus) override;
 	virtual std::vector<std::shared_ptr<Tile>> chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices, int number) override;
-	virtual std::vector<std::shared_ptr<Tile>> discardDownToFour() override;
+	virtual void discardDownToFour() override;
 	virtual bool isAI() override {
 		return false; 
 	}

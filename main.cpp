@@ -1,6 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include "Game.hpp"
-#include "MainMenu.hpp"
+#include <ui_elements/MainMenu.hpp>
 #include "Logger.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/WindowStyle.hpp>

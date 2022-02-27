@@ -11,7 +11,7 @@ class Game;
 
 class Player {
 public:
-	Player(PlayerColour playercolour, std::shared_ptr<Bag> bag);
+	Player(PlayerColour playercolour, std::shared_ptr<Bag> bag, sf::Vector2f boardpos);
 	virtual ~Player() = default;
 
 	// Virtuals that need overriding because an in-game choice is needed
@@ -23,9 +23,14 @@ public:
 	) = 0;
 	virtual PlacingChoice placeTile(Tile bonus) = 0;
 	virtual std::vector<std::shared_ptr<Tile>> chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices, int number) = 0;
-	virtual std::vector<std::shared_ptr<Tile>> discardDownToFour() = 0;
+	virtual void discardDownToFour() = 0;
 
 	// Other helpers
+	std::vector<std::shared_ptr<Tile>> getTiles() {return m_stored_tiles;};
+	void discardTile(std::shared_ptr<Tile> tile) {
+		m_bag->toBin({tile});
+		(void)std::remove(m_stored_tiles.begin(), m_stored_tiles.end(), tile);
+	}
 	virtual bool isAI() = 0;
 	void pickBonusPieces(int number);
 	bool hasTiles();
@@ -46,6 +51,10 @@ public:
 	void resolvePickingChoice(PickingChoice& choice, TileType bonus, std::shared_ptr<Factory> centre, bool& centre_taken, int& startingPlayer, int currentPlayerIndex);
 	void resolvePlacingChoice(PlacingChoice& choice, TileType bonus);
 
+	void pass() {
+		m_done_placing = true;
+		m_discarded = true;
+	}
 	bool finishedPlacing() {
 		return m_done_placing;
 	};
@@ -54,7 +63,7 @@ public:
 		m_discarded = false;
 	};
 
-	// A weird cmd line only thing to look like it's thinking
+	// A weird thing to look like it's thinking
 	void commandLineWait();
 
 	std::string toShortString();

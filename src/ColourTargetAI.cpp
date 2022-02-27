@@ -4,7 +4,7 @@
 #include <vector>
 #include <set>
 
-ColourTargetAI::ColourTargetAI(PlayerColour colour, std::shared_ptr<Bag> bag, TileType target) : Player(colour, bag), m_target_colour(target) {
+ColourTargetAI::ColourTargetAI(PlayerColour colour, std::shared_ptr<Bag> bag, sf::Vector2f boardpos, TileType target) : Player(colour, bag, boardpos), m_target_colour(target) {
     // Need to apply weights to the different colours
     // This will change as ones board fills up
     m_tile_picking_weights = generatePickingWeightsFromBoard();
@@ -164,6 +164,6 @@ std::vector<std::shared_ptr<Tile>> ColourTargetAI::chooseBonusPieces(std::vector
     return retlist;
 }
 
-std::vector<std::shared_ptr<Tile>> ColourTargetAI::discardDownToFour() {
-    return {};
+void ColourTargetAI::discardDownToFour() {
+    m_stored_tiles = {};
 }

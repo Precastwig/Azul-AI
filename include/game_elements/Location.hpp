@@ -102,11 +102,17 @@ public:
 	const bool tile(const cIndex& index) {
 		return m_visual_tiles[index.getIndex()]->isFilled();
 	}
-	const void place(const int& index) {
+	const void place(const int& index, TileType col) {
+		auto tile = m_visual_tiles[index];
+		tile->setFilled(true);
+		if (m_l == LocationType::CENTRE_STAR) {
+			// We need to set the tile to the correct colour
+			tile->setTileCol(col);
+		}
 		m_visual_tiles[index]->setFilled(true);
 	}
-	const void place(const cIndex& index) {
-		m_visual_tiles[index.getIndex()]->setFilled(true);
+	const void place(const cIndex& index, TileType col) {
+		place(index.getIndex(), col);
 	}
 	const LocationType colour() {
 		return m_l;

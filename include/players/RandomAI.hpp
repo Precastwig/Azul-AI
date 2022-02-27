@@ -6,7 +6,7 @@
 // A player object that just makes random decisions
 class RandomAI : public Player {
 public:
-	RandomAI(PlayerColour colour, std::shared_ptr<Bag> bag) : Player(colour, bag) {
+	RandomAI(PlayerColour colour, std::shared_ptr<Bag> bag, sf::Vector2f boardpos) : Player(colour, bag, boardpos) {
 		srand (time(NULL));
 	};
 	~RandomAI() = default;
@@ -21,7 +21,7 @@ public:
 	virtual PlacingChoice placeTile(Tile bonus) override;
 	virtual std::vector<std::shared_ptr<Tile>> chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices, int num) override;
 	// Returns which tiles the player would like to keep
-	virtual std::vector<std::shared_ptr<Tile>> discardDownToFour() override;
+	virtual void discardDownToFour() override;
 	virtual bool isAI() override {
 		return true; 
 	}

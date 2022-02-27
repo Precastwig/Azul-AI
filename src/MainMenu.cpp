@@ -1,4 +1,4 @@
-#include "MainMenu.hpp"
+#include <ui_elements/MainMenu.hpp>
 #include <SFML/System/Vector2.hpp>
 
 MainMenu::MainMenu(sf::RenderWindow* window, sf::Vector2f size) : m_window(window), m_state(MAIN), m_newgame("New Game"), m_settings("Settings"), m_exit("Quit") {

@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <string>
 #include <vector>
 #include <memory>
@@ -15,7 +16,7 @@ class Player;
 
 class Board : sf::Drawable {
 public:
-	Board();
+	Board(sf::Vector2f position);
 
 	void onHover(int xpos, int ypos);
 	void onClick(int x, int y, Game& game);

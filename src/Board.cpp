@@ -9,21 +9,20 @@
 #include <vector>
 #include <game_elements/Location.hpp>
 
-Board::Board()
+Board::Board(sf::Vector2f position)
 {
 	// Initialise lists
 	double rotation = (11 * M_PI) / 6;
 	double spin = (8 * M_PI) / 6;
 	double incrementval = (2* M_PI) / (Location::all_locations().size() - 1);
-	sf::Vector2f centre(800, 500);
 	for (LocationType type : Location::all_locations()) {
 		auto star = std::make_shared<Location>(type);
 		sf::Vector2f starPos;
 		if (type == LocationType::CENTRE_STAR) {
-			starPos = centre;
+			starPos = position;
 			rotation = (9 * M_PI) / 6;
 		} else {
-			starPos = Factory::calculateNewPos(centre, 195, spin);
+			starPos = Factory::calculateNewPos(position, 195, spin);
 		}
 		star->setPosition(starPos);
 		star->setRotation(rotation);
@@ -49,7 +48,7 @@ Board::Board()
 		m_background.getSize().x / 2.0,
 		m_background.getSize().y / 2.0
 	));
-	m_background.setPosition(centre);
+	m_background.setPosition(position);
 	m_background.setFillColor(sf::Color::White);
 }
 
@@ -169,7 +168,7 @@ std::vector<TileType> Board::getUnusedColoursInCentre() {
 
 void Board::placeTile(PlacingChoice choice, Player* me) {
 	// Place the tile
-	choice.star->place(choice.index);
+	choice.star->place(choice.index, choice.cost.colour);
 
 	if (choice.star->colour() == LocationType::CENTRE_STAR) {
 		// We need to log what colour we're placing

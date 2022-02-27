@@ -94,11 +94,10 @@ std::vector<std::shared_ptr<Tile>> Human::chooseBonusPieces(std::vector<std::sha
 	return return_list;
 }
 
-std::vector<std::shared_ptr<Tile>> Human::discardDownToFour() {
-	std::vector<std::shared_ptr<Tile>> tilesToLose;
-	int num = numTiles();
-	while (num > 4) {
-		std::cout << "Discard tiles until four are left\n";
+void Human::discardDownToFour() {
+	std::vector<std::shared_ptr<Tile>> tilesToKeep;
+	while (tilesToKeep.size() < 3) {
+		std::cout << "Pick up to four tiles to keep\n";
 		std::vector<TileType> allTiles = Tile::all_tile_types();
 		for (TileType tile : allTiles) {
 			std::cout << Tile::toString(tile) << ": " << howManyColourStored(tile, m_stored_tiles) << "\n";
@@ -110,14 +109,14 @@ std::vector<std::shared_ptr<Tile>> Human::discardDownToFour() {
 			// acceptable choice
 			for (auto tile : m_stored_tiles) {
 				if (tile->colour() == chosenColour) {
-					tilesToLose.push_back(tile);
+					tilesToKeep.push_back(tile);
 					break;
 				}
 			}
-			num--;
 		} else {
 			std::cout << "Invalid choice, try again\n";
 		}
 	}
-	return tilesToLose;
+
+	m_stored_tiles = tilesToKeep;
 }

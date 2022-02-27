@@ -50,7 +50,7 @@ public:
 	}
 	cIndex operator--(int) {
 		cIndex temp = *this;
-		++*this;
+		--*this;
 		return temp;
 	}
 

@@ -7,6 +7,14 @@
 #include <string>
 #include <utils/cIndex.hpp>
 
+enum GameState {
+	PICKING,
+	PLACING,
+	DISCARDING,
+	CHOOSINGREWARD,
+	NOSTATE // For pause menu or something?
+};
+
 enum TileType {
 	ORANGE,
 	RED,

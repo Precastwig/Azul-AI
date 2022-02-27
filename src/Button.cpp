@@ -1,8 +1,10 @@
-#include "game_elements/Button.hpp"
+#include "Colours.hpp"
+#include <SFML/Graphics/Color.hpp>
+#include <ui_elements/Button.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/System/String.hpp>
 
-Button::Button(std::string str, sf::Vector2f location): m_current(false), m_outline_on(true) {
+Button::Button(std::string str, sf::Vector2f location): m_outline_on(true) {
     if (!m_font.loadFromFile("resources/NotoSansCJK-Medium.ttc")) {
         g_logger.log(Logger::ERROR, "Font not loaded");
     }
@@ -14,8 +16,8 @@ Button::Button(std::string str, sf::Vector2f location): m_current(false), m_outl
     m_string.setOrigin(playerRect.left + playerRect.width/2.0f,
                         playerRect.top  + playerRect.height/2.0f);
     // m_string.setFillColor(sf::Color::Black);
-    m_outline = sf::RectangleShape(sf::Vector2f(100, 100));
-    m_outline.setFillColor(sf::Color::Red);
+    m_background = sf::RectangleShape(sf::Vector2f(100, 100));
+    m_background.setFillColor(Colours::button_default_col());
     
     setPosition(location);
 
@@ -23,27 +25,35 @@ Button::Button(std::string str, sf::Vector2f location): m_current(false), m_outl
 }
 
 void Button::setSize(sf::Vector2f size) {
-    m_outline.setSize(size);
-    setPosition(m_outline.getPosition());
+    m_background.setSize(size);
+    setPosition(m_background.getPosition());
 }
 
 void Button::setPosition(sf::Vector2f newpos) {
-    m_outline.setPosition(newpos);
-    float stringx = newpos.x + m_outline.getSize().x/2.0f;
-    float stringy = newpos.y + m_outline.getSize().y/2.0f;
+    m_background.setPosition(newpos);
+    float stringx = newpos.x + m_background.getSize().x/2.0f;
+    float stringy = newpos.y + m_background.getSize().y/2.0f;
     m_string.setPosition(sf::Vector2f(stringx,stringy));
+}
+
+void Button::setColour(sf::Color col) {
+    m_background.setFillColor(col);
 }
 
 void Button::draw(sf::RenderTarget &target, sf::RenderStates states) const {
     // target.draw(*m_currentSpr);
     if (m_outline_on) {
-        target.draw(m_outline);
+        target.draw(m_background);
     }
     target.draw(m_string);
 }
 
+bool Button::contains(int x, int y) {
+    return m_background.getGlobalBounds().contains(x,y);
+}
+
 bool Button::onClick(int x, int y) {
-    sf::FloatRect rect = m_outline.getGlobalBounds();
+    sf::FloatRect rect = m_background.getGlobalBounds();
     if (rect.contains(x,y)) {
         m_callback();
         //setState(!m_current);
@@ -52,22 +62,31 @@ bool Button::onClick(int x, int y) {
     return false;
 }
 
-void Button::setState(bool which) {
-    m_current = which;
-    if (m_current) {
-        g_logger.log(Logger::INFO, "True\n");
-    } else {
-        g_logger.log(Logger::INFO, "False\n");
-    }
-    // if (m_current) {
-    //     m_currentSpr = &m_clicked;
-    //     return;
-    // }
-    // m_currentSpr = &m_normal;
+void Button::setHoverState(bool state) {
+    m_hovered = state;
+    updateColours();
 }
 
 void Button::setText(std::string words) {
     m_string.setString(words);
+    sf::FloatRect playerRect = m_string.getLocalBounds();
+    m_string.setOrigin(playerRect.left + playerRect.width/2.0f,
+                    playerRect.top  + playerRect.height/2.0f);
+    setPosition(m_background.getPosition());
+}
+
+void Button::updateColours() {
+    // Can this be merged with BoardTile's hoverability?
+    // Yes but I CBA
+    if (m_hovered) {
+        sf::Color col = m_background.getFillColor();
+        col.a = 200;
+        m_background.setFillColor(col);
+    } else {
+        sf::Color col = m_background.getFillColor();
+        col.a = 125;
+        m_background.setFillColor(col);
+    }
 }
 
 // sf::Sprite* Button::getSprite() {
