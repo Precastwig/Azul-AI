@@ -3,18 +3,18 @@
 
 #include "utils/helper_enums.hpp"
 #include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <game_elements/Tile.hpp>
+
+extern sf::Font g_font;
 
 // Small wrapper for Tile that adds a number to be rendered
 class BoardTile : sf::Drawable {
 public:
     BoardTile(int num, TileType t): m_tile(t), m_num(num), m_filled(false), m_hovered(false) {
-        if (!m_font.loadFromFile("resources/NotoSansCJK-Medium.ttc")) {
-            g_logger.log(Logger::ERROR, "Font not loaded");
-        }
         m_num_txt = sf::Text();
-        m_num_txt.setFont(m_font);
+        m_num_txt.setFont(g_font);
         m_num_txt.setString(std::to_string(num + 1));
         m_num_txt.setColor(sf::Color::Black);
         m_num_txt.setCharacterSize(20);
@@ -92,7 +92,6 @@ private:
         }
     }
     Tile m_tile;
-    sf::Font m_font;
     int m_num;
     bool m_filled;
     bool m_hovered;

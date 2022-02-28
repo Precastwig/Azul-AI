@@ -34,13 +34,6 @@ void Bag::toBin(std::vector<std::shared_ptr<Tile>> tiles) {
 	m_tile_bin.insert(m_tile_bin.end(), tiles.begin(), tiles.end());
 }
 
-// void toBin(std::shared_ptr<Tile> colour, int number) {
-// 	for (int i = 0; i < number; i++) {
-// 		// Place a tile in the bin
-// 		m_tile_bin.push_back(colour);
-// 	}
-// }
-
 void Bag::takeRewardTiles(std::vector<std::shared_ptr<Tile>> tiles) {
 	for (std::shared_ptr<Tile> tile : tiles) {
 		auto tile_iter = std::find(m_reward_tiles.begin(), m_reward_tiles.end(), tile);
@@ -53,7 +46,7 @@ void Bag::takeRewardTiles(std::vector<std::shared_ptr<Tile>> tiles) {
 			}
 		} else {
 			// if it's not in there something's gone wrong!
-			// Error?
+			g_logger.log(Logger::ERROR, "Reward tile selected not found");
 		}
 	}
 }

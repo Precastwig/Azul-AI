@@ -29,7 +29,7 @@ public:
 	std::vector<std::shared_ptr<Tile>> getTiles() {return m_stored_tiles;};
 	void discardTile(std::shared_ptr<Tile> tile) {
 		m_bag->toBin({tile});
-		(void)std::remove(m_stored_tiles.begin(), m_stored_tiles.end(), tile);
+		m_stored_tiles.erase(std::remove(m_stored_tiles.begin(), m_stored_tiles.end(), tile));
 	}
 	virtual bool isAI() = 0;
 	void pickBonusPieces(int number);
@@ -48,13 +48,10 @@ public:
 	}
 
 	// Resolvers
-	void resolvePickingChoice(PickingChoice& choice, TileType bonus, std::shared_ptr<Factory> centre, bool& centre_taken, int& startingPlayer, int currentPlayerIndex);
+	void resolvePickingChoice(PickingChoice& choice, TileType bonus, std::shared_ptr<Factory> centre, bool& centre_taken);
 	void resolvePlacingChoice(PlacingChoice& choice, TileType bonus);
 
-	void pass() {
-		m_done_placing = true;
-		m_discarded = true;
-	}
+	void pass();
 	bool finishedPlacing() {
 		return m_done_placing;
 	};

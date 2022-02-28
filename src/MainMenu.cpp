@@ -4,11 +4,11 @@
 MainMenu::MainMenu(sf::RenderWindow* window, sf::Vector2f size) : m_window(window), m_state(MAIN), m_newgame("New Game"), m_settings("Settings"), m_exit("Quit") {
     int xpos = size.x / 10.0;
     m_newgame.setPosition(sf::Vector2f(xpos, size.y / 4));
-    m_newgame.setOutline(true);
+    m_newgame.setOutlineThickness(0.0);
     m_settings.setPosition(sf::Vector2f(xpos, (size.y * 2) / 4));
-    m_settings.setOutline(true);
+    m_settings.setOutlineThickness(0.0);
     m_exit.setPosition(sf::Vector2f(xpos, (size.y * 3) / 4));
-    m_exit.setOutline(true);
+    m_exit.setOutlineThickness(0.0);
 }
 
 void MainMenu::onClick(int xPos, int yPos) {

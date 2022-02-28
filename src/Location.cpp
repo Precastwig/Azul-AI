@@ -3,6 +3,9 @@
 #include <game_elements/Location.hpp>
 #include <Game.hpp>
 #include <memory>
+#include <players/PlayerInfo.hpp>
+
+extern PlayerInfo g_player_info;
 
 Location::Location(LocationType l) : m_l(l), m_starting_rotation(0.0), m_current_pos() {
     for (size_t j = 0; j < 6; ++j) {
@@ -21,7 +24,7 @@ void Location::onClick(int x, int y, Game& game) {
     for (auto tile : m_visual_tiles) {
         if (tile->contains(x,y) && !tile->isFilled()) {
             g_logger.log(Logger::INFO, "Clicked on tile");
-            std::vector<PlacingChoice> choices = game.getCurrentPlayer()->getAllowedPlacingChoices(game.getBonus());
+            std::vector<PlacingChoice> choices = g_player_info.getCurrentPlayer()->getAllowedPlacingChoices(game.getBonus());
             choices = PlacingChoice::filterChoicesFromLocation(choices, colour());
             for (PlacingChoice choice : choices) {
                 if (choice.index.getIndex() == tile->getIndex()) {

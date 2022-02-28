@@ -4,21 +4,20 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/System/String.hpp>
 
-Button::Button(std::string str, sf::Vector2f location): m_outline_on(true) {
-    if (!m_font.loadFromFile("resources/NotoSansCJK-Medium.ttc")) {
-        g_logger.log(Logger::ERROR, "Font not loaded");
-    }
+extern sf::Font g_font;
+
+Button::Button(std::string str, sf::Vector2f location) {
     m_string = sf::Text();
     m_string.setString(str);
     m_string.setCharacterSize(14);
-    m_string.setFont(m_font);
+    m_string.setFont(g_font);
     sf::FloatRect playerRect = m_string.getLocalBounds();
     m_string.setOrigin(playerRect.left + playerRect.width/2.0f,
                         playerRect.top  + playerRect.height/2.0f);
     // m_string.setFillColor(sf::Color::Black);
     m_background = sf::RectangleShape(sf::Vector2f(100, 100));
     m_background.setFillColor(Colours::button_default_col());
-    
+    m_background.setOutlineThickness(0.0);
     setPosition(location);
 
     m_callback = [](){};
@@ -42,9 +41,7 @@ void Button::setColour(sf::Color col) {
 
 void Button::draw(sf::RenderTarget &target, sf::RenderStates states) const {
     // target.draw(*m_currentSpr);
-    if (m_outline_on) {
-        target.draw(m_background);
-    }
+    target.draw(m_background);
     target.draw(m_string);
 }
 

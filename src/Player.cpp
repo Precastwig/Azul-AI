@@ -2,12 +2,15 @@
 #include "Game.hpp"
 #include "utils/helper_enums.hpp"
 #include <SFML/System/Vector2.hpp>
+#include <players/PlayerInfo.hpp>
 #include <algorithm>
 #include <memory>
 #include <set>
 #include <iostream>
 #include <chrono>
 #include <thread>
+
+extern PlayerInfo g_player_info;
 
 Player::Player(PlayerColour playercolour, std::shared_ptr<Bag> bag, sf::Vector2f boardpos)
 	:  m_done_placing(false), m_discarded(false), m_board(boardpos), m_bag(bag), m_col(playercolour), m_points(0) {
@@ -104,6 +107,12 @@ void Player::pickBonusPieces(int number) {
 	m_stored_tiles.insert(m_stored_tiles.end(), choices.begin(), choices.end());
 	// Remove the tiles from the bonus board
 	m_bag->takeRewardTiles(choices);
+}
+
+void Player::pass() {
+	m_done_placing = true;
+	m_discarded = true;
+	g_player_info.nextTurn();	
 }
 
 int Player::howManyColourStored(TileType t, std::vector<std::shared_ptr<Tile>> stored) {
@@ -203,14 +212,12 @@ void Player::resolvePickingChoice(
 	PickingChoice& choice,
 	TileType bonus,
 	std::shared_ptr<Factory> centre,
-	bool& centre_taken, 
-	int& startingPlayer,
-	int currentPlayerIndex) {
+	bool& centre_taken) {
 	if (!centre_taken && choice.factory == centre) {
 		// Someone has taken from the centre
 		centre_taken = true;
 		minusPoisonPoints();
-		startingPlayer = currentPlayerIndex;
+		g_player_info.setStartingPlayer();
 	}
 	std::vector<std::shared_ptr<Tile>> pickedTiles = choice.factory->removeTiles(choice.tile_colour, bonus, centre);
 	m_stored_tiles.insert(m_stored_tiles.end(), pickedTiles.begin(), pickedTiles.end());

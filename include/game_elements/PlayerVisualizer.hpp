@@ -9,7 +9,7 @@
 #include "Logger.hpp"
 #include "players/Player.hpp"
 #include "utils/helper_enums.hpp"
-#include <ui_elements/OnOffButton.hpp>
+#include <ui_elements/Button.hpp>
 
 extern Logger g_logger;
 extern GameState g_visual_state;
@@ -22,7 +22,7 @@ public:
     void onClick(int x, int y);
     void onHover(int x, int y);
     
-    void update(std::shared_ptr<Player> currentPlayer);
+    void update();
 private:
     void updateString();
     void donePlacing();
@@ -32,9 +32,7 @@ private:
     GameState* m_game_state;
     sf::Text m_player_name;
     sf::RectangleShape m_outline;
-    OnOffButton m_doneplacing_button;
-    // Should font be a global? maybe
-    sf::Font m_font;
+    Button m_doneplacing_button;
 
     // I think we want a hover state? Maybe later
     bool m_hovering;

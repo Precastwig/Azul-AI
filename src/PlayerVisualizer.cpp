@@ -6,15 +6,14 @@
 #include <SFML/System/Vector2.hpp>
 #include <memory>
 #include <vector>
+#include <players/PlayerInfo.hpp>
 
 sf::Color bgCol = sf::Color(255, 228,204);
 sf::Color lineCol = sf::Color(255, 190, 134);
 sf::Color txtCol = sf::Color(sf::Color::Black);
+extern PlayerInfo g_player_info;
 
 PlayerVisualizer::PlayerVisualizer(std::shared_ptr<Player> player, sf::Vector2f location, sf::Vector2f size) : m_player(player) {
-    if (!m_font.loadFromFile("resources/NotoSansCJK-Medium.ttc")) {
-        g_logger.log(Logger::ERROR, "Font not loaded");
-    }
     m_outline = sf::RectangleShape(size);
     m_outline.setPosition(location);
     m_outline.setFillColor(bgCol);
@@ -24,7 +23,7 @@ PlayerVisualizer::PlayerVisualizer(std::shared_ptr<Player> player, sf::Vector2f 
     m_player_name = sf::Text();
     m_player_name.setString(player->toStringNoBoard());
     m_player_name.setPosition(sf::Vector2f(location.x + size.x/10.0f,location.y + size.y/10.0f));
-    m_player_name.setFont(m_font);
+    m_player_name.setFont(g_font);
     m_player_name.setCharacterSize(20);
     m_player_name.setColor(txtCol);
     // Place the button at the bottom?
@@ -55,7 +54,8 @@ void PlayerVisualizer::donePlacing() {
                 currX,
                 currY
             ));
-            tile->setRotation(0.0); // Might have to be 90 deg
+            tile->setRotation(0.0);
+            tile->setOutlineThickness(0.0);
             if (currX < endx) {
                 currX += xincrement;
             } else {
@@ -66,16 +66,18 @@ void PlayerVisualizer::donePlacing() {
     } else if (g_visual_state == GameState::DISCARDING) {
         if (m_player->getTiles().size() <= 4) {
             m_player->pass();
+            g_visual_state = GameState::PLACING;
         } else {
             // Do a warning flash thing? or something
             g_logger.log(Logger::WARNING, "Pressed button when had more than 4 tiles left");
         }
     }
-    // Display the tiles and let user click them in game.cpp
-    // we dont want to pass until we are ready, should be done by clicking this
 }
 
 void PlayerVisualizer::onClick(int x, int y) {
+    if (g_player_info.getCurrentPlayer() != m_player) {
+        return;
+    }
     if (g_visual_state == GameState::PLACING || g_visual_state == GameState::DISCARDING) {
         m_doneplacing_button.onClick(x, y);
     }
@@ -94,19 +96,19 @@ void PlayerVisualizer::onClick(int x, int y) {
 }
 
 void PlayerVisualizer::onHover(int x, int y) {
+    if (g_player_info.getCurrentPlayer() != m_player) {
+        return;
+    }
     if (g_visual_state == GameState::PLACING) {
         if (m_doneplacing_button.contains(x, y)) {
-            if (!m_doneplacing_button.getState()) {
-                m_doneplacing_button.setHoverState(true);
-            }
+            m_doneplacing_button.setOutlineThickness(3.0);
         } else {
-            if (m_doneplacing_button.getState()) {
-                m_doneplacing_button.setHoverState(false);
-            }
+            m_doneplacing_button.setOutlineThickness(0.0);
         }
     }
 
-    if (g_visual_state == GameState::DISCARDING) {
+    if (g_visual_state == GameState::DISCARDING &&
+        g_player_info.getCurrentPlayer() == m_player) {
         // Reverse through the list for the hovering
         std::vector<std::shared_ptr<Tile>> tiles = m_player->getTiles();
         bool outlined = false;
@@ -123,20 +125,14 @@ void PlayerVisualizer::onHover(int x, int y) {
     }
 }
 
-void PlayerVisualizer::update(std::shared_ptr<Player> currentPlayer) {
+void PlayerVisualizer::update() {
     updateString();
-    if (m_player == currentPlayer) {
+    if (m_player == g_player_info.getCurrentPlayer()) {
         m_outline.setOutlineColor(sf::Color::Black);
         m_outline.setOutlineThickness(2.5);
     } else {
         m_outline.setOutlineColor(lineCol);
         m_outline.setOutlineThickness(1.0);
-    }
-    if (currentPlayer->finishedPlacing()) {
-        m_doneplacing_button.setOutline(false);
-        m_doneplacing_button.setOnState(true);
-    } else {
-        m_doneplacing_button.setOnState(false);
     }
 }
 
@@ -150,7 +146,9 @@ void PlayerVisualizer::draw(sf::RenderTarget &target, sf::RenderStates states) c
     if (g_visual_state == GameState::PLACING || g_visual_state == GameState::DISCARDING) {
         target.draw(m_doneplacing_button, states);
     } 
-
+    if (g_player_info.getCurrentPlayer() != m_player) {
+        return;
+    }
     if (g_visual_state == GameState::DISCARDING) {
         for (std::shared_ptr<Tile> tile : m_player->getTiles()) {
             target.draw(*tile, states);

@@ -1,17 +1,23 @@
 #ifndef GAME
 #define GAME
 
+// SFML includes
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Graphics.hpp>
+
+// std includes
 #include <vector>
 #include <memory>
 #include <mutex>
-#include "players/Player.hpp"
+
+// Internal includes
+#include <players/Player.hpp>
 #include <utils/Choices.hpp>
+#include <game_elements/RoundVisualizer.hpp>
 #include <game_elements/Bag.hpp>
 #include <game_elements/Factory.hpp>
-#include <ui_elements/Button.hpp>
 #include <game_elements/PlayerVisualizer.hpp>
-#include <SFML/Graphics.hpp>
+#include <ui_elements/Button.hpp>
 
 using namespace sf;
 
@@ -64,7 +70,6 @@ public:
 	bool playerNotFinished();
 	// Get the current bonus tile type
 	TileType getBonus();
-	std::shared_ptr<Player> getCurrentPlayer();
 
 private:
 	std::vector<Board*> getVisualisedBoards() const;
@@ -99,11 +104,8 @@ private:
 	bool m_centre_taken;
 	std::mutex m_thread_running;
 
-	// Member variable for players
-	cIndex m_current_player;
-	int m_starting_player;
-	std::vector<std::shared_ptr<Player>> m_players;
 	//std::vector<std::shared_ptr<sf::Texture>> m_textures;
+	std::unique_ptr<RoundVisualizer> m_round_visualizer;
 	std::vector<std::unique_ptr<PlayerVisualizer>> m_player_visualizers;
 };
 

@@ -20,7 +20,7 @@ public:
     void setHoverState(bool state);
     void setText(std::string);
     void setSize(sf::Vector2f size);
-    void setOutline(bool on) {m_outline_on = on;};
+    void setOutlineThickness(float size) {m_background.setOutlineThickness(size);};
     void setPosition(sf::Vector2f newpos);
     void setColour(sf::Color col);
     
@@ -32,10 +32,8 @@ protected:
     // sf::Sprite m_clicked;
     // sf::Sprite* m_currentSpr;
     sf::RectangleShape m_background;
-    bool m_outline_on;
     bool m_hovered;
     sf::Text m_string;
-    sf::Font m_font;
 };
 
 #endif

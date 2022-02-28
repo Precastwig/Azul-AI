@@ -13,6 +13,7 @@ enum gui_modes {
 
 // Prints a bunch of info to the command line
 Logger g_logger;
+sf::Font g_font;
 
 int main(int argc, char *argv[]) {
 	gui_modes guiMode = QT;
@@ -31,6 +32,9 @@ int main(int argc, char *argv[]) {
 		Game game;
 		game.play();
 	} else if (guiMode == QT) {
+		if (!g_font.loadFromFile("resources/NotoSansCJK-Medium.ttc")) {
+            g_logger.log(Logger::ERROR, "Font not loaded");
+        }
 		int window_width = 1920;
 		int window_height = 1080;
 		sf::ContextSettings settings;
