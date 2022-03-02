@@ -14,8 +14,9 @@
 
 GameState g_visual_state;
 PlayerInfo g_player_info;
+extern MenuState g_menu_state;
 
-Game::Game(sf::Vector2f size) : m_debug_switchstage("Switch stage"), m_centre_taken(false), m_round_num(0) {
+Game::Game(sf::Vector2f size) : m_screen_size(size), m_debug_switchstage("Switch stage"), m_centre_taken(false), m_round_num(0), m_finish_screen(nullptr) {
 	// Create the bag
 	m_bag = std::make_shared<Bag>();
 	g_visual_state = GameState::PICKING;
@@ -72,14 +73,14 @@ Game::Game(sf::Vector2f size) : m_debug_switchstage("Switch stage"), m_centre_ta
 		angle += (2 * M_PI / num_factories);
 	}
 	m_centre = std::make_shared<Factory>(num_factories, middle, 60);
-	m_debug_switchstage.setPosition(playerVisualpositions[2]);
-	m_debug_switchstage.m_callback = []() {
-		if (g_visual_state == GameState::PICKING) {
-			g_visual_state = GameState::PLACING;
-		} else if (g_visual_state == GameState::PLACING) {
-			g_visual_state = GameState::PICKING;
-		}
-	};
+	//m_debug_switchstage.setPosition(playerVisualpositions[2]);
+	//m_debug_switchstage.m_callback = []() {
+	//	if (g_visual_state == GameState::PICKING) {
+	//		g_visual_state = GameState::PLACING;
+	//	} else if (g_visual_state == GameState::PLACING) {
+	//		g_visual_state = GameState::PICKING;
+	//	}
+	//};
 	// Alternately could use bind?
 	//	std::bind(&Game::flipStage, std::ref(*this));
 
@@ -98,15 +99,17 @@ void Game::onClick(int xPos, int yPos) {
 				factory->onClick(xPos, yPos, *this);
 			}
 			m_centre->onClick(xPos, yPos, *this);
-		} else {
+		} else if (g_visual_state == GameState::PLACING || g_visual_state == GameState::DISCARDING) {
 			std::shared_ptr<Player> currPlayer = g_player_info.getCurrentPlayer();
 			currPlayer->getBoardPtr()->onClick(xPos, yPos, *this);
 			
 			for (auto& vp : m_player_visualizers) {
 				vp->onClick(xPos, yPos);
 			}
+		} else if (g_visual_state == GameState::FINISH) {
+			m_finish_screen->onClick(xPos, yPos);
 		}
-		m_debug_switchstage.onClick(xPos, yPos);
+		//m_debug_switchstage.onClick(xPos, yPos);
 		m_thread_running.unlock();
 	}
 }
@@ -141,11 +144,17 @@ void Game::draw(RenderTarget &target, RenderStates states) const {
 		}
 		//m_boards[m_current_player.getIndex()]->draw(target, states);
 	}
-	for (size_t i = 0; i < m_player_visualizers.size(); ++i) {
-		m_player_visualizers[i]->draw(target, states);
+
+	if (g_visual_state != GameState::FINISH) {
+		for (size_t i = 0; i < m_player_visualizers.size(); ++i) {
+			m_player_visualizers[i]->draw(target, states);
+		}
+		target.draw(*m_bag, states);
+	} else {
+		m_finish_screen->draw(target, states);
 	}
 	m_round_visualizer->draw(target, states);
-	m_debug_switchstage.draw(target, states);
+	//m_debug_switchstage.draw(target, states);
 }
 
 std::vector<Board*> Game::getVisualisedBoards() const {
@@ -155,6 +164,21 @@ std::vector<Board*> Game::getVisualisedBoards() const {
 void performAIActionWorker(Game* game, std::shared_ptr<Player> player) {
 	// Perform the action then move the player forward
 	game->performAIAction(player);
+}
+
+void Game::passOrChangeStage() {
+	if (playerNotFinished()) {
+		// This could be better? but I can't think of how right now
+		bool lookingForNextPlayer = true;
+		while (lookingForNextPlayer) {
+			g_player_info.nextTurn();
+			if (!g_player_info.getCurrentPlayer()->finishedPlacing()) {
+				lookingForNextPlayer = false;
+			}
+		}
+	} else {
+		switchToPickingStage();
+	}
 }
 
 void Game::performAIAction(std::shared_ptr<Player> player) {
@@ -168,9 +192,17 @@ void Game::performAIAction(std::shared_ptr<Player> player) {
 		pick_tile(choice);
 	} else if (g_visual_state == GameState::PLACING) { 
 		PlacingChoice choice = player->placeTile(getBonus());
-		place_tile(choice);
+		if (!player->finishedPlacing()) {
+			place_tile(choice);
+		} else {
+        	g_visual_state = GameState::DISCARDING;
+		}
 	} else if (g_visual_state == GameState::DISCARDING) {
 		player->discardDownToFour();
+		g_visual_state = GameState::PLACING;
+		passOrChangeStage();
+	} else if (g_visual_state == GameState::CHOOSINGREWARD) {
+		player->pickBonusPieces();
 	}
 	m_thread_running.unlock();
 }
@@ -295,14 +327,18 @@ void Game::switchToPlacingStage() {
 
 void Game::switchToPickingStage() {
 	g_visual_state = GameState::PICKING;
-	if (m_round_num < m_bonus_tile_order.size()) {
+	if (m_round_num < m_bonus_tile_order.size() - 1) {
 		m_round_num++;
 		m_round_visualizer->nextround();
 		fill_factories();
 		updatePlayerVisualizers();
 	} else {
 		// End the game
-		// Somehow
+		g_visual_state = GameState::FINISH;
+		m_finish_screen = std::make_unique<FinishScreen>(
+			m_screen_size,
+			g_player_info.getPlayers()
+		);
 	}
 }
 
@@ -312,27 +348,16 @@ void Game::place_tile(PlacingChoice& placed) {
 	std::shared_ptr<Player> player = g_player_info.getCurrentPlayer();
 	if (player->finishedPlacing() || placed.star == nullptr) {
 		g_logger.log(Logger::ERROR, "Place_tile called when current player has finished placing");
-		g_player_info.nextTurn();
 		if (!playerNotFinished()) {
 			switchToPickingStage();
 		}
+		g_player_info.nextTurn();
 		return;
 	}
 
 	player->resolvePlacingChoice(placed, getBonus());
 
-	if (playerNotFinished()) {
-		// This could be better? but I can't think of how right now
-		bool lookingForNextPlayer = true;
-		while (lookingForNextPlayer) {
-			g_player_info.nextTurn();
-			if (!g_player_info.getCurrentPlayer()->finishedPlacing()) {
-				lookingForNextPlayer = false;
-			}
-		}
-	} else {
-		switchToPickingStage();
-	}
+	passOrChangeStage();
 	updatePlayerVisualizers();
 }
 

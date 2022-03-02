@@ -1,7 +1,9 @@
 #include "game_elements/Bag.hpp"
 #include <assert.h>
 
-Bag::Bag() {
+extern sf::Font g_font;
+
+Bag::Bag(sf::Vector2f size, sf::Vector2f position) {
 	for (TileType toAdd : Tile::all_tile_types()) {
 		// Add 22 of each colour
 		for (int i = 0; i < 22; ++i) {
@@ -14,6 +16,18 @@ Bag::Bag() {
 		std::shared_ptr<Tile> pulled = pullTile();
 		m_reward_tiles.push_back(pulled);
 	}
+	m_background.setSize(size);
+	m_background.setPosition(position);
+	m_txt = sf::Text();
+	m_txt.setFont(g_font);
+	sf::FloatRect playerRect = m_txt.getLocalBounds();
+    m_txt.setOrigin(playerRect.left + playerRect.width/2.0f,
+                        playerRect.top  + playerRect.height/2.0f);
+	m_txt.setString("Reward Tiles");
+}
+
+void Bag::draw (RenderTarget &target, RenderStates states) const {
+	target.draw(m_txt);
 }
 
 void Bag::fillFactory(std::shared_ptr<Factory> f) {

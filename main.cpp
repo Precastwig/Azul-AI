@@ -2,6 +2,7 @@
 #include "Game.hpp"
 #include <ui_elements/MainMenu.hpp>
 #include "Logger.hpp"
+#include "utils/helper_enums.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/WindowStyle.hpp>
 #include <iostream>
@@ -14,6 +15,7 @@ enum gui_modes {
 // Prints a bunch of info to the command line
 Logger g_logger;
 sf::Font g_font;
+MenuState g_menu_state;
 
 int main(int argc, char *argv[]) {
 	gui_modes guiMode = QT;
@@ -44,9 +46,8 @@ int main(int argc, char *argv[]) {
 		Game game(sf::Vector2f(window_width, window_height));
 	   	// Game stuff
 	   	game.fill_factories();
-		bool menuopen = true;
 		MainMenu menu(&window, sf::Vector2f(window_width, window_height));
-	   	menu.m_newgame.m_callback = [&menuopen]() {menuopen = !menuopen;};
+	   	menu.m_newgame.m_callback = []() {g_menu_state = MenuState::OFF;};
 	
 		// Start the game loop
 	    while (window.isOpen())
@@ -61,7 +62,7 @@ int main(int argc, char *argv[]) {
 
 				if (event.type == sf::Event::MouseButtonPressed) {
 					if (event.mouseButton.button == sf::Mouse::Left) {
-						if (menuopen) {
+						if (g_menu_state != MenuState::OFF) {
 							// Give to the menu
 							menu.onClick(event.mouseButton.x, event.mouseButton.y);
 						} else {
@@ -71,7 +72,7 @@ int main(int argc, char *argv[]) {
 				}
 
 				if (event.type == sf::Event::MouseMoved) {
-					if (menuopen) {
+					if (g_menu_state != MenuState::OFF) {
 						// Menu onhover
 					} else {
 						game.onHover(event.mouseMove.x, event.mouseMove.y);
@@ -81,7 +82,7 @@ int main(int argc, char *argv[]) {
 	        // Clear screen
 	        window.clear(Color(194, 240, 242));
 	        // Draw the relevent thing
-			if (menuopen) {
+			if (g_menu_state != MenuState::OFF) {
 				window.draw(menu);
 			} else {
 				// This is non locking, so shouldn't halt UI

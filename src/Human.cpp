@@ -70,10 +70,10 @@ PlacingChoice Human::placeTile(Tile bonus) {
 	}
 }
 
-std::vector<std::shared_ptr<Tile>> Human::chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices, int number) {
+std::vector<std::shared_ptr<Tile>> Human::chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices) {
 	std::vector<std::shared_ptr<Tile>> return_list;
-	while (number > 0) {
-		std::cout << "\nChoose " << number << " bonus pieces\n";
+	while (m_bonus_to_choose > 0) {
+		std::cout << "\nChoose " << m_bonus_to_choose << " bonus pieces\n";
 		std::vector<std::shared_ptr<Tile>> availableColours;
 		for (std::shared_ptr<Tile> c : choices) {
 			if (std::find(availableColours.begin(), availableColours.end(), c) == availableColours.end()) {
@@ -88,7 +88,7 @@ std::vector<std::shared_ptr<Tile>> Human::chooseBonusPieces(std::vector<std::sha
 		std::cin >> i;
 		if (i >= 0 && i < availableColours.size()) {
 			return_list.push_back(availableColours[i]);
-			number--;
+			m_bonus_to_choose--;
 		}
 	}
 	return return_list;

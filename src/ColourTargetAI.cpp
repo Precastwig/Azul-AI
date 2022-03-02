@@ -151,12 +151,12 @@ PlacingChoice ColourTargetAI::placeTile(Tile bonus) {
     return choices[0];
 }
 
-std::vector<std::shared_ptr<Tile>> ColourTargetAI::chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices, int number) {
+std::vector<std::shared_ptr<Tile>> ColourTargetAI::chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices) {
     std::vector<std::shared_ptr<Tile>> retlist;
     for (std::shared_ptr<Tile> choice : choices) {
-        if (number > 0) {
+        if (m_bonus_to_choose > 0) {
             retlist.push_back(choice);
-            number--;
+            m_bonus_to_choose--;
         } else {
             break;
         }

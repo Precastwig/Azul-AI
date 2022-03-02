@@ -3,14 +3,19 @@
 
 #include "utils/helper_enums.hpp"
 #include "game_elements/Factory.hpp"
+#include <SFML/Graphics/Drawable.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <algorithm>
 #include <memory>
 
 // This class ecompasses the bag of tiles, the bin, and the reward tile selection
 // aka, all locations that tiles originate, and go to die
-class Bag {
+class Bag : public sf::Drawable {
 public:
-	Bag();
+	Bag(sf::Vector2f size, sf::Vector2f position);
+
+	virtual void draw (RenderTarget &target, RenderStates states) const override;
 
 	void fillFactory(std::shared_ptr<Factory> f);
 
@@ -28,10 +33,15 @@ public:
 	};
 
 private:
+	// Functions
 	void binToBag();
-
 	std::shared_ptr<Tile> pullTile();
 
+	// Visualization Variables
+	sf::Text m_txt;
+	sf::RectangleShape m_background;
+
+	// Storage Variables
 	std::vector<std::shared_ptr<Tile>> m_tile_bin;
 	std::vector<std::shared_ptr<Tile>> m_tile_bag;
 	// Reward tiles

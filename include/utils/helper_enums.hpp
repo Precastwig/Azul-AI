@@ -7,11 +7,18 @@
 #include <string>
 #include <utils/cIndex.hpp>
 
+enum MenuState {
+	MAIN,
+	SETTINGS,
+	OFF
+};
+
 enum GameState {
 	PICKING,
 	PLACING,
 	DISCARDING,
 	CHOOSINGREWARD,
+	FINISH,
 	NOSTATE // For pause menu or something?
 };
 

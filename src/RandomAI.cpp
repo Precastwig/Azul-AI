@@ -15,7 +15,7 @@ PickingChoice RandomAI::pickTile(
 	);
 	int random_index = rand() % choices.size();
 	std::cout << "RANDOM BOT " + m_col.toString() + " IS PICKING A FACTORY";
-	commandLineWait();
+	//commandLineWait();
 	std::cout << choices[random_index].to_string() + "\n";
  	return choices[random_index];
 }
@@ -28,24 +28,24 @@ PlacingChoice RandomAI::placeTile(Tile bonus) {
 	}
 	int random_index = rand() % choices.size();
 	std::cout << "RANDOM BOT " + m_col.toString() + " IS PLACING A TILE";
-	commandLineWait();
+	//commandLineWait();
 	std::cout << choices[random_index].to_string() + "\n";
 	return choices[random_index];
 }
 
-std::vector<std::shared_ptr<Tile>> RandomAI::chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices, int number) {
+std::vector<std::shared_ptr<Tile>> RandomAI::chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices) {
 	std::cout << "\nChoosing bonus pieces!\n";
 	std::string s;
 	std::cin >> s;
 	std::vector<std::shared_ptr<Tile>> return_list;
 	std::vector<int> chosen_ints;
-	while (number > 0) {
+	while (m_bonus_to_choose > 0) {
 		int randomChoice = rand() % choices.size();
 		if (std::find(chosen_ints.begin(), chosen_ints.end(), randomChoice) == chosen_ints.end()) {
 			// Element not found
 			chosen_ints.push_back(randomChoice);
 			return_list.push_back(choices[randomChoice]);
-			number--;
+			m_bonus_to_choose--;
 		}
 	}
 	return return_list;

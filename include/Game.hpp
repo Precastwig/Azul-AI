@@ -17,6 +17,7 @@
 #include <game_elements/Bag.hpp>
 #include <game_elements/Factory.hpp>
 #include <game_elements/PlayerVisualizer.hpp>
+#include <ui_elements/FinishScreen.hpp>
 #include <ui_elements/Button.hpp>
 
 using namespace sf;
@@ -74,6 +75,7 @@ public:
 private:
 	std::vector<Board*> getVisualisedBoards() const;
 	void updatePlayerVisualizers();
+	void passOrChangeStage();
 
 	//-------------------------------------------------------------------
 	// Member variables
@@ -103,8 +105,10 @@ private:
 	// Used only in SFML implementation
 	bool m_centre_taken;
 	std::mutex m_thread_running;
+	sf::Vector2f m_screen_size;
 
 	//std::vector<std::shared_ptr<sf::Texture>> m_textures;
+	std::unique_ptr<FinishScreen> m_finish_screen;
 	std::unique_ptr<RoundVisualizer> m_round_visualizer;
 	std::vector<std::unique_ptr<PlayerVisualizer>> m_player_visualizers;
 };

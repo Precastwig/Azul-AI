@@ -1,5 +1,6 @@
 #include "game_elements/Board.hpp"
 #include "players/Player.hpp"
+#include "utils/helper_enums.hpp"
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -8,6 +9,8 @@
 #include <memory>
 #include <vector>
 #include <game_elements/Location.hpp>
+
+extern GameState g_visual_state;
 
 Board::Board(sf::Vector2f position)
 {
@@ -191,7 +194,8 @@ void Board::placeTile(PlacingChoice choice, Player* me) {
 	int reward = bonusPiecesAwarded();
 	if (reward > 0) {
 		// and then reward them with some bonus tiles
-		me->pickBonusPieces(reward);
+		me->setBonusToPick(reward);
+		g_visual_state = GameState::CHOOSINGREWARD;
 	}
 }
 

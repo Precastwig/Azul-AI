@@ -13,7 +13,7 @@
 extern PlayerInfo g_player_info;
 
 Player::Player(PlayerColour playercolour, std::shared_ptr<Bag> bag, sf::Vector2f boardpos)
-	:  m_done_placing(false), m_discarded(false), m_board(boardpos), m_bag(bag), m_col(playercolour), m_points(0) {
+	:  m_done_placing(false), m_discarded(false), m_board(boardpos), m_bag(bag), m_col(playercolour), m_points(0), m_bonus_to_choose(0) {
 };
 
 void Player::addPoints(int points) {
@@ -101,8 +101,8 @@ void Player::createAllVariationsOfChoice(
 	}
 }
 
-void Player::pickBonusPieces(int number) {
-	std::vector<std::shared_ptr<Tile>> choices = chooseBonusPieces(m_bag->rewardTiles(), number);
+void Player::pickBonusPieces() {
+	std::vector<std::shared_ptr<Tile>> choices = chooseBonusPieces(m_bag->rewardTiles());
 	// Add the tiles to our piece list
 	m_stored_tiles.insert(m_stored_tiles.end(), choices.begin(), choices.end());
 	// Remove the tiles from the bonus board

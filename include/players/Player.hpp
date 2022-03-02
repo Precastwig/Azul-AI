@@ -22,7 +22,7 @@ public:
 		bool centrePoison
 	) = 0;
 	virtual PlacingChoice placeTile(Tile bonus) = 0;
-	virtual std::vector<std::shared_ptr<Tile>> chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices, int number) = 0;
+	virtual std::vector<std::shared_ptr<Tile>> chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices) = 0;
 	virtual void discardDownToFour() = 0;
 
 	// Other helpers
@@ -32,7 +32,7 @@ public:
 		m_stored_tiles.erase(std::remove(m_stored_tiles.begin(), m_stored_tiles.end(), tile));
 	}
 	virtual bool isAI() = 0;
-	void pickBonusPieces(int number);
+	void pickBonusPieces();
 	bool hasTiles();
 	int numTiles();
 	void addPoints(int points);
@@ -40,6 +40,9 @@ public:
 	int points() {
 		return m_points;
 	};
+	void setBonusToPick(int num) {
+		m_bonus_to_choose = num;
+	}
 	PlayerColour colour() {
 		return m_col;
 	};
@@ -82,6 +85,7 @@ protected:
 
 	int howManyColourStored(TileType t, std::vector<std::shared_ptr<Tile>> stored);
 
+	int m_bonus_to_choose;
 	// Flag for when the player hass passed
 	bool m_done_placing;
 	// Flag for when the player has discarded down to 4 tiles remaining
