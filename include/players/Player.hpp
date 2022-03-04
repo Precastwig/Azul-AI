@@ -31,6 +31,9 @@ public:
 		m_bag->toBin({tile});
 		m_stored_tiles.erase(std::remove(m_stored_tiles.begin(), m_stored_tiles.end(), tile));
 	}
+	void addTile(std::shared_ptr<Tile> tile) {
+		m_stored_tiles.push_back(tile);
+	}
 	virtual bool isAI() = 0;
 	void pickBonusPieces();
 	bool hasTiles();
@@ -42,6 +45,9 @@ public:
 	};
 	void setBonusToPick(int num) {
 		m_bonus_to_choose = num;
+	}
+	int getBonusToPick() {
+		return m_bonus_to_choose;
 	}
 	PlayerColour colour() {
 		return m_col;

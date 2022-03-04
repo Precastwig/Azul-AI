@@ -184,6 +184,10 @@ void Player::resolvePlacingChoice(PlacingChoice& choice, TileType bonus) {
 		}
 		// Keep the remaining tiles
 		m_stored_tiles = newStoredTiles;
+		std::cout << toBin.size() << "\n";
+		for (auto t : toBin) {
+			std::cout << t->toString();
+		}
 		// Put the used tiles in the bin
 		m_bag->toBin(toBin);
 		// Place the tile on the board (this scores us points)

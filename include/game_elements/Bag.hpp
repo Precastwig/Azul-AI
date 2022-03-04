@@ -21,7 +21,7 @@ public:
 
 	void toBin(std::vector<std::shared_ptr<Tile>> tiles);
 
-	// void toBin(Tile colour, int number);
+	void onClick(int x, int y);
 
 	// This function removes the given list of tiles from the
 	// reward tiles display

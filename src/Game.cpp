@@ -18,7 +18,8 @@ extern MenuState g_menu_state;
 
 Game::Game(sf::Vector2f size) : m_screen_size(size), m_debug_switchstage("Switch stage"), m_centre_taken(false), m_round_num(0), m_finish_screen(nullptr) {
 	// Create the bag
-	m_bag = std::make_shared<Bag>();
+	sf::Vector2f middle(size.x / 2,size.y / 2);
+	m_bag = std::make_shared<Bag>(size, middle);
 	g_visual_state = GameState::PICKING;
 
 	sf::Vector2f playerVisualSize(size.x / 8,size.y / 2);
@@ -53,6 +54,7 @@ Game::Game(sf::Vector2f size) : m_screen_size(size), m_debug_switchstage("Switch
 
 	// Randomise the starting player
 	g_player_info.initialiseIndicies();
+	g_player_info.setGamePtr(this);
 
 	for (size_t i = 0; i < g_player_info.numPlayers(); ++i) {
 		auto ptr = std::make_unique<PlayerVisualizer>(
@@ -66,7 +68,6 @@ Game::Game(sf::Vector2f size) : m_screen_size(size), m_debug_switchstage("Switch
 	// Create the factories
 	int num_factories = (g_player_info.numPlayers() * 2) + 1;
 	double angle = 0.0;
-	sf::Vector2f middle(size.x / 2,size.y / 2);
 	for (int i = 0; i < num_factories; ++i) {
 		sf::Vector2f factoryPos = Factory::calculateNewPos(middle, 250, angle);
 		m_factories.push_back(std::make_shared<Factory>(i, factoryPos, 60));
@@ -108,6 +109,8 @@ void Game::onClick(int xPos, int yPos) {
 			}
 		} else if (g_visual_state == GameState::FINISH) {
 			m_finish_screen->onClick(xPos, yPos);
+		} else if (g_visual_state == GameState::CHOOSINGREWARD) {
+			m_bag->onClick(xPos, yPos);
 		}
 		//m_debug_switchstage.onClick(xPos, yPos);
 		m_thread_running.unlock();
@@ -149,7 +152,9 @@ void Game::draw(RenderTarget &target, RenderStates states) const {
 		for (size_t i = 0; i < m_player_visualizers.size(); ++i) {
 			m_player_visualizers[i]->draw(target, states);
 		}
-		target.draw(*m_bag, states);
+		if (g_visual_state == GameState::CHOOSINGREWARD) {
+			m_bag->draw(target, states);
+		}
 	} else {
 		m_finish_screen->draw(target, states);
 	}
@@ -164,21 +169,6 @@ std::vector<Board*> Game::getVisualisedBoards() const {
 void performAIActionWorker(Game* game, std::shared_ptr<Player> player) {
 	// Perform the action then move the player forward
 	game->performAIAction(player);
-}
-
-void Game::passOrChangeStage() {
-	if (playerNotFinished()) {
-		// This could be better? but I can't think of how right now
-		bool lookingForNextPlayer = true;
-		while (lookingForNextPlayer) {
-			g_player_info.nextTurn();
-			if (!g_player_info.getCurrentPlayer()->finishedPlacing()) {
-				lookingForNextPlayer = false;
-			}
-		}
-	} else {
-		switchToPickingStage();
-	}
 }
 
 void Game::performAIAction(std::shared_ptr<Player> player) {
@@ -200,9 +190,10 @@ void Game::performAIAction(std::shared_ptr<Player> player) {
 	} else if (g_visual_state == GameState::DISCARDING) {
 		player->discardDownToFour();
 		g_visual_state = GameState::PLACING;
-		passOrChangeStage();
+		g_player_info.passOrChangeState();
 	} else if (g_visual_state == GameState::CHOOSINGREWARD) {
 		player->pickBonusPieces();
+		g_player_info.passOrChangeState();
 	}
 	m_thread_running.unlock();
 }
@@ -305,14 +296,6 @@ void Game::updatePlayerVisualizers() {
 	}
 }
 
-bool Game::playerNotFinished() {
-	for (std::shared_ptr<Player> player : g_player_info.getPlayers()) {
-		if (!player->finishedPlacing())
-			return true;
-	}
-	return false;
-}
-
 TileType Game::getBonus() {
 	return m_bonus_tile_order[m_round_num];
 }
@@ -348,7 +331,7 @@ void Game::place_tile(PlacingChoice& placed) {
 	std::shared_ptr<Player> player = g_player_info.getCurrentPlayer();
 	if (player->finishedPlacing() || placed.star == nullptr) {
 		g_logger.log(Logger::ERROR, "Place_tile called when current player has finished placing");
-		if (!playerNotFinished()) {
+		if (!g_player_info.playerNotFinished()) {
 			switchToPickingStage();
 		}
 		g_player_info.nextTurn();
@@ -356,8 +339,10 @@ void Game::place_tile(PlacingChoice& placed) {
 	}
 
 	player->resolvePlacingChoice(placed, getBonus());
-
-	passOrChangeStage();
+	// This might have changed the game state, so we should check that hasn't happen
+	if (g_visual_state != GameState::CHOOSINGREWARD) {
+		g_player_info.passOrChangeState();
+	}
 	updatePlayerVisualizers();
 }
 
@@ -366,7 +351,7 @@ void Game::placing_stage() {
 	for (std::shared_ptr<Player> player : g_player_info.getPlayers()) {
 		player->resetDonePlacing();
 	}
-	while (playerNotFinished()) {
+	while (g_player_info.playerNotFinished()) {
 		std::shared_ptr<Player> current_player = g_player_info.getCurrentPlayer();
 		PlacingChoice choice = current_player->placeTile(getBonus());
 		current_player->resolvePlacingChoice(choice, getBonus());

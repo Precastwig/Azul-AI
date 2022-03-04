@@ -67,15 +67,12 @@ public:
 
 	// Check if all factories are empty
 	bool noTilesLeft();
-	// Check that there is a player that still wishes to place tiles
-	bool playerNotFinished();
 	// Get the current bonus tile type
 	TileType getBonus();
 
 private:
 	std::vector<Board*> getVisualisedBoards() const;
 	void updatePlayerVisualizers();
-	void passOrChangeStage();
 
 	//-------------------------------------------------------------------
 	// Member variables
