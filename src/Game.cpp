@@ -195,6 +195,7 @@ void Game::performAIAction(std::shared_ptr<Player> player) {
 		player->pickBonusPieces();
 		g_player_info.passOrChangeState();
 	}
+	updatePlayerVisualizers();
 	m_thread_running.unlock();
 }
 
@@ -335,6 +336,7 @@ void Game::place_tile(PlacingChoice& placed) {
 			switchToPickingStage();
 		}
 		g_player_info.nextTurn();
+		updatePlayerVisualizers();
 		return;
 	}
 

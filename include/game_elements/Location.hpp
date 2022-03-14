@@ -29,6 +29,16 @@ public:
 			CENTRE_STAR
 		};
 	};
+	static std::vector<LocationType> all_locations_except_centre() {
+		return {
+			ORANGE_STAR,
+			RED_STAR,
+			BLUE_STAR,
+			YELLOW_STAR,
+			GREEN_STAR,
+			PURPLE_STAR
+		};
+	}
 	static int num_locations() {
 		return all_locations().size();
 	}

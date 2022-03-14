@@ -98,41 +98,60 @@ std::vector<TileType> Board::getAdjacentStarColours(TileType starCol) {
 	return returnList;
 }
 
+bool check_column_relevent_centre_spaces(LocationType loc, std::shared_ptr<Location> centre) {
+	switch(loc) {
+		case CENTRE_STAR:
+			// this makes no sense
+			return false;
+		case RED_STAR:
+			return centre->tile(0) && centre->tile(1);
+		case BLUE_STAR:
+			return centre->tile(1) && centre->tile(2);
+		case YELLOW_STAR:
+			return centre->tile(2) && centre->tile(3);
+		case GREEN_STAR:
+			return centre->tile(3) && centre->tile(4);
+		case PURPLE_STAR:
+			return centre->tile(4) && centre->tile(5);
+		case ORANGE_STAR:
+			return centre->tile(5) && centre->tile(0);
+	}
+	return false;
+}
+
 int Board::bonusPiecesAwarded() {
 	// There should only be one change every time we call this
 	// function, so we can return when we find a true
-	for (int i = 1; i <= 6; i++) {
-		cIndex star_index(i, 6);
-		std::shared_ptr<Location> star = m_stars[star_index.getIndex()];
-		if (!m_windows[star_index.getIndex()]) {
+	for (LocationType location : Location::all_locations_except_centre()) {
+		std::shared_ptr<Location> star = m_stars[location];
+		if (!m_windows[location]) {
 			// If the window is covered
 			if (star->tile(4) &&
 				star->tile(5)) {
-				m_windows[star_index.getIndex()] = true;
+				m_windows[location] = true;
 				return 3;
 			}
 		}
 
-		if (!m_statues[star_index.getIndex()]) {
+		if (!m_statues[location]) {
 			// If the statue is covered
-			if (star->tile(1) && star->tile(2)) {
+			if (star->tile(0) && star->tile(1)) {
 				// We also need to check the "next one"
-				std::shared_ptr<Location> nextStar = m_stars[(++star_index).getIndex()];
-				if(nextStar->tile(4) && nextStar->tile(3)) {
-					m_statues[star_index.getIndex()] = true;
+				LocationType next_location = Location::clockwise_location(location);
+				std::shared_ptr<Location> nextStar = m_stars[next_location];
+				if(nextStar->tile(3) && nextStar->tile(2)) {
+					m_statues[location] = true;
 					return 2;
 				}
 			}
 		}
-		if (!m_columns[star_index.getIndex()]) {
+		if (!m_columns[location]) {
 			// If the column is covered
-			if (star->tile(2) && star->tile(3)) {
+			if (star->tile(1) && star->tile(2)) {
 				// We also need to check if the central pieces are covered
 				std::shared_ptr<Location> centralStar = m_stars[LocationType::CENTRE_STAR];
-				if (centralStar->tile(star_index) &&
-					centralStar->tile(star_index - 1)
-				) {
-					m_columns[star_index.getIndex()] = true;
+				if (check_column_relevent_centre_spaces(location, centralStar)) {
+					m_columns[location] = true;
 					return 1;
 				}
 			}
