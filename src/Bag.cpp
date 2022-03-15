@@ -20,7 +20,7 @@ Bag::Bag(sf::Vector2f size, sf::Vector2f position) : m_tile_bin(), m_reward_tile
 	for (int i = 0; i < 10; ++i) {
 		std::shared_ptr<Tile> pulled = pullTile();
 		m_reward_tiles.push_back(pulled);
-		sf::Vector2f newPos = Factory::calculateNewPos(m_background.getPosition(), size.x/2.0, angle);
+		sf::Vector2f newPos = Factory::calculateNewPos(position, size.x/3.0, angle);
 		m_reward_tiles[i]->setPosition(newPos);
 		angle += (2 * M_PI / 10);
 	}
@@ -32,15 +32,19 @@ Bag::Bag(sf::Vector2f size, sf::Vector2f position) : m_tile_bin(), m_reward_tile
 	m_background.setFillColor(sf::Color::Magenta);
 	m_txt = sf::Text();
 	m_txt.setFont(g_font);
+	m_txt.setString("Reward Tiles");
 	sf::FloatRect playerRect = m_txt.getLocalBounds();
     m_txt.setOrigin(playerRect.left + playerRect.width/2.0f,
                         playerRect.top  + playerRect.height/2.0f);
-	sf::Vector2f textpos = sf::Vector2f(position.x + size.x / 2, position.y + size.y/10);
+	sf::Vector2f textpos = sf::Vector2f(position.x, position.y - size.y + 10);
 	m_txt.setPosition(textpos);
-	m_txt.setString("Reward Tiles");
 }
 
 void Bag::draw (RenderTarget &target, RenderStates states) const {
+	target.draw(m_background);
+	for (std::shared_ptr<Tile> t : m_reward_tiles) {
+		target.draw(*t, states);
+	}
 	target.draw(m_txt);
 }
 

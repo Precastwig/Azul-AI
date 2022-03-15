@@ -1,11 +1,13 @@
 #ifndef PLAYERINFO
 #define PLAYERINFO
 
+#include <SFML/Graphics/Drawable.hpp>
 #include <players/Player.hpp>
 #include <game_elements/PlayerVisualizer.hpp>
 
 class PlayerInfo {
 public:
+    PlayerInfo() : hovered_element(nullptr), m_game_ptr(nullptr) {};
     std::shared_ptr<Player> getCurrentPlayer() {
 	    return players[current_player.getIndex()];
     }
@@ -14,6 +16,12 @@ public:
     }
     void setGamePtr(Game* g) {
         m_game_ptr = g;
+    }
+    void setHoveredElement(sf::Drawable* element) {
+        hovered_element = element;
+    }
+    sf::Drawable* getHoveredElement() {
+        return hovered_element;
     }
     // Sets the starting player to the current player
     void setStartingPlayer() {
@@ -51,6 +59,9 @@ public:
         current_player = cIndex(starting_player + 1, players.size());
     }
 private:
+    // A temporary element to visualize because of some hovering
+    sf::Drawable* hovered_element; 
+    
     cIndex current_player;
 	int starting_player;
 	std::vector<std::shared_ptr<Player>> players;

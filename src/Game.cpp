@@ -3,6 +3,7 @@
 #include "players/RandomAI.hpp"
 #include "players/Human.hpp"
 #include "utils/helper_enums.hpp"
+#include <SFML/Graphics/Drawable.hpp>
 #include <ui_elements/Button.hpp>
 #include <players/PlayerInfo.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -19,10 +20,13 @@ extern MenuState g_menu_state;
 Game::Game(sf::Vector2f size) : m_screen_size(size), m_debug_switchstage("Switch stage"), m_centre_taken(false), m_round_num(0), m_finish_screen(nullptr) {
 	// Create the bag
 	sf::Vector2f middle(size.x / 2,size.y / 2);
-	m_bag = std::make_shared<Bag>(size, middle);
+	sf::Vector2f playerVisualSize(size.x / 8,size.y / 2);
+	float reward_size_x = size.x - (playerVisualSize.x * 4);
+	// a square, for now
+	sf::Vector2f reward_size(reward_size_x, std::min(reward_size_x, size.y));
+	m_bag = std::make_shared<Bag>(reward_size, middle);
 	g_visual_state = GameState::PICKING;
 
-	sf::Vector2f playerVisualSize(size.x / 8,size.y / 2);
 	std::vector<sf::Vector2f> playerVisualpositions;
 	playerVisualpositions.push_back(sf::Vector2f(0,0));
 	playerVisualpositions.push_back(sf::Vector2f(size.x - playerVisualSize.x,0));
@@ -118,6 +122,16 @@ void Game::onClick(int xPos, int yPos) {
 }
 
 void Game::onHover(int xPos, int yPos) {
+	if (g_visual_state == GameState::PICKING || g_visual_state == GameState::CHOOSINGREWARD) {
+		sf::Drawable* hovered_game_board = nullptr;
+		for (auto& pv : m_player_visualizers) {
+			if (pv->contains(xPos, yPos)) {
+				std::shared_ptr<Player> p = pv->getPlayerVisualized();
+				hovered_game_board = p->getBoardPtr();
+			}
+		}
+		g_player_info.setHoveredElement(hovered_game_board);
+	}
 	if (g_visual_state == GameState::PICKING) {
 		for (std::shared_ptr<Factory> factory : m_factories) {
 			factory->onHover(xPos, yPos, getBonus());
@@ -126,6 +140,9 @@ void Game::onHover(int xPos, int yPos) {
 	} else {
 		std::shared_ptr<Player> currPlayer = g_player_info.getCurrentPlayer();
 		currPlayer->getBoardPtr()->onHover(xPos, yPos);
+	}
+	if (g_visual_state != GameState::FINISH) {
+		// Always check the player visualizers, since they're always on show
 		for (auto& pv : m_player_visualizers) {
 			pv->onHover(xPos, yPos);
 		}
@@ -138,7 +155,7 @@ void Game::draw(RenderTarget &target, RenderStates states) const {
 		for (std::shared_ptr<Factory> factory : m_factories) {
 			factory->draw(target, states);
 		}
-	} else if (g_visual_state == GameState::PLACING || g_visual_state == GameState::DISCARDING) {
+	} else if (g_visual_state == GameState::PLACING || g_visual_state == GameState::DISCARDING || g_visual_state == GameState::CHOOSINGREWARD) {
 		// Placing stage
 		for (Board* b : getVisualisedBoards()) {
 			if (b) {
@@ -159,6 +176,11 @@ void Game::draw(RenderTarget &target, RenderStates states) const {
 		m_finish_screen->draw(target, states);
 	}
 	m_round_visualizer->draw(target, states);
+
+	sf::Drawable* temp_elem = g_player_info.getHoveredElement();
+	if (temp_elem) {
+		target.draw(*temp_elem, states);
+	}
 	//m_debug_switchstage.draw(target, states);
 }
 

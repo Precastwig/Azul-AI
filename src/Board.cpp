@@ -119,6 +119,14 @@ bool check_column_relevent_centre_spaces(LocationType loc, std::shared_ptr<Locat
 	return false;
 }
 
+void Board::setTempVisualState() {
+	m_background.setFillColor(Colours::change_opacity(m_background.getFillColor(), 100));
+}
+
+void Board::setRegularVisualState() {
+	m_background.setFillColor(Colours::change_opacity(m_background.getFillColor(), 255));
+}
+
 int Board::bonusPiecesAwarded() {
 	// There should only be one change every time we call this
 	// function, so we can return when we find a true

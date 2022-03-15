@@ -95,6 +95,14 @@ void PlayerVisualizer::onClick(int x, int y) {
     }
 }
 
+bool PlayerVisualizer::contains(int x, int y) {
+    return m_outline.getGlobalBounds().contains(x, y);
+}
+
+std::shared_ptr<Player> PlayerVisualizer::getPlayerVisualized() {
+    return m_player;
+}
+
 void PlayerVisualizer::onHover(int x, int y) {
     if (g_player_info.getCurrentPlayer() != m_player) {
         return;

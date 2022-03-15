@@ -64,6 +64,11 @@ public:
 			255	
 		);
 	}
+
+	static sf::Color change_opacity(sf::Color col, const int& op) {
+		col.a = op;
+		return col;
+	}
 	
 };
 

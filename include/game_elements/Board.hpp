@@ -14,12 +14,17 @@
 // Pre declarations
 class Player;
 
-class Board : sf::Drawable {
+class Board : public sf::Drawable {
 public:
 	Board(sf::Vector2f position);
 
 	void onHover(int xpos, int ypos);
 	void onClick(int x, int y, Game& game);
+
+	// Sets the various visual elements for when the game is in a nonplacing state
+	void setTempVisualState(); 
+	// The opposite of the above function 
+	void setRegularVisualState();
 
 	virtual void draw (sf::RenderTarget &target, sf::RenderStates states) const override;
 
