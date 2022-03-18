@@ -2,6 +2,7 @@
 #define GAME
 
 // SFML includes
+#include "utils/helper_enums.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Graphics.hpp>
 
@@ -25,7 +26,7 @@ using namespace sf;
 class Game : public Drawable {
 public:
 	// Constructor/Destructor
-	Game(sf::Vector2f size = sf::Vector2f());
+	Game(std::vector<PlayerType> players, sf::Vector2f size = sf::Vector2f());
 	~Game();
 
 	virtual void draw (RenderTarget &target, RenderStates states) const override;

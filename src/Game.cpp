@@ -17,7 +17,7 @@ GameState g_visual_state;
 PlayerInfo g_player_info;
 extern MenuState g_menu_state;
 
-Game::Game(sf::Vector2f size) : m_screen_size(size), m_debug_switchstage("Switch stage"), m_centre_taken(false), m_round_num(0), m_finish_screen(nullptr) {
+Game::Game(std::vector<PlayerType> players, sf::Vector2f size) : m_screen_size(size), m_debug_switchstage("Switch stage"), m_centre_taken(false), m_round_num(0), m_finish_screen(nullptr) {
 	// Create the bag
 	sf::Vector2f middle(size.x / 2,size.y / 2);
 	sf::Vector2f playerVisualSize(size.x / 8,size.y / 2);
@@ -32,25 +32,43 @@ Game::Game(sf::Vector2f size) : m_screen_size(size), m_debug_switchstage("Switch
 	playerVisualpositions.push_back(sf::Vector2f(size.x - playerVisualSize.x,0));
 	playerVisualpositions.push_back(sf::Vector2f(0,size.y - playerVisualSize.y));
 	playerVisualpositions.push_back(sf::Vector2f(size.x - playerVisualSize.x, size.y - playerVisualSize.y));
-	// Create the players, for now one randomAI and one human
-	std::shared_ptr<Player> player1 = std::make_shared<Human>(
-		PlayerColour::all_colours()[0], 
-		m_bag, 
-		sf::Vector2f(
-			playerVisualSize.x + 300,
-			300
-		)
-	);
-	std::shared_ptr<Player> player2 = std::make_shared<RandomAI>(
-		PlayerColour::all_colours()[1], 
-		m_bag,
-		sf::Vector2f(
-			playerVisualpositions[1].x - 300,
-			300
-		)
-	);
-	g_player_info.addPlayer(player1);
-	g_player_info.addPlayer(player2);
+	// Create the players
+	for (size_t i = 0; i < players.size(); ++i) {
+		std::shared_ptr<Player> new_player = nullptr;
+		sf::Vector2f board_position;
+		// The size of the board is hard coded for now
+		if (i % 2 != 0) {
+			// The board lies on the right
+			board_position.x = playerVisualpositions[i].x - 300;
+		} else {
+			// The board lies on the left
+			board_position.x = playerVisualSize.x + 300;
+		}
+		if (i < 2) {
+			// The board lies on the top half of the screen
+			board_position.y = 300;
+		} else {
+			// The board lies on the bottom half of the screen
+			board_position.y = playerVisualpositions[i].y + 300;
+		}
+		switch (players[i]) {
+			case HUMAN:
+				new_player = std::make_shared<Human>(
+					PlayerColour::all_colours()[i], 
+					m_bag, 
+					board_position
+				);
+				break;
+			case RANDOM:
+			default:
+				new_player = std::make_shared<RandomAI>(
+					PlayerColour::all_colours()[i], 
+					m_bag,
+					board_position
+				);
+		}
+		g_player_info.addPlayer(new_player);
+	}
 
 	for (std::shared_ptr<Player> p : g_player_info.getPlayers()) {
 		m_boards.push_back(p->getBoardPtr());
@@ -90,6 +108,8 @@ Game::Game(sf::Vector2f size) : m_screen_size(size), m_debug_switchstage("Switch
 	//	std::bind(&Game::flipStage, std::ref(*this));
 
 	m_round_visualizer = std::make_unique<RoundVisualizer>(m_bonus_tile_order, sf::Vector2f(size.x/2, size.y *9 / 10));
+
+	fill_factories();
 }
 
 Game::~Game() {

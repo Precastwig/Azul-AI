@@ -14,6 +14,19 @@ public:
 		m_index = i;
 	};
 
+	void set_max(unsigned int i) {
+		m_max = i;
+		// Make sure to limit the index to the new max
+		if (m_index > m_max)
+			m_index = i;
+	}
+
+	void set_index(unsigned int i) {
+		if (i <= m_max) {
+			m_index = i;
+		}
+	}
+
 	bool operator==(const int& i) const {
 		return m_index == i;
 	}

@@ -1,6 +1,9 @@
+#include "ui_elements/Selector.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <memory>
 #include <ui_elements/Button.hpp>
+#include <Game.hpp>
 #include <utils/helper_enums.hpp>
 
 using namespace sf;
@@ -12,14 +15,23 @@ public:
 
     virtual void draw (RenderTarget &target, RenderStates states) const override;
     void onClick(int xPos, int yPos);
+    void onHover(int x, int y);
+    void performMultithreadedActions();
     // Public so that we can give it the callback easily
     Button m_newgame;
 private:
+    void updatePlayerSelectors();
+    std::vector<PlayerType> getPlayerTypesFromUI();
     // Render window
     sf::RenderWindow* m_window;
 
+    // Game state
+    std::unique_ptr<Game> m_game;
 
-    // Background?
+    // New game options
+    Selector<int> m_num_players;
+    std::vector<Selector<PlayerType>> m_player_type_selectors;
+    Button m_start_new_game;
 
     // Main state
     Button m_settings;

@@ -9,6 +9,7 @@
 
 enum MenuState {
 	MAIN,
+	NEWGAME,
 	SETTINGS,
 	OFF
 };
@@ -20,6 +21,12 @@ enum GameState {
 	CHOOSINGREWARD,
 	FINISH,
 	NOSTATE // For pause menu or something?
+};
+
+enum PlayerType {
+	HUMAN,
+	RANDOM,
+	COLOURTARGET
 };
 
 enum TileType {

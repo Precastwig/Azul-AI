@@ -31,8 +31,12 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	if (guiMode == COMMAND_LINE) {
-		Game game;
-		game.play();
+		// COMMAND LINE MODE DEPRICATED BECAUSE I'M LAZY
+		// It /probably/ works, but all the UI elements would be created
+		// and moved around, so you'd just be saving the rendering time,
+		// Which I imagine is minimal.
+		// Game game;
+		// game.play();
 	} else if (guiMode == QT) {
 		if (!g_font.loadFromFile("resources/NotoSansCJK-Medium.ttc")) {
             g_logger.log(Logger::ERROR, "Font not loaded");
@@ -43,11 +47,7 @@ int main(int argc, char *argv[]) {
 		settings.antialiasingLevel = 8;
 		sf::RenderWindow window(sf::VideoMode(window_width, window_height), "Azul: Summer Pavillion", sf::Style::Titlebar | sf::Style::Close, settings);
 		window.setFramerateLimit(120); // 120 seems like plenty
-		Game game(sf::Vector2f(window_width, window_height));
-	   	// Game stuff
-	   	game.fill_factories();
 		MainMenu menu(&window, sf::Vector2f(window_width, window_height));
-	   	menu.m_newgame.m_callback = []() {g_menu_state = MenuState::OFF;};
 	
 		// Start the game loop
 	    while (window.isOpen())
@@ -62,33 +62,19 @@ int main(int argc, char *argv[]) {
 
 				if (event.type == sf::Event::MouseButtonPressed) {
 					if (event.mouseButton.button == sf::Mouse::Left) {
-						if (g_menu_state != MenuState::OFF) {
-							// Give to the menu
-							menu.onClick(event.mouseButton.x, event.mouseButton.y);
-						} else {
-							game.onClick(event.mouseButton.x, event.mouseButton.y);
-						}
+						menu.onClick(event.mouseButton.x, event.mouseButton.y);
 					}
 				}
 
 				if (event.type == sf::Event::MouseMoved) {
-					if (g_menu_state != MenuState::OFF) {
-						// Menu onhover
-					} else {
-						game.onHover(event.mouseMove.x, event.mouseMove.y);
-					}
+					menu.onHover(event.mouseMove.x, event.mouseMove.y);
 				}
 	        }
 	        // Clear screen
 	        window.clear(Color(194, 240, 242));
 	        // Draw the relevent thing
-			if (g_menu_state != MenuState::OFF) {
-				window.draw(menu);
-			} else {
-				// This is non locking, so shouldn't halt UI
-				game.performAIActions();
-	        	window.draw(game);
-			}
+			menu.performMultithreadedActions();
+			window.draw(menu);
 	        // Update the window
 	        window.display();
 	    }
