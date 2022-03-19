@@ -18,6 +18,8 @@ PlayerInfo g_player_info;
 extern MenuState g_menu_state;
 
 Game::Game(std::vector<PlayerType> players, sf::Vector2f size) : m_screen_size(size), m_debug_switchstage("Switch stage"), m_centre_taken(false), m_round_num(0), m_finish_screen(nullptr) {
+	g_player_info.wipeInfo();
+	g_visual_state = GameState::PICKING;
 	// Create the bag
 	sf::Vector2f middle(size.x / 2,size.y / 2);
 	sf::Vector2f playerVisualSize(size.x / 8,size.y / 2);
@@ -236,6 +238,9 @@ void Game::performAIAction(std::shared_ptr<Player> player) {
 	} else if (g_visual_state == GameState::CHOOSINGREWARD) {
 		player->pickBonusPieces();
 		g_player_info.passOrChangeState();
+		if (g_visual_state == GameState::CHOOSINGREWARD) {
+			g_visual_state = GameState::PLACING;
+		}
 	}
 	updatePlayerVisualizers();
 	m_thread_running.unlock();
@@ -360,11 +365,11 @@ void Game::switchToPickingStage() {
 		updatePlayerVisualizers();
 	} else {
 		// End the game
-		g_visual_state = GameState::FINISH;
 		m_finish_screen = std::make_unique<FinishScreen>(
 			m_screen_size,
 			g_player_info.getPlayers()
 		);
+		g_visual_state = GameState::FINISH;
 	}
 }
 

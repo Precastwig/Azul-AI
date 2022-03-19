@@ -18,13 +18,18 @@ class FinishScreen : sf::Drawable {
 public:
     FinishScreen(sf::Vector2f size, std::vector<std::shared_ptr<Player>> players) {
         std::sort(players.begin(), players.end(), [](std::shared_ptr<Player> p1, std::shared_ptr<Player> p2) {
-            return p1->points() < p2->points();
+            return p1->points() > p2->points();
         });
+        sf::Vector2f startpos(size.x/2.0, size.y*1/8.0);
         for (size_t i = 0; i < players.size(); ++i) {
             sf::Text txt;
             txt.setFont(g_font);
-            std::string str = std::to_string(i) + "." + players[i]->toShortString();
+            std::string str = getPlaceString(i) + players[i]->toShortString();
+            txt.setPosition(startpos);
+            txt.setColor(sf::Color::Black);
+            txt.move(sf::Vector2f(0, i * size.y / 8.0));
             txt.setString(str);
+            m_scores.push_back(txt);
         }
         m_ok.setText("Back to menu");
         m_ok.setPosition(sf::Vector2f(size.x/2.0, size.y*4/5));
@@ -44,6 +49,21 @@ public:
         target.draw(m_ok, states);
     }
 private:
+    std::string getPlaceString(int place) {
+        if (place == 0) {
+            return "1st: ";
+        }
+        if (place == 1) {
+            return "2nd: ";
+        }
+        if (place == 2) {
+            return "3rd: "; 
+        }
+        if (place == 3) {
+            return "4th: ";
+        }
+        return "5th?";
+    } 
     std::vector<sf::Text> m_scores;
     Button m_ok;
 };

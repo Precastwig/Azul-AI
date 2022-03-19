@@ -35,8 +35,6 @@ PlacingChoice RandomAI::placeTile(Tile bonus) {
 
 std::vector<std::shared_ptr<Tile>> RandomAI::chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices) {
 	std::cout << "\nChoosing bonus pieces!\n";
-	std::string s;
-	std::cin >> s;
 	std::vector<std::shared_ptr<Tile>> return_list;
 	std::vector<int> chosen_ints;
 	while (m_bonus_to_choose > 0) {

@@ -11,6 +11,11 @@ public:
     std::shared_ptr<Player> getCurrentPlayer() {
 	    return players[current_player.getIndex()];
     }
+    void wipeInfo() {
+        hovered_element = nullptr;
+        m_game_ptr = nullptr;
+        players.clear();
+    }
     void nextTurn() {
         current_player++;
     }

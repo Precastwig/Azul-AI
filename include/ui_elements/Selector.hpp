@@ -4,7 +4,6 @@
 #include "utils/cIndex.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <ui_elements/IsoTriangle.hpp>
-#include <ui_elements/Selector.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
