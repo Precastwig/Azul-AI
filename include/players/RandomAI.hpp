@@ -25,6 +25,9 @@ public:
 	virtual bool isAI() override {
 		return true; 
 	}
+	virtual std::string playerTypeString() override{
+		return "RandomAI";
+	}
 private:
 };
 

@@ -18,8 +18,11 @@ class Board : public sf::Drawable {
 public:
 	Board(sf::Vector2f position);
 
-	void onHover(int xpos, int ypos);
+	// Input responding functions
+	void onHover(int xpos, int ypos, Game& game);
 	void onClick(int x, int y, Game& game);
+	void onLeft(TileType bonus);
+	void onRight(TileType bonus);
 
 	// Sets the various visual elements for when the game is in a nonplacing state
 	void setTempVisualState(); 

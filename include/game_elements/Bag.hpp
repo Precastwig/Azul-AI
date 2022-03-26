@@ -8,6 +8,7 @@
 #include <SFML/System/Vector2.hpp>
 #include <algorithm>
 #include <memory>
+#include <set>
 
 // This class ecompasses the bag of tiles, the bin, and the reward tile selection
 // aka, all locations that tiles originate, and go to die
@@ -45,6 +46,7 @@ private:
 	std::vector<std::shared_ptr<Tile>> m_tile_bin;
 	std::vector<std::shared_ptr<Tile>> m_tile_bag;
 	// Reward tiles
+	std::set<std::shared_ptr<Tile>> m_set_aside_to_take;
 	std::vector<std::shared_ptr<Tile>> m_reward_tiles;
 };
 

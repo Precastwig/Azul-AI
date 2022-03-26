@@ -2,6 +2,7 @@
 #define COLOUR_TARGET_AI
 
 #include "players/Player.hpp"
+#include "utils/helper_enums.hpp"
 
 // A player object that attempts to collect a single colour
 // As secondary objectives it collects both adjacant colours
@@ -25,9 +26,13 @@ public:
 	virtual bool isAI() override {
 		return true;
 	}
+	virtual std::string playerTypeString() override {
+		return "ColourTargetAI";
+	}
 private:
     std::vector<double> generatePickingWeightsFromBoard();
 	std::vector<double> generatePickingWeightsFromBoardImpl(std::vector<double>* currentWeights);
+	double evaluatePlacingChoice(PlacingChoice& choice, TileType bonusCol);
     double evaluatePickingChoice(PickingChoice choice, TileType bonusCol);
     std::vector<double> m_tile_picking_weights;
     TileType m_target_colour;

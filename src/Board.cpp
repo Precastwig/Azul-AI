@@ -55,15 +55,27 @@ Board::Board(sf::Vector2f position)
 	m_background.setFillColor(sf::Color::White);
 }
 
-void Board::onHover(int xpos, int ypos) {
+void Board::onHover(int xpos, int ypos, Game& game) {
 	for (std::shared_ptr<Location> loc : m_stars) {
-		loc->onHover(xpos, ypos);
+		loc->onHover(xpos, ypos, game);
 	}
 }
 
 void Board::onClick(int x, int y, Game& game) {
 	for (auto loc : m_stars) {
 		loc->onClick(x, y, game);
+	}
+}
+
+void Board::onLeft(TileType bonus) {
+	for (std::shared_ptr<Location> loc : m_stars) {
+		loc->onLeft(bonus);
+	}
+}
+
+void Board::onRight(TileType bonus) {
+	for (std::shared_ptr<Location> loc : m_stars) {
+		loc->onRight(bonus);
 	}
 }
 
@@ -222,7 +234,7 @@ void Board::placeTile(PlacingChoice choice, Player* me) {
 	if (reward > 0) {
 		// and then reward them with some bonus tiles
 		me->setBonusToPick(reward);
-		g_visual_state = GameState::CHOOSINGREWARD;
+		g_visual_state.set_reward();
 	}
 }
 
@@ -256,20 +268,20 @@ std::vector<PlacingChoice> Board::getAllPlacingChoices() {
 
 int Board::tilesNeededToGetStatue(LocationType star) {
 	// Check 3/4 of tilcol
-	int tilesNeededForColumn = (m_stars[star]->tile(1)) ? 1 : 0;
-	tilesNeededForColumn += (m_stars[star]->tile(2)) ? 2 : 0;
+	int tilesNeededForColumn = (m_stars[star]->tile(0)) ? 1 : 0;
+	tilesNeededForColumn += (m_stars[star]->tile(1)) ? 2 : 0;
 	if (tilesNeededForColumn == 0) {
 		return 0;
 	}
 	LocationType nextStar = Location::clockwise_location(star);
-	tilesNeededForColumn += (m_stars[nextStar]->tile(3)) ? 3 : 0;
-	tilesNeededForColumn += (m_stars[nextStar]->tile(4)) ? 4 : 0;
+	tilesNeededForColumn += (m_stars[nextStar]->tile(2)) ? 3 : 0;
+	tilesNeededForColumn += (m_stars[nextStar]->tile(3)) ? 4 : 0;
 	return tilesNeededForColumn;
 }
 
 int Board::tilesNeededToGetWindow(LocationType loc) {
-	int tilesNeeded = (m_stars[loc]->tile(5)) ? 5 : 0;
-	tilesNeeded += (m_stars[loc]->tile(6)) ? 6 : 0;
+	int tilesNeeded = (m_stars[loc]->tile(4)) ? 5 : 0;
+	tilesNeeded += (m_stars[loc]->tile(5)) ? 6 : 0;
 	return tilesNeeded;
 }
 

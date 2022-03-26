@@ -9,6 +9,7 @@
 #include "Colours.hpp"
 
 class Game;
+class PlacingChoice;
 
 class Location : public std::enable_shared_from_this<Location>, sf::Drawable {
 public:
@@ -82,8 +83,10 @@ public:
 		updateTilesPos();
 	}
 
-	void onHover(int xpos, int ypos);
+	void onHover(int xpos, int ypos, Game& game);
 	void onClick(int x, int y, Game& game);
+	void onLeft(TileType bonus);
+	void onRight(TileType bonus);
 
 	virtual void draw (sf::RenderTarget &target, sf::RenderStates states) const override;
 
@@ -195,6 +198,17 @@ private:
 	std::vector<std::shared_ptr<BoardTile>> m_visual_tiles;
 	double m_starting_rotation;
 	sf::Vector2f m_current_pos;
+
+	// Placing choice selection mechanism
+	PlacingChoice get_choice();
+	void set_choices(std::vector<PlacingChoice> c, TileType bonus);
+    void update_highlight(TileType bonus);
+    void wipe_choices(TileType bonus) {
+        m_curr_choices.clear();
+        update_highlight(bonus);
+    }
+	cIndex m_index;
+    std::vector<PlacingChoice> m_curr_choices; 
 };
 
 #endif

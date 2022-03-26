@@ -1,11 +1,18 @@
 #include "game_elements/Factory.hpp"
 #include "Game.hpp"
+#include "players/PlayerInfo.hpp"
 #include "utils/helper_enums.hpp"
+#include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Text.hpp>
+#include <atomic>
 #include <memory>
+#include <string>
 #include <utils/Choices.hpp>
 #include <cmath>
 
-Factory::Factory(const int id, const sf::Vector2f position, const float size) : m_id(id), m_size(size), m_tiles(), m_background() {
+extern PlayerInfo g_player_info;
+
+Factory::Factory(const int id, const sf::Vector2f position, const float size) : m_id(id), m_size(size), m_tiles(), m_background(), m_hover_minus_points_text(nullptr), m_first_tile(nullptr) {
 	m_background.setOrigin(size*2,size*2);
 	m_background.setRadius(size * 2);
 	m_background.setPosition(position);
@@ -27,6 +34,9 @@ void Factory::draw(RenderTarget &target, RenderStates states) const {
 	target.draw(m_background, states);
 	for (std::shared_ptr<Tile> tile : m_tiles) {
 		target.draw(*tile, states);
+	}
+	if (m_hover_minus_points_text) {
+		target.draw(*m_hover_minus_points_text, states);
 	}
 }
 
@@ -55,7 +65,7 @@ bool Factory::contains(int x, int y) {
 	return false;
 }
 
-void Factory::onHover(int x, int y, const TileType& bonus) {
+void Factory::onHover(int x, int y, const TileType& bonus, const bool& isCentre) {
 	TileType hovertype = TileType::NONE;
 	for (std::shared_ptr<Tile> tile : m_tiles) {
 		if (tile->colour() != bonus && tile->contains(x, y)) {
@@ -74,6 +84,34 @@ void Factory::onHover(int x, int y, const TileType& bonus) {
 			tile->setOutlineThickness(0.0);
 		}
 	}
+	std::shared_ptr<Player> curr_player = g_player_info.getCurrentPlayer();
+	if (isCentre && !g_player_info.centreTaken()) {
+		if (m_first_tile) {
+			m_first_tile->setHovered(hovertype != TileType::NONE);
+		}
+		if (curr_player->points() > 0 && curr_player->getPoisonPoints() > 0) {
+			if (hovertype == TileType::NONE) {
+				if (m_hover_minus_points_text) {
+					// Remove the hover text
+					m_hover_minus_points_text = nullptr;
+				}
+			} else {
+				// Hovering over a tile
+				if (m_hover_minus_points_text) {
+					// Update its position
+					m_hover_minus_points_text->setPosition(x + 15, y + 15);
+				} else {
+					// Create the hover text
+					m_hover_minus_points_text = std::make_shared<sf::Text>();
+					m_hover_minus_points_text->setFont(g_font);
+					m_hover_minus_points_text->setCharacterSize(20);
+					m_hover_minus_points_text->setColor(sf::Color::Red);
+					m_hover_minus_points_text->setString("-" + std::to_string(curr_player->getPoisonPoints()));
+					m_hover_minus_points_text->setPosition(x + 15, y + 15);
+				}
+			}
+		}
+	}
 }
 
 void Factory::onClick(int x, int y, Game& game) {
@@ -83,6 +121,10 @@ void Factory::onClick(int x, int y, Game& game) {
 	for (std::shared_ptr<Tile> tile : m_tiles) {
 		if (tile->contains(x,y)) {
 			g_logger.log(Logger::INFO, "Clicked tile " + tile->toString());
+			m_hover_minus_points_text = nullptr;
+			if (m_first_tile) {
+				m_first_tile->setHovered(false);
+			}
 			if (tile->colour() == game.getBonus()) {
 				// We want to allow picking bonus tiles if the factory only contains bonus tiles
 				if (isOnlyBonus(game.getBonus())) {

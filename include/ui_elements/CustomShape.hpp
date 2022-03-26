@@ -2,6 +2,7 @@
 #define CUSTOMSHAPE
 
 #include <SFML/Graphics/ConvexShape.hpp>
+#include <cstddef>
 
 class CustomShape : public sf::ConvexShape {
 public:
@@ -36,10 +37,12 @@ public:
 protected:
     const std::vector<sf::Vector2f> getVertices() {
 		sf::Transform t = getTransform();
-		return {t.transformPoint(getPoint(0)),
-			t.transformPoint(getPoint(1)),
-			t.transformPoint(getPoint(2)),
-			t.transformPoint(getPoint(3))};
+		int num_points = getPointCount();
+		std::vector<sf::Vector2f> vertices;
+		for (size_t i = 0; i < getPointCount(); ++i) {
+			vertices.push_back(t.transformPoint(getPoint(i)));
+		}
+		return vertices;
 	}
 };
 

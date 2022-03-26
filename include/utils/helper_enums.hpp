@@ -14,14 +14,49 @@ enum MenuState {
 	OFF
 };
 
-enum GameState {
-	PICKING,
-	PLACING,
-	DISCARDING,
-	CHOOSINGREWARD,
-	FINISH,
-	NOSTATE // For pause menu or something?
+class GameState {
+public:
+	// Basic checkers
+	bool is_picking() {return m_state == PICKING;}
+	void set_picking() {m_state = PICKING;}
+	bool is_finish() {return m_state == FINISH;}
+	void set_finish() {m_state = FINISH;}
+	bool is_placing() {return m_state == PLACING;}
+	void set_placing() {m_state = PLACING;}
+	bool is_discarding() {return m_state == DISCARDING;}
+	void set_discarding() {m_state = DISCARDING;}
+	bool is_reward() {return m_state == CHOOSINGREWARD;}
+	void set_reward() {m_state = CHOOSINGREWARD;}
+
+	// Complex checkers
+	bool is_popup_game_board() {
+		return m_state == PICKING || m_state == CHOOSINGREWARD;
+	}
+	bool is_player_visualizers_clickable() {
+		return m_state == DISCARDING || m_state == PLACING;
+	}
+	bool is_player_visualizers_visable() {
+		return m_state != FINISH && m_state != NOSTATE;
+	}
+	bool is_boards_visualised() {
+		return m_state == GameState::PLACING || 
+			m_state == GameState::DISCARDING || 
+			m_state == GameState::CHOOSINGREWARD;
+	}
+	bool is_discard_button_clickable() {
+		return m_state == PLACING || m_state == DISCARDING;
+	}
+
+	enum {
+		PICKING,
+		PLACING,
+		DISCARDING,
+		CHOOSINGREWARD,
+		FINISH,
+		NOSTATE // For pause menu or something?
+	} m_state;
 };
+
 
 enum PlayerType {
 	HUMAN,
@@ -49,6 +84,7 @@ enum LocationType {
 	CENTRE_STAR
 };
 
+// This is not a good class composition, should be all static
 class PlayerColour {
 public:
 	enum Colour {
@@ -64,6 +100,11 @@ public:
 		BLACK,
 		GREY};
 	};
+	// So dumb
+	static std::string toString(Colour c) {
+		PlayerColour temp(c);
+		return temp.toString();
+	}
 	const std::string toString() {
 		return strings[m_c];
 	}

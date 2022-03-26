@@ -2,17 +2,18 @@
 #define GAME
 
 // SFML includes
-#include "utils/helper_enums.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Graphics.hpp>
 
 // std includes
+#include <utility>
 #include <vector>
 #include <memory>
 #include <mutex>
 
 // Internal includes
 #include <players/Player.hpp>
+#include "utils/helper_enums.hpp"
 #include <utils/Choices.hpp>
 #include <game_elements/RoundVisualizer.hpp>
 #include <game_elements/Bag.hpp>
@@ -26,13 +27,15 @@ using namespace sf;
 class Game : public Drawable {
 public:
 	// Constructor/Destructor
-	Game(std::vector<PlayerType> players, sf::Vector2f size = sf::Vector2f());
+	Game(std::vector<std::pair<PlayerType, PlayerColour::Colour>> players, sf::Vector2f size = sf::Vector2f());
 	~Game();
 
 	virtual void draw (RenderTarget &target, RenderStates states) const override;
 
 	void onClick(int xPos, int yPos);
 	void onHover(int xPos, int yPos);
+	void onLeft();
+	void onRight();
 	
 	//-------------------------------------------------------------------
 	// SFML specific functions
@@ -74,6 +77,7 @@ public:
 private:
 	std::vector<Board*> getVisualisedBoards() const;
 	void updatePlayerVisualizers();
+	void positionTiles();
 
 	//-------------------------------------------------------------------
 	// Member variables
@@ -101,7 +105,7 @@ private:
 	int m_round_num;
 	Button m_debug_switchstage;
 	// Used only in SFML implementation
-	bool m_centre_taken;
+	std::unique_ptr<FirstTile> m_first_tile;
 	std::mutex m_thread_running;
 	sf::Vector2f m_screen_size;
 

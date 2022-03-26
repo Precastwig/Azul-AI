@@ -32,6 +32,9 @@ public:
     void setStartingPlayer() {
         starting_player = current_player.getIndex();
     }
+    std::shared_ptr<Player> getStartingPlayer() {
+        return players[starting_player];
+    }
     void addPlayer(std::shared_ptr<Player> p) {
         players.push_back(p);
     }
@@ -44,6 +47,14 @@ public:
                 return true;
         }
         return false;
+    }
+
+    bool centreTaken() {
+        return centre_taken;
+    }
+
+    void setCentreTaken(bool state) {
+        centre_taken = state;
     }
 
     std::vector<std::shared_ptr<Player>> getPlayers() {
@@ -66,7 +77,7 @@ public:
 private:
     // A temporary element to visualize because of some hovering
     sf::Drawable* hovered_element; 
-    
+    bool centre_taken;
     cIndex current_player;
 	int starting_player;
 	std::vector<std::shared_ptr<Player>> players;

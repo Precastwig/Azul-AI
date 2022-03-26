@@ -76,6 +76,7 @@ void Bag::takeRewardTiles(std::vector<std::shared_ptr<Tile>> tiles) {
 			std::shared_ptr<Tile> replacement = pullTile();
 			if (replacement != nullptr) {
 				replacement->setPosition(tilePos);
+				replacement->setOutlineThickness(0.0);
 				m_reward_tiles.push_back(replacement);
 			}
 		} else {
@@ -86,22 +87,41 @@ void Bag::takeRewardTiles(std::vector<std::shared_ptr<Tile>> tiles) {
 }
 
 void Bag::onClick(int x, int y) {
+	std::shared_ptr<Player> currPlayer =  g_player_info.getCurrentPlayer();
+	int bonus_amount = currPlayer->getBonusToPick();
 	for (std::shared_ptr<Tile> tile : m_reward_tiles) {
 		if (tile->contains(x, y)) {
-			std::shared_ptr<Player> currPlayer =  g_player_info.getCurrentPlayer();
-			int bonus_amount = currPlayer->getBonusToPick();
 			if (bonus_amount > 0) {
-				currPlayer->addTile(tile);
-				takeRewardTiles({tile});
-				bonus_amount--;
-				currPlayer->setBonusToPick(bonus_amount);
-				if (bonus_amount == 0) {
-					// Done picking bonus tiles
-					g_visual_state = GameState::PLACING;
-					g_player_info.passOrChangeState();
+				if (m_set_aside_to_take.find(tile) != m_set_aside_to_take.end()) {
+					// It already exists
+					m_set_aside_to_take.erase(tile);
+					bonus_amount++;
+					tile->setOutlineThickness(0.0);
+					tile->setOutlineColor(sf::Color::Black);
+				} else {
+					tile->setOutlineColor(sf::Color::White);
+					tile->setOutlineThickness(2.0);
+					g_logger.log(Logger::INFO, currPlayer->toShortString() + " is taking a " + tile->toString() + " reward tile");
+					m_set_aside_to_take.insert(tile);
+					bonus_amount--;
 				}
+				currPlayer->setBonusToPick(bonus_amount);
+				break;
 			}
 		}
+	}
+	if (bonus_amount == 0) {
+		std::vector<std::shared_ptr<Tile>> taken_tiles_vec(m_set_aside_to_take.begin(), m_set_aside_to_take.end());
+		for (auto tile_ptr : taken_tiles_vec) {
+			tile_ptr->setOutlineColor(sf::Color::Black);
+			tile_ptr->setOutlineThickness(0.0);
+			currPlayer->addTile(tile_ptr);
+		}
+		takeRewardTiles(taken_tiles_vec);
+		m_set_aside_to_take.clear();
+		// Done picking bonus tiles
+		g_visual_state.set_placing();
+		g_player_info.passOrChangeState();
 	}
 }
 

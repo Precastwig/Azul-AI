@@ -28,6 +28,7 @@ public:
 private:
     void updateString();
     void donePlacing();
+    void updatePlayerTilePositions();
     // The thing we're visualizing
     std::shared_ptr<Player> m_player;
     // Visualization elements
@@ -35,6 +36,7 @@ private:
     sf::Text m_player_name;
     sf::RectangleShape m_outline;
     Button m_doneplacing_button;
+    FirstTile m_first_tile;
 
     // I think we want a hover state? Maybe later
     bool m_hovering;

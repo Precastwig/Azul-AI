@@ -1,8 +1,10 @@
 #include "players/RandomAI.hpp"
 #include "ui_elements/Selector.hpp"
 #include "utils/helper_enums.hpp"
+#include <algorithm>
 #include <ui_elements/MainMenu.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <utility>
 
 extern MenuState g_menu_state;
 
@@ -63,14 +65,29 @@ void MainMenu::onClick(int xPos, int yPos) {
             g_menu_state = SETTINGS;
             g_logger.log(Logger::INFO, "Settings game button pressed");
         }
+        return;
     }
 
     if (g_menu_state == MenuState::NEWGAME) {
         if (m_start_new_game.onClick(xPos, yPos)) {
             sf::Vector2u windowsize = m_window->getSize();
-            std::vector<PlayerType> player_types = getPlayerTypesFromUI();
-            m_game = std::make_unique<Game>(player_types, sf::Vector2f(windowsize.x, windowsize.y));
-            g_menu_state = MenuState::OFF;
+            std::vector<std::pair<PlayerType, PlayerColour::Colour>> players = getPlayerInfoFromUI();
+            // Check the player info is good
+            std::vector<PlayerColour::Colour> used_colours;
+            bool invalid = false;
+            for (auto& p_info : players) {
+                if (std::find(used_colours.begin(), used_colours.end(), p_info.second) != used_colours.end()) {
+                    // One colour used twice
+                    invalid = true; 
+                }
+                used_colours.push_back(p_info.second);
+            }
+            if (!invalid) {
+                m_game = std::make_unique<Game>(players, sf::Vector2f(windowsize.x, windowsize.y));
+                g_menu_state = MenuState::OFF;
+            } else {
+                // Do a warning thing?!?!?!??!?! maybe
+            }
         } else if (m_num_players.onClick(xPos, yPos)) {
             updatePlayerSelectors();
         }
@@ -79,13 +96,27 @@ void MainMenu::onClick(int xPos, int yPos) {
                 return;
             }
         }
+        for (Selector<PlayerColour::Colour>& c : m_player_colour_selectors) {
+            if (c.onClick(xPos, yPos)) {
+                return;
+            }
+        }
     }
 }
 
-std::vector<PlayerType> MainMenu::getPlayerTypesFromUI() {
-    std::vector<PlayerType> types;
-    for (Selector<PlayerType>& player_selector : m_player_type_selectors) {
-        types.push_back(player_selector.getSelectedVal());
+std::vector<std::pair<PlayerType, PlayerColour::Colour>> MainMenu::getPlayerInfoFromUI() {
+    std::vector<std::pair<PlayerType, PlayerColour::Colour>> types;
+    for (size_t i = 0; i < m_player_type_selectors.size(); ++i) {
+        PlayerColour::Colour col; 
+        if (i >= m_player_colour_selectors.size()) {
+            // This shouldn't happen
+            g_logger.log(Logger::ERROR, "Different number of player type selectors as player colour selectors");
+            col = PlayerColour::BLACK; // IDK
+        } else {
+            col = m_player_colour_selectors[i].getSelectedVal();
+        }
+
+        types.push_back(std::pair<PlayerType, PlayerColour::Colour>(m_player_type_selectors[i].getSelectedVal(), col));
     }
     return types;
 }
@@ -93,17 +124,26 @@ std::vector<PlayerType> MainMenu::getPlayerTypesFromUI() {
 void MainMenu::updatePlayerSelectors() {
     int num_players = m_num_players.getSelectedVal();
     while (m_player_type_selectors.size() < num_players) {
-        // We need to create a new one
-        sf::Vector2f position(m_window->getSize().x * 6.0 / 10, m_window->getSize().y * (3 + m_player_type_selectors.size())/ 10.0);
-        Selector<PlayerType> newSelector(SelectorType::SCROLL, position);
-        newSelector.addOption("Human", HUMAN);
-        newSelector.addOption("Random AI", RANDOM);
-        m_player_type_selectors.push_back(newSelector);
+        // We need to create a new one 
+        float player_y = m_window->getSize().y * (3 + m_player_type_selectors.size())/ 10.0;
+        sf::Vector2f position(m_window->getSize().x * 6.0 / 10.0, player_y);
+        Selector<PlayerType> newTypeSelector(SelectorType::SCROLL, position);
+        newTypeSelector.addOption("Human", HUMAN);
+        newTypeSelector.addOption("Random AI", RANDOM);
+        newTypeSelector.addOption("Colour Target AI", COLOURTARGET);
+        m_player_type_selectors.push_back(newTypeSelector);
+        float colour_x = position.x - (newTypeSelector.getWidth() * 1.5);
+        Selector<PlayerColour::Colour> newColourSelector(SelectorType::SCROLL,sf::Vector2f(colour_x, player_y));
+        for (PlayerColour::Colour c : PlayerColour::all_colours()) {
+            newColourSelector.addOption(PlayerColour::toString(c), c);
+        }
+        m_player_colour_selectors.push_back(newColourSelector);
     }
 
     while (m_player_type_selectors.size() > num_players) {
         // Remove the last one
         m_player_type_selectors.pop_back();
+        m_player_colour_selectors.pop_back();
     }
 }
 
@@ -118,6 +158,9 @@ void MainMenu::draw (RenderTarget &target, RenderStates states) const {
         target.draw(m_num_players);
         for (const Selector<PlayerType>& s : m_player_type_selectors) {
             target.draw(s);
+        }
+        for (const Selector<PlayerColour::Colour>& c: m_player_colour_selectors) {
+            target.draw(c);
         }
         target.draw(m_start_new_game);
         return;

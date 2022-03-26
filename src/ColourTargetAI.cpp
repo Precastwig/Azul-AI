@@ -1,6 +1,8 @@
 #include "players/ColourTargetAI.hpp"
+#include <algorithm>
 #include <cstddef>
 #include <memory>
+#include <utility>
 #include <vector>
 #include <set>
 
@@ -39,7 +41,7 @@ std::vector<double> ColourTargetAI::generatePickingWeightsFromBoardImpl(std::vec
             }
         }        
 
-        numWanted[tilecol] = sumOfCost - howManyColourStored(tilecol, m_stored_tiles);
+        numWanted[tilecol] = sumOfCost - howManyColourStored(tilecol, getTiles());
 
         // Bonus stuff, we can only evaluate bonus info if we know the value of all the tile colours
         if (currentWeights) {  
@@ -120,7 +122,7 @@ PickingChoice ColourTargetAI::pickTile(
 	Tile bonus,
 	bool centrePoison
 ) {
-    generatePickingWeightsFromBoard();
+    m_tile_picking_weights = generatePickingWeightsFromBoard();
 	std::vector<PickingChoice> choices = getAllPickingChoices(
 		factories,
 		centre,
@@ -142,12 +144,43 @@ PickingChoice ColourTargetAI::pickTile(
     return currentBestChoice;
 }
 
+double ColourTargetAI::evaluatePlacingChoice(PlacingChoice& choice, TileType bonusCol) {
+    // Evaluate colour, higher ones are better?
+    double score = choice.cost.num_colour + (choice.cost.num_bonus * 0.5);
+    score *= m_tile_picking_weights[choice.cost.colour];
+    if (choice.star->colour() == LocationType::CENTRE_STAR) {
+        // Penalty?
+        score -= 1;
+    }
+    return score;
+}
+
 PlacingChoice ColourTargetAI::placeTile(Tile bonus) {
+    // For now, same as picking
+    m_tile_picking_weights = generatePickingWeightsFromBoard();
 	std::vector<PlacingChoice> choices = getAllowedPlacingChoices(bonus);
 	if (choices.size() == 0) {
 		m_done_placing = true;
 		return PlacingChoice();
 	}
+
+    // We need to evaluate each one and compare evaluations
+    std::vector<std::pair<PlacingChoice, double>> choices_with_scores;
+    for (PlacingChoice& c : choices) {
+        choices_with_scores.push_back(std::pair<PlacingChoice, double>(c, evaluatePlacingChoice(c, bonus.colour())));
+    }
+    std::sort(choices_with_scores.begin(), choices_with_scores.end(), [&](std::pair<PlacingChoice, double>& c1, std::pair<PlacingChoice, double>& c2){
+        return c1.second > c2.second;
+    });
+    if (numTiles() > 4 || bonus == TileType::RED) {
+        // We might as well place something...?
+        return choices_with_scores[0].first;
+    }
+    if (choices_with_scores[0].second <= 1.0) {
+        // Below 1 isn't even worth it...?
+        m_done_placing = true;
+        return PlacingChoice();
+    }
     return choices[0];
 }
 
@@ -165,5 +198,7 @@ std::vector<std::shared_ptr<Tile>> ColourTargetAI::chooseBonusPieces(std::vector
 }
 
 void ColourTargetAI::discardDownToFour() {
-    m_stored_tiles = {};
+    while (getTiles().size() > 4) {
+        discardTile(getTiles()[0]);
+    }
 }

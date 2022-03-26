@@ -62,6 +62,13 @@ public:
         return false;
     }
 
+    float getWidth() {
+        if (m_style == SCROLL) {
+            return m_text_width + m_prev_triangle.get_height() + m_next_triangle.get_height();
+        }
+        return m_text_width; 
+    }
+
     void setPosition(sf::Vector2f pos) {
         m_position = pos;
         updatePositions();
@@ -84,15 +91,15 @@ public:
 private:
     const float arrow_angle = M_PI / 3;
     void updatePositions() {
-        float max_text_width = 0;
+        m_text_width = 0; // max text width
         for (size_t i = 0; i < m_options.size(); ++i) {
             m_options[i].setPosition(position_from_index(i));
-            if (m_options[i].getGlobalBounds().width > max_text_width) {
-                max_text_width = m_options[i].getGlobalBounds().width;
+            if (m_options[i].getGlobalBounds().width > m_text_width) {
+                m_text_width = m_options[i].getGlobalBounds().width;
             }
         }
-        m_next_triangle.setPosition(sf::Vector2f(m_position.x + max_text_width + 100, m_position.y));
-        m_prev_triangle.setPosition(sf::Vector2f(m_position.x - max_text_width - 100, m_position.y));
+        m_next_triangle.setPosition(sf::Vector2f(m_position.x + m_text_width + m_next_triangle.get_height(), m_position.y));
+        m_prev_triangle.setPosition(sf::Vector2f(m_position.x - m_text_width - m_prev_triangle.get_height(), m_position.y));
     }
     sf::Vector2f position_from_index(int index) {
         if (m_style == SCROLL) {
@@ -102,6 +109,7 @@ private:
         }
         return m_position;
     }
+    float m_text_width;
     cIndex m_selected;
     std::vector<sf::Text> m_options;
     std::vector<A> m_values;

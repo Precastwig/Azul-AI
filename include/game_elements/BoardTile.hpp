@@ -19,7 +19,7 @@ public:
         m_num_txt.setColor(sf::Color::Black);
         m_num_txt.setCharacterSize(20);
         sf::FloatRect rect = m_num_txt.getLocalBounds();
-        m_num_txt.setOrigin(sf::Vector2f(rect.width/2,rect.height/2));
+        m_num_txt.setOrigin(sf::Vector2f(rect.left + rect.width/2,rect.top + rect.height/2));
         updateColours();
     }
 

@@ -50,12 +50,9 @@ std::vector<std::shared_ptr<Tile>> RandomAI::chooseBonusPieces(std::vector<std::
 }
 
 void RandomAI::discardDownToFour() {
-	std::vector<std::shared_ptr<Tile>> return_list;
 	// Keep saving tiles until we have either saved 4 or run out
-	while (return_list.size() != 4 && !m_stored_tiles.empty()) {
-		int keepIndex = rand() % m_stored_tiles.size();
-		return_list.push_back(m_stored_tiles[keepIndex]);
-		m_stored_tiles.erase(m_stored_tiles.begin() + keepIndex);
+	while (getTiles().size() > 4) {
+		int discardIndex = rand() % getTiles().size();
+		discardTile(getTiles()[discardIndex]);
 	}
-	m_stored_tiles = return_list;
 }

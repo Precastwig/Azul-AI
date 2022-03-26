@@ -24,8 +24,12 @@ public:
 	virtual PlacingChoice placeTile(Tile bonus) = 0;
 	virtual std::vector<std::shared_ptr<Tile>> chooseBonusPieces(std::vector<std::shared_ptr<Tile>> choices) = 0;
 	virtual void discardDownToFour() = 0;
+	// Simple differentiation for AI player classes
+	virtual bool isAI() = 0;
 
 	// Other helpers
+
+	// Tile related helpers
 	std::vector<std::shared_ptr<Tile>> getTiles() {return m_stored_tiles;};
 	void discardTile(std::shared_ptr<Tile> tile) {
 		m_bag->toBin({tile});
@@ -33,22 +37,27 @@ public:
 	}
 	void addTile(std::shared_ptr<Tile> tile) {
 		m_stored_tiles.push_back(tile);
+		sortTiles();	
 	}
-	virtual bool isAI() = 0;
-	void pickBonusPieces();
 	bool hasTiles();
 	int numTiles();
+	void sortTiles();
+	void highlightCostTiles(const PlacingChoice& choice, TileType bonus);
+
+	void setBonusToPick(int num) {m_bonus_to_choose = num;}
+	int getBonusToPick() {return m_bonus_to_choose;}
+	void pickBonusPieces();
+
+	// Point related helpers
 	void addPoints(int points);
+	int getPoisonPoints();
 	void minusPoisonPoints();
 	int points() {
 		return m_points;
 	};
-	void setBonusToPick(int num) {
-		m_bonus_to_choose = num;
-	}
-	int getBonusToPick() {
-		return m_bonus_to_choose;
-	}
+
+	// Generic helpers
+	std::vector<PlacingChoice> getAllowedPlacingChoices(Tile bonus);
 	PlayerColour colour() {
 		return m_col;
 	};
@@ -57,9 +66,10 @@ public:
 	}
 
 	// Resolvers
-	void resolvePickingChoice(PickingChoice& choice, TileType bonus, std::shared_ptr<Factory> centre, bool& centre_taken);
+	void resolvePickingChoice(PickingChoice& choice, TileType bonus, std::shared_ptr<Factory> centre);
 	void resolvePlacingChoice(PlacingChoice& choice, TileType bonus);
 
+	// Turn related helpers
 	void pass();
 	bool finishedPlacing() {
 		return m_done_placing;
@@ -72,10 +82,12 @@ public:
 	// A weird thing to look like it's thinking
 	void commandLineWait();
 
+	// Various tostring functions
+	virtual std::string playerTypeString() = 0;
+	std::string colourString() {return m_col.toString();}
 	std::string toShortString();
 	std::string toStringNoBoard();
 	std::string toString();
-	std::vector<PlacingChoice> getAllowedPlacingChoices(Tile bonus);
 protected:
 	std::vector<std::shared_ptr<Location>> getLocationsFromChoiceList(std::vector<PlacingChoice> choices);
 	std::vector<PickingChoice> getAllPickingChoices(
@@ -99,10 +111,11 @@ protected:
 	// The board
 	Board m_board;
 	// The tiles taken to be placed on the board
-	std::vector<std::shared_ptr<Tile>> m_stored_tiles;
+	int m_stored_from_previous_round;
 	PlayerColour m_col;
 	std::shared_ptr<Bag> m_bag;
 private:
+	std::vector<std::shared_ptr<Tile>> m_stored_tiles;
 	int m_points;
 };
 

@@ -2,6 +2,7 @@
 #include "Game.hpp"
 #include "utils/helper_enums.hpp"
 #include <SFML/System/Vector2.hpp>
+#include <exception>
 #include <players/PlayerInfo.hpp>
 #include <algorithm>
 #include <memory>
@@ -13,7 +14,7 @@
 extern PlayerInfo g_player_info;
 
 Player::Player(PlayerColour playercolour, std::shared_ptr<Bag> bag, sf::Vector2f boardpos)
-	:  m_done_placing(false), m_discarded(false), m_board(boardpos), m_bag(bag), m_col(playercolour), m_points(0), m_bonus_to_choose(0) {
+	:  m_done_placing(false), m_discarded(false), m_board(boardpos), m_bag(bag), m_col(playercolour), m_points(0), m_bonus_to_choose(0), m_stored_from_previous_round(0) {
 };
 
 void Player::addPoints(int points) {
@@ -62,6 +63,45 @@ std::vector<PickingChoice> Player::getAllPickingChoices(
 	return choices;
 }
 
+void Player::sortTiles() {
+	std::sort(m_stored_tiles.begin(), m_stored_tiles.end(), [](
+		std::shared_ptr<Tile>& tile_ptr1,
+		std::shared_ptr<Tile>& tile_ptr2
+	) {
+		return tile_ptr1->colour() > tile_ptr2->colour();
+	});
+}
+
+void Player::highlightCostTiles(const PlacingChoice& choice, TileType bonus) {
+	// Reset all highlights
+	if (!choice.star) {
+		g_logger.log(Logger::INFO, "Reset cost highlight");
+		for (auto& tile : m_stored_tiles) {
+			tile->setOutlineColor(sf::Color::Black);
+			tile->setOutlineThickness(0.0);
+		}
+		return;
+	}
+
+	g_logger.log(Logger::INFO, "Highlighting cost choice: " + choice.to_string());
+	int num_col = choice.cost.num_colour;
+	int num_bon = choice.cost.num_bonus;
+	for (auto& tile : m_stored_tiles) {
+		if (num_col > 0 && choice.cost.colour == tile->colour()) {
+			num_col--;
+			tile->setOutlineColor(sf::Color::Red);
+			tile->setOutlineThickness(5.0);
+		} else if (num_bon > 0 && tile->colour() == bonus) {
+			num_bon--;
+			tile->setOutlineColor(sf::Color::Red);
+			tile->setOutlineThickness(5.0);
+		} else {
+			tile->setOutlineColor(sf::Color::Black);
+			tile->setOutlineThickness(0.0);
+		}
+	}
+}
+
 void Player::commandLineWait() {
 	for (unsigned int i = 0; i < 5; ++i) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -71,8 +111,12 @@ void Player::commandLineWait() {
 	std::cout << "\n";
 }
 
+int Player::getPoisonPoints() {
+	return m_stored_tiles.size() - m_stored_from_previous_round;
+}
+
 void Player::minusPoisonPoints() {
-	m_points -= m_stored_tiles.size();
+	m_points -= getPoisonPoints();
 	if (m_points < 0) {
 		m_points = 0;
 	}
@@ -105,6 +149,7 @@ void Player::pickBonusPieces() {
 	std::vector<std::shared_ptr<Tile>> choices = chooseBonusPieces(m_bag->rewardTiles());
 	// Add the tiles to our piece list
 	m_stored_tiles.insert(m_stored_tiles.end(), choices.begin(), choices.end());
+	sortTiles();
 	// Remove the tiles from the bonus board
 	m_bag->takeRewardTiles(choices);
 }
@@ -112,6 +157,7 @@ void Player::pickBonusPieces() {
 void Player::pass() {
 	m_done_placing = true;
 	m_discarded = true;
+	m_stored_from_previous_round = m_stored_tiles.size();
 	g_player_info.nextTurn();	
 }
 
@@ -211,24 +257,25 @@ std::vector<std::shared_ptr<Location>> Player::getLocationsFromChoiceList(std::v
 void Player::resolvePickingChoice(
 	PickingChoice& choice,
 	TileType bonus,
-	std::shared_ptr<Factory> centre,
-	bool& centre_taken) {
-	if (!centre_taken && choice.factory == centre) {
+	std::shared_ptr<Factory> centre) {
+	if (!g_player_info.centreTaken() && choice.factory == centre) {
 		// Someone has taken from the centre
-		centre_taken = true;
+		g_logger.log(Logger::INFO, "Someone has picked from centre");
+		g_player_info.setCentreTaken(true);
 		minusPoisonPoints();
 		g_player_info.setStartingPlayer();
 	}
 	std::vector<std::shared_ptr<Tile>> pickedTiles = choice.factory->removeTiles(choice.tile_colour, bonus, centre);
 	m_stored_tiles.insert(m_stored_tiles.end(), pickedTiles.begin(), pickedTiles.end());
+	sortTiles();
 }
 
 std::string Player::toShortString() {
-	return m_col.toString() + ": " + std::to_string(m_points);
+	return m_col.toString() + "(" + playerTypeString() + ") : " + std::to_string(m_points);
 }
 
 std::string Player::toStringNoBoard() {
-	std::string str = "Player: " + m_col.toString() + "\n";
+	std::string str = "Player: " + m_col.toString() + " (" + playerTypeString() + ")\n";
 	str += "Points: " + std::to_string(m_points) + "\n";
 	for (TileType tile : Tile::all_tile_types()) {
 		str += Tile::toString(tile) + ": " + std::to_string(howManyColourStored(tile, m_stored_tiles)) + "\n";

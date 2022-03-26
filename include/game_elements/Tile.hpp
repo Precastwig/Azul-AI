@@ -39,7 +39,7 @@ public:
 			PURPLE
 		};
 	}
-	Tile(TileType t) : m_t(t), m_size(Vector2f(DEFAULT_TILE_SIZE_X,DEFAULT_TILE_SIZE_Y)) {
+	Tile(TileType t, Vector2f size = Vector2f(DEFAULT_TILE_SIZE_X,DEFAULT_TILE_SIZE_Y)) : m_t(t), m_size(size) {
 		setPointCount(4);
 		setPoint(0, Vector2f(0,DEFAULT_TILE_SIZE_Y));
 		setPoint(1, Vector2f(-DEFAULT_TILE_SIZE_X,0));
@@ -73,6 +73,9 @@ public:
 	}
 	void setType(TileType t) {
 		m_t = t;
+	}
+	Vector2f getSize() {
+		return m_size;
 	}
 private:
 	void setupColour() {

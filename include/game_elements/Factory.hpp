@@ -1,8 +1,10 @@
 #ifndef FACTORY
 #define FACTORY
 
+#include "FirstTile.hpp"
 #include "utils/helper_enums.hpp"
 #include "Logger.hpp"
+#include <SFML/Graphics/Text.hpp>
 #include <stdlib.h>
 #include <memory>
 #include <SFML/Graphics.hpp>
@@ -23,7 +25,7 @@ public:
 
 	static sf::Vector2f calculateNewPos(const sf::Vector2f& oldPos, const float& size, const double& angle);
 
-	void onHover(int x, int y, const TileType& bonus);
+	void onHover(int x, int y, const TileType& bonus, const bool& isCentre);
 	void onClick(int x, int y, Game& game);
 
 	// Add tiles to the factory
@@ -42,12 +44,14 @@ public:
 
 	std::string toString();
 	int id() {return m_id;};
+	FirstTile* m_first_tile; // Non-owning pointer
 private:
 	bool contains(int x, int y);
 	const int m_id;
 	const float m_size;
 	// Drawable elements
 	std::vector<std::shared_ptr<Tile>> m_tiles;
+	std::shared_ptr<sf::Text> m_hover_minus_points_text;
 	sf::CircleShape m_background;
 };
 

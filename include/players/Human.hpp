@@ -22,6 +22,9 @@ public:
 	virtual bool isAI() override {
 		return false; 
 	}
+	virtual std::string playerTypeString() override {
+		return "Human";
+	}
 private:
 };
 

@@ -1,9 +1,12 @@
 #include "Game.hpp"
 #include "game_elements/RoundVisualizer.hpp"
+#include "players/ColourTargetAI.hpp"
 #include "players/RandomAI.hpp"
 #include "players/Human.hpp"
 #include "utils/helper_enums.hpp"
 #include <SFML/Graphics/Drawable.hpp>
+#include <cmath>
+#include <cstdlib>
 #include <ui_elements/Button.hpp>
 #include <players/PlayerInfo.hpp>
 #include <SFML/System/Vector2.hpp>
@@ -17,9 +20,13 @@ GameState g_visual_state;
 PlayerInfo g_player_info;
 extern MenuState g_menu_state;
 
-Game::Game(std::vector<PlayerType> players, sf::Vector2f size) : m_screen_size(size), m_debug_switchstage("Switch stage"), m_centre_taken(false), m_round_num(0), m_finish_screen(nullptr) {
+Game::Game(std::vector<std::pair<PlayerType, PlayerColour::Colour>> players, sf::Vector2f size) : m_screen_size(size), m_debug_switchstage("Switch stage"), m_round_num(0), m_finish_screen(nullptr) {
+	// Reset the relevent global variables
 	g_player_info.wipeInfo();
-	g_visual_state = GameState::PICKING;
+	g_visual_state.set_picking();
+
+	m_first_tile = std::make_unique<FirstTile>();
+
 	// Create the bag
 	sf::Vector2f middle(size.x / 2,size.y / 2);
 	sf::Vector2f playerVisualSize(size.x / 8,size.y / 2);
@@ -27,7 +34,6 @@ Game::Game(std::vector<PlayerType> players, sf::Vector2f size) : m_screen_size(s
 	// a square, for now
 	sf::Vector2f reward_size(reward_size_x, std::min(reward_size_x, size.y));
 	m_bag = std::make_shared<Bag>(reward_size, middle);
-	g_visual_state = GameState::PICKING;
 
 	std::vector<sf::Vector2f> playerVisualpositions;
 	playerVisualpositions.push_back(sf::Vector2f(0,0));
@@ -53,18 +59,27 @@ Game::Game(std::vector<PlayerType> players, sf::Vector2f size) : m_screen_size(s
 			// The board lies on the bottom half of the screen
 			board_position.y = playerVisualpositions[i].y + 300;
 		}
-		switch (players[i]) {
+		switch (players[i].first) {
 			case HUMAN:
 				new_player = std::make_shared<Human>(
-					PlayerColour::all_colours()[i], 
+					players[i].second, 
 					m_bag, 
 					board_position
+				);
+				break;
+			case COLOURTARGET:
+				// needs a colour target
+				new_player = std::make_shared<ColourTargetAI>(
+					players[i].second,
+					m_bag,
+					board_position,
+					Tile::all_tile_types()[rand() % Tile::all_tile_types().size()]
 				);
 				break;
 			case RANDOM:
 			default:
 				new_player = std::make_shared<RandomAI>(
-					PlayerColour::all_colours()[i], 
+					players[i].second, 
 					m_bag,
 					board_position
 				);
@@ -98,6 +113,8 @@ Game::Game(std::vector<PlayerType> players, sf::Vector2f size) : m_screen_size(s
 		angle += (2 * M_PI / num_factories);
 	}
 	m_centre = std::make_shared<Factory>(num_factories, middle, 60);
+	m_first_tile->setPosition(middle);
+	m_centre->m_first_tile = m_first_tile.get();
 	//m_debug_switchstage.setPosition(playerVisualpositions[2]);
 	//m_debug_switchstage.m_callback = []() {
 	//	if (g_visual_state == GameState::PICKING) {
@@ -121,21 +138,23 @@ void Game::onClick(int xPos, int yPos) {
 	// The user should only be able to interact if the AI isn't currently running
 	if (m_thread_running.try_lock()) {
 		// Find the object that we've clicked on and call its onClick event
-		if (g_visual_state == GameState::PICKING) {
+		if (g_visual_state.is_player_visualizers_clickable()) {
+			for (auto& vp : m_player_visualizers) {
+				vp->onClick(xPos, yPos);
+			}
+		}
+
+		if (g_visual_state.is_picking()) {
 			for (std::shared_ptr<Factory> factory : m_factories) {
 				factory->onClick(xPos, yPos, *this);
 			}
 			m_centre->onClick(xPos, yPos, *this);
-		} else if (g_visual_state == GameState::PLACING || g_visual_state == GameState::DISCARDING) {
+		} else if (g_visual_state.is_placing()) {
 			std::shared_ptr<Player> currPlayer = g_player_info.getCurrentPlayer();
 			currPlayer->getBoardPtr()->onClick(xPos, yPos, *this);
-			
-			for (auto& vp : m_player_visualizers) {
-				vp->onClick(xPos, yPos);
-			}
-		} else if (g_visual_state == GameState::FINISH) {
+		} else if (g_visual_state.is_finish()) {
 			m_finish_screen->onClick(xPos, yPos);
-		} else if (g_visual_state == GameState::CHOOSINGREWARD) {
+		} else if (g_visual_state.is_reward()) {
 			m_bag->onClick(xPos, yPos);
 		}
 		//m_debug_switchstage.onClick(xPos, yPos);
@@ -144,7 +163,7 @@ void Game::onClick(int xPos, int yPos) {
 }
 
 void Game::onHover(int xPos, int yPos) {
-	if (g_visual_state == GameState::PICKING || g_visual_state == GameState::CHOOSINGREWARD) {
+	if (g_visual_state.is_popup_game_board()) {
 		sf::Drawable* hovered_game_board = nullptr;
 		for (auto& pv : m_player_visualizers) {
 			if (pv->contains(xPos, yPos)) {
@@ -154,16 +173,16 @@ void Game::onHover(int xPos, int yPos) {
 		}
 		g_player_info.setHoveredElement(hovered_game_board);
 	}
-	if (g_visual_state == GameState::PICKING) {
+	if (g_visual_state.is_picking()) {
 		for (std::shared_ptr<Factory> factory : m_factories) {
-			factory->onHover(xPos, yPos, getBonus());
+			factory->onHover(xPos, yPos, getBonus(), false);
 		}
-		m_centre->onHover(xPos, yPos, getBonus());
+		m_centre->onHover(xPos, yPos, getBonus(), true);
 	} else {
 		std::shared_ptr<Player> currPlayer = g_player_info.getCurrentPlayer();
-		currPlayer->getBoardPtr()->onHover(xPos, yPos);
+		currPlayer->getBoardPtr()->onHover(xPos, yPos, *this);
 	}
-	if (g_visual_state != GameState::FINISH) {
+	if (g_visual_state.is_player_visualizers_visable()) {
 		// Always check the player visualizers, since they're always on show
 		for (auto& pv : m_player_visualizers) {
 			pv->onHover(xPos, yPos);
@@ -171,13 +190,30 @@ void Game::onHover(int xPos, int yPos) {
 	}
 }
 
+void Game::onLeft() {
+	for (Board* b_ptr : m_boards) {
+		b_ptr->onLeft(getBonus());
+	}
+}
+
+void Game::onRight() {
+	for (Board* b_ptr : m_boards) {
+		b_ptr->onRight(getBonus());
+	}
+}
+
 void Game::draw(RenderTarget &target, RenderStates states) const {
-	if (g_visual_state == GameState::PICKING) {
+	if (g_visual_state.is_picking()) {
 		m_centre->draw(target, states);
 		for (std::shared_ptr<Factory> factory : m_factories) {
 			factory->draw(target, states);
 		}
-	} else if (g_visual_state == GameState::PLACING || g_visual_state == GameState::DISCARDING || g_visual_state == GameState::CHOOSINGREWARD) {
+		if (!g_player_info.centreTaken()) {
+			m_first_tile->draw(target, states);
+		}
+	} 
+	
+	if (g_visual_state.is_boards_visualised()) {
 		// Placing stage
 		for (Board* b : getVisualisedBoards()) {
 			if (b) {
@@ -187,17 +223,20 @@ void Game::draw(RenderTarget &target, RenderStates states) const {
 		//m_boards[m_current_player.getIndex()]->draw(target, states);
 	}
 
-	if (g_visual_state != GameState::FINISH) {
+	if (g_visual_state.is_reward()) {
+		m_bag->draw(target, states);
+	}
+
+	if (g_visual_state.is_player_visualizers_visable()) {
 		for (size_t i = 0; i < m_player_visualizers.size(); ++i) {
 			m_player_visualizers[i]->draw(target, states);
 		}
-		if (g_visual_state == GameState::CHOOSINGREWARD) {
-			m_bag->draw(target, states);
-		}
-	} else {
+		m_round_visualizer->draw(target, states);
+	}
+	
+	if (g_visual_state.is_finish()) {
 		m_finish_screen->draw(target, states);
 	}
-	m_round_visualizer->draw(target, states);
 
 	sf::Drawable* temp_elem = g_player_info.getHoveredElement();
 	if (temp_elem) {
@@ -216,30 +255,30 @@ void performAIActionWorker(Game* game, std::shared_ptr<Player> player) {
 }
 
 void Game::performAIAction(std::shared_ptr<Player> player) {
-	if (g_visual_state == GameState::PICKING) {
+	if (g_visual_state.is_picking()) {
 		PickingChoice choice = player->pickTile(
 			m_factories,
 			m_centre,
 			getBonus(),
-			!m_centre_taken
+			!g_player_info.centreTaken()
 		);
 		pick_tile(choice);
-	} else if (g_visual_state == GameState::PLACING) { 
+	} else if (g_visual_state.is_placing()) { 
 		PlacingChoice choice = player->placeTile(getBonus());
 		if (!player->finishedPlacing()) {
 			place_tile(choice);
 		} else {
-        	g_visual_state = GameState::DISCARDING;
+        	g_visual_state.set_discarding();
 		}
-	} else if (g_visual_state == GameState::DISCARDING) {
+	} else if (g_visual_state.is_discarding()) {
 		player->discardDownToFour();
-		g_visual_state = GameState::PLACING;
+		g_visual_state.set_placing();
 		g_player_info.passOrChangeState();
-	} else if (g_visual_state == GameState::CHOOSINGREWARD) {
+	} else if (g_visual_state.is_reward()) {
 		player->pickBonusPieces();
 		g_player_info.passOrChangeState();
-		if (g_visual_state == GameState::CHOOSINGREWARD) {
-			g_visual_state = GameState::PLACING;
+		if (g_visual_state.is_reward()) {
+			g_visual_state.set_placing();
 		}
 	}
 	updatePlayerVisualizers();
@@ -317,7 +356,7 @@ void Game::picking_stage() {
 			getBonus(),
 			!centreTaken
 		);
-		player->resolvePickingChoice(choice, getBonus(), m_centre, m_centre_taken);
+		player->resolvePickingChoice(choice, getBonus(), m_centre);
 		g_player_info.nextTurn();
 		printFactories();
 	}
@@ -328,7 +367,7 @@ void Game::pick_tile(PickingChoice& picked) {
 	std::string withBonus = (picked.with_bonus) ? "with a bonus tile" : "";
 	g_logger.log(Logger::INFO, player->toShortString() + " has picked " + std::to_string(picked.factory->numberOf(picked.tile_colour)) + " " + Tile::toString(picked.tile_colour) + " " + withBonus);
 
-	player->resolvePickingChoice(picked, getBonus(), m_centre, m_centre_taken);
+	player->resolvePickingChoice(picked, getBonus(), m_centre);
 	if (noTilesLeft()) {
 		switchToPlacingStage();
 	} else {
@@ -349,7 +388,7 @@ TileType Game::getBonus() {
 }
 
 void Game::switchToPlacingStage() {
-	g_visual_state = GameState::PLACING;
+	g_visual_state.set_placing();
 	for (std::shared_ptr<Player> player : g_player_info.getPlayers()) {
 		player->resetDonePlacing();
 	}
@@ -357,7 +396,8 @@ void Game::switchToPlacingStage() {
 }
 
 void Game::switchToPickingStage() {
-	g_visual_state = GameState::PICKING;
+	g_visual_state.set_picking();
+	g_player_info.setCentreTaken(false);
 	if (m_round_num < m_bonus_tile_order.size() - 1) {
 		m_round_num++;
 		m_round_visualizer->nextround();
@@ -369,7 +409,7 @@ void Game::switchToPickingStage() {
 			m_screen_size,
 			g_player_info.getPlayers()
 		);
-		g_visual_state = GameState::FINISH;
+		g_visual_state.set_finish();
 	}
 }
 
@@ -388,8 +428,8 @@ void Game::place_tile(PlacingChoice& placed) {
 	}
 
 	player->resolvePlacingChoice(placed, getBonus());
-	// This might have changed the game state, so we should check that hasn't happen
-	if (g_visual_state != GameState::CHOOSINGREWARD) {
+	// This might have changed the game state, so we should check that hasn't happened
+	if (!g_visual_state.is_reward()) {
 		g_player_info.passOrChangeState();
 	}
 	updatePlayerVisualizers();

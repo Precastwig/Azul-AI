@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include "Game.hpp"
+#include <cstdlib>
 #include <ui_elements/MainMenu.hpp>
 #include "Logger.hpp"
 #include "utils/helper_enums.hpp"
@@ -19,6 +20,8 @@ MenuState g_menu_state;
 
 int main(int argc, char *argv[]) {
 	gui_modes guiMode = QT;
+	// Initialise random seed
+	srand(time(nullptr));
 	// Parse flags
 	for (int i = 1; i < argc; i++) {
 		std::string arg(argv[i]);
@@ -63,6 +66,25 @@ int main(int argc, char *argv[]) {
 				if (event.type == sf::Event::MouseButtonPressed) {
 					if (event.mouseButton.button == sf::Mouse::Left) {
 						menu.onClick(event.mouseButton.x, event.mouseButton.y);
+					}
+				}
+
+				if (event.type == sf::Event::MouseWheelScrolled) {
+					if (event.mouseWheelScroll.delta > 0) {
+						// Positive is up/left
+						menu.onLeft();
+					} else {
+						menu.onRight();
+					}
+				} else if (event.type == sf::Event::KeyPressed) {
+					if (event.key.code == sf::Keyboard::Key::Left || 
+					event.key.code == sf::Keyboard::Key::A || 
+					event.key.code == sf::Keyboard::Key::W) {
+						menu.onLeft();
+					} else if (event.key.code == sf::Keyboard::Key::Right || 
+					event.key.code == sf::Keyboard::Key::D || 
+					event.key.code == sf::Keyboard::Key::S) {
+						menu.onRight();
 					}
 				}
 
