@@ -10,6 +10,7 @@ public:
     ~RoundVisualizer() {};
     virtual void draw (sf::RenderTarget &target, sf::RenderStates states) const override;
     void nextround();
+    void spinTile();
 private:
     void updateVisuals();
     int m_current_round;

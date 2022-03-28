@@ -1,7 +1,9 @@
 #include "utils/Sounds.hpp"
 #include <SFML/System/Vector2.hpp>
+#include <functional>
 #include <game_elements/RoundVisualizer.hpp>
 #include <string>
+#include <thread>
 
 extern sf::Font g_font;
 
@@ -28,7 +30,24 @@ RoundVisualizer::RoundVisualizer(std::vector<TileType> order, sf::Vector2f posit
 void RoundVisualizer::nextround() {
     m_current_round++;
     Sounds::dong();
+    std::thread spinnerThread(&RoundVisualizer::spinTile, std::ref(*this));
+    spinnerThread.detach();
     updateVisuals();
+}
+
+void RoundVisualizer::spinTile() {
+    // 3 seconds, spin 6 times  
+    // 720 degrees/sec
+    float spin_velocity = 720; // Maybe?
+    float curr_spin = 0;
+    float total_spin = 720;
+    sf::Clock clock;
+    while (curr_spin < total_spin) {
+        clock.restart();
+        float time = clock.getElapsedTime().asSeconds();
+        m_bonusmarkers[m_current_round].rotate(spin_velocity * time);
+        curr_spin += spin_velocity * time;
+    }
 }
 
 void RoundVisualizer::updateVisuals() {

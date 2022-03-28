@@ -4,6 +4,7 @@
 extern Logger g_logger;
 
 sf::Sound m_sound;
+sf::Sound m_dong_sound;
 sf::SoundBuffer m_pop_sound_buff;
 sf::SoundBuffer m_click_sound_buff;
 sf::SoundBuffer m_dong_sound_buff;
@@ -30,7 +31,7 @@ void Sounds::click(float pitch) {
 }
 
 void Sounds::dong(float pitch) {
-    m_sound.setBuffer(m_dong_sound_buff);
-    m_sound.setPitch(pitch);
-    m_sound.play();
+    m_dong_sound.setBuffer(m_dong_sound_buff);
+    m_dong_sound.setPitch(pitch);
+    m_dong_sound.play();
 }
