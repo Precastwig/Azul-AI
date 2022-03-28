@@ -147,7 +147,7 @@ void MainMenu::updatePlayerSelectors() {
     }
 }
 
-void MainMenu::draw (RenderTarget &target, RenderStates states) const {
+void MainMenu::draw (sf::RenderTarget &target, sf::RenderStates states) const {
     switch (g_menu_state) {
     case OFF:
         if (m_game) {

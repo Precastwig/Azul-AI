@@ -11,7 +11,7 @@ extern sf::Font g_font;
 
 class FirstTile : public sf::Drawable {
 public:
-    FirstTile() : m_tile(TileType::NONE, Vector2f(25, 15)) {
+    FirstTile() : m_tile(TileType::NONE, sf::Vector2f(25, 15)) {
         m_tile.setFillColor(sf::Color::White);
         m_tile.setOutlineColor(sf::Color::Red);
         setHovered(false);
@@ -51,7 +51,7 @@ public:
     sf::Vector2f getSize() {
         return m_tile.getSize();
     }
-    virtual void draw (RenderTarget &target, RenderStates states) const override {
+    virtual void draw (sf::RenderTarget &target, sf::RenderStates states) const override {
         // First draw the tile
         target.draw(m_tile, states);
         // Then the text

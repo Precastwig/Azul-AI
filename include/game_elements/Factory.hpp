@@ -10,18 +10,16 @@
 #include <SFML/Graphics.hpp>
 #include <game_elements/Tile.hpp>
 
-using namespace sf;
-
 class Game;
 class Factory;
 extern Logger g_logger;
 
-class Factory : public std::enable_shared_from_this<Factory>, Drawable {
+class Factory : public std::enable_shared_from_this<Factory>, sf::Drawable {
 public:
 	Factory(const int id, const sf::Vector2f position, const float size);
 	~Factory() = default;
 
-	virtual void draw (RenderTarget &target, RenderStates states) const override;
+	virtual void draw (sf::RenderTarget &target, sf::RenderStates states) const override;
 
 	static sf::Vector2f calculateNewPos(const sf::Vector2f& oldPos, const float& size, const double& angle);
 

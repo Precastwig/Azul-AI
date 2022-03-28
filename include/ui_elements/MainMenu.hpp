@@ -6,14 +6,12 @@
 #include <Game.hpp>
 #include <utils/helper_enums.hpp>
 
-using namespace sf;
-
-class MainMenu : public Drawable {
+class MainMenu : public sf::Drawable {
 public:
     MainMenu(sf::RenderWindow* window, sf::Vector2f size = sf::Vector2f());
     ~MainMenu() {};
 
-    virtual void draw (RenderTarget &target, RenderStates states) const override;
+    virtual void draw (sf::RenderTarget &target, sf::RenderStates states) const override;
     void onClick(int xPos, int yPos);
     void onHover(int x, int y);
     void onLeft() {

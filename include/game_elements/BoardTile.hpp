@@ -70,7 +70,7 @@ public:
         return m_tile.contains(x, y);
     }
 
-    virtual void draw (RenderTarget &target, RenderStates states) const override {
+    virtual void draw (sf::RenderTarget &target, sf::RenderStates states) const override {
         // First draw the tile
         target.draw(m_tile, states);
         // Then the text
@@ -87,7 +87,7 @@ private:
             } else {
                 m_tile.setFillColor(Colours::board_tile_unfill_col(m_tile.colour()));
             }
-            m_tile.setOutlineColor(Color::Black);
+            m_tile.setOutlineColor(sf::Color::Black);
             m_tile.setOutlineThickness(2.0);
         }
     }

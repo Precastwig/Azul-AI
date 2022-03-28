@@ -22,15 +22,13 @@
 #include <ui_elements/FinishScreen.hpp>
 #include <ui_elements/Button.hpp>
 
-using namespace sf;
-
-class Game : public Drawable {
+class Game : public sf::Drawable {
 public:
 	// Constructor/Destructor
 	Game(std::vector<std::pair<PlayerType, PlayerColour::Colour>> players, sf::Vector2f size = sf::Vector2f());
 	~Game();
 
-	virtual void draw (RenderTarget &target, RenderStates states) const override;
+	virtual void draw (sf::RenderTarget &target, sf::RenderStates states) const override;
 
 	void onClick(int xPos, int yPos);
 	void onHover(int xPos, int yPos);

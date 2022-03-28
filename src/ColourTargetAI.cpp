@@ -1,7 +1,9 @@
 #include "players/ColourTargetAI.hpp"
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <memory>
+#include <thread>
 #include <utility>
 #include <vector>
 #include <set>

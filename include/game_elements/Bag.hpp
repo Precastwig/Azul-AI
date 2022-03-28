@@ -16,7 +16,7 @@ class Bag : public sf::Drawable {
 public:
 	Bag(sf::Vector2f size, sf::Vector2f position);
 
-	virtual void draw (RenderTarget &target, RenderStates states) const override;
+	virtual void draw (sf::RenderTarget &target, sf::RenderStates states) const override;
 
 	void fillFactory(std::shared_ptr<Factory> f);
 

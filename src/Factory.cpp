@@ -16,7 +16,7 @@ Factory::Factory(const int id, const sf::Vector2f position, const float size) : 
 	m_background.setOrigin(size*2,size*2);
 	m_background.setRadius(size * 2);
 	m_background.setPosition(position);
-	m_background.setFillColor(Color(255,203,208));
+	m_background.setFillColor(sf::Color(255,203,208));
 };
 
 void Factory::positionTiles() const {
@@ -30,7 +30,7 @@ void Factory::positionTiles() const {
 	}
 }
 
-void Factory::draw(RenderTarget &target, RenderStates states) const {
+void Factory::draw(sf::RenderTarget &target, sf::RenderStates states) const {
 	target.draw(m_background, states);
 	for (std::shared_ptr<Tile> tile : m_tiles) {
 		target.draw(*tile, states);

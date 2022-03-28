@@ -40,7 +40,7 @@ Bag::Bag(sf::Vector2f size, sf::Vector2f position) : m_tile_bin(), m_reward_tile
 	m_txt.setPosition(textpos);
 }
 
-void Bag::draw (RenderTarget &target, RenderStates states) const {
+void Bag::draw (sf::RenderTarget &target, sf::RenderStates states) const {
 	target.draw(m_background);
 	for (std::shared_ptr<Tile> t : m_reward_tiles) {
 		target.draw(*t, states);

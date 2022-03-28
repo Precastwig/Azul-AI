@@ -4,26 +4,24 @@
 #include "utils/helper_enums.hpp"
 #include <SFML/Graphics/Color.hpp>
 
-using namespace sf;
-
 class Colours {
 public:
     static sf::Color tile_to_col(TileType t) {
         switch (t) {
 			default:
-			case TileType::ORANGE: return (Color(235,149,52));
+			case TileType::ORANGE: return (sf::Color(235,149,52));
 			break;
-			case TileType::RED: return (Color(235,52,52));
+			case TileType::RED: return (sf::Color(235,52,52));
 			break;
-			case TileType::BLUE: return (Color(52,137,235));
+			case TileType::BLUE: return (sf::Color(52,137,235));
 			break;
-			case TileType::YELLOW: return (Color(235,229,52));
+			case TileType::YELLOW: return (sf::Color(235,229,52));
 			break;
-			case TileType::GREEN: return (Color(70,235,52));
+			case TileType::GREEN: return (sf::Color(70,235,52));
 			break;
-			case TileType::PURPLE: return (Color(171,52,235));
+			case TileType::PURPLE: return (sf::Color(171,52,235));
 			break;
-			case TileType::NONE: return (Color(0,0,0,0));
+			case TileType::NONE: return (sf::Color(0,0,0,0));
 		}
     }
 

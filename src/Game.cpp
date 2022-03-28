@@ -202,7 +202,7 @@ void Game::onRight() {
 	}
 }
 
-void Game::draw(RenderTarget &target, RenderStates states) const {
+void Game::draw(sf::RenderTarget &target, sf::RenderStates states) const {
 	if (g_visual_state.is_picking()) {
 		m_centre->draw(target, states);
 		for (std::shared_ptr<Factory> factory : m_factories) {

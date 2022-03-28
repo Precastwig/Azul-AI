@@ -1,12 +1,15 @@
-#include <SFML/Graphics.hpp>
-#include "Game.hpp"
-#include <cstdlib>
 #include <ui_elements/MainMenu.hpp>
+#include <cstdlib>
 #include "Logger.hpp"
 #include "utils/helper_enums.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/WindowStyle.hpp>
 #include <iostream>
+#include <SFML/Graphics.hpp>
+#include "Game.hpp"
+#if __linux__
+#include <X11/Xlib.h>
+#endif
 
 enum gui_modes {
 	COMMAND_LINE,
@@ -19,6 +22,9 @@ sf::Font g_font;
 MenuState g_menu_state;
 
 int main(int argc, char *argv[]) {
+	#if __linux__
+		XInitThreads();
+	#endif
 	gui_modes guiMode = QT;
 	// Initialise random seed
 	srand(time(nullptr));
@@ -41,6 +47,7 @@ int main(int argc, char *argv[]) {
 		// Game game;
 		// game.play();
 	} else if (guiMode == QT) {
+		
 		if (!g_font.loadFromFile("resources/NotoSansCJK-Medium.ttc")) {
             g_logger.log(Logger::ERROR, "Font not loaded");
         }
@@ -93,7 +100,7 @@ int main(int argc, char *argv[]) {
 				}
 	        }
 	        // Clear screen
-	        window.clear(Color(194, 240, 242));
+	        window.clear(sf::Color(194, 240, 242));
 	        // Draw the relevent thing
 			menu.performMultithreadedActions();
 			window.draw(menu);

@@ -40,7 +40,7 @@ void RoundVisualizer::updateVisuals() {
 }
 
 
-void RoundVisualizer::draw (RenderTarget &target, RenderStates states) const {
+void RoundVisualizer::draw (sf::RenderTarget &target, sf::RenderStates states) const {
     for (size_t i = 0; i < m_bonusmarkers.size(); ++i) {
         target.draw(m_bonusmarkers[i], states);
         target.draw(m_roundmarkers[i], states);

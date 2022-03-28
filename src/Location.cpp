@@ -27,11 +27,9 @@ void Location::onClick(int x, int y, Game& game) {
             g_logger.log(Logger::INFO, "Clicked on tile");
             PlacingChoice pc = get_choice();
             // Sanity check
-            if (pc.index == tile->getIndex() - 1) {
+            if (pc.star) {
                 game.place_tile(pc);
                 return;
-            } else {
-                g_logger.log(Logger::ERROR, "Highlighted choice is not relevent to clicked tile (choice: " + pc.to_string() + ")");
             }
         }
     }

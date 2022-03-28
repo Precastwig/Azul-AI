@@ -8,7 +8,7 @@ class RoundVisualizer : sf::Drawable {
 public:
     RoundVisualizer(std::vector<TileType> order, sf::Vector2f position);
     ~RoundVisualizer() {};
-    virtual void draw (RenderTarget &target, RenderStates states) const override;
+    virtual void draw (sf::RenderTarget &target, sf::RenderStates states) const override;
     void nextround();
 private:
     void updateVisuals();
