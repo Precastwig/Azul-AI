@@ -1,4 +1,5 @@
 #include "utils/Choices.hpp"
+#include "utils/Sounds.hpp"
 #include "utils/helper_enums.hpp"
 #include <asm-generic/errno.h>
 #include <game_elements/Location.hpp>
@@ -7,6 +8,7 @@
 #include <players/PlayerInfo.hpp>
 
 extern PlayerInfo g_player_info;
+extern Sounds g_sounds;
 
 Location::Location(LocationType l) : m_l(l), m_starting_rotation(0.0), m_current_pos() {
     for (size_t j = 0; j < 6; ++j) {
@@ -28,6 +30,7 @@ void Location::onClick(int x, int y, Game& game) {
             PlacingChoice pc = get_choice();
             // Sanity check
             if (pc.star) {
+                g_sounds.pop(0.5);
                 game.place_tile(pc);
                 return;
             }

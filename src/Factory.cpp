@@ -1,6 +1,7 @@
 #include "game_elements/Factory.hpp"
 #include "Game.hpp"
 #include "players/PlayerInfo.hpp"
+#include "utils/Sounds.hpp"
 #include "utils/helper_enums.hpp"
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Text.hpp>
@@ -11,6 +12,7 @@
 #include <cmath>
 
 extern PlayerInfo g_player_info;
+extern Sounds g_sounds;
 
 Factory::Factory(const int id, const sf::Vector2f position, const float size) : m_id(id), m_size(size), m_tiles(), m_background(), m_hover_minus_points_text(nullptr), m_first_tile(nullptr) {
 	m_background.setOrigin(size*2,size*2);
@@ -118,6 +120,7 @@ void Factory::onClick(int x, int y, Game& game) {
 	if (!contains(x,y)) {
 		return;
 	}
+	g_sounds.pop();
 	for (std::shared_ptr<Tile> tile : m_tiles) {
 		if (tile->contains(x,y)) {
 			g_logger.log(Logger::INFO, "Clicked tile " + tile->toString());

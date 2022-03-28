@@ -1,6 +1,7 @@
 #include <ui_elements/MainMenu.hpp>
 #include <cstdlib>
 #include "Logger.hpp"
+#include "utils/Sounds.hpp"
 #include "utils/helper_enums.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/WindowStyle.hpp>
@@ -20,6 +21,7 @@ enum gui_modes {
 Logger g_logger;
 sf::Font g_font;
 MenuState g_menu_state;
+Sounds g_sounds;
 
 int main(int argc, char *argv[]) {
 	#if __linux__
