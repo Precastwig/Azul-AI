@@ -1,3 +1,4 @@
+#include "utils/Sounds.hpp"
 #include <SFML/System/Vector2.hpp>
 #include <game_elements/RoundVisualizer.hpp>
 #include <string>
@@ -26,6 +27,7 @@ RoundVisualizer::RoundVisualizer(std::vector<TileType> order, sf::Vector2f posit
 
 void RoundVisualizer::nextround() {
     m_current_round++;
+    Sounds::dong();
     updateVisuals();
 }
 

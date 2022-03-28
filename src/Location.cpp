@@ -8,7 +8,6 @@
 #include <players/PlayerInfo.hpp>
 
 extern PlayerInfo g_player_info;
-extern Sounds g_sounds;
 
 Location::Location(LocationType l) : m_l(l), m_starting_rotation(0.0), m_current_pos() {
     for (size_t j = 0; j < 6; ++j) {
@@ -30,7 +29,7 @@ void Location::onClick(int x, int y, Game& game) {
             PlacingChoice pc = get_choice();
             // Sanity check
             if (pc.star) {
-                g_sounds.pop(0.5);
+                Sounds::pop(0.5);
                 game.place_tile(pc);
                 return;
             }
@@ -50,7 +49,10 @@ void Location::onHover(int xpos, int ypos, Game& game) {
                 choices = PlacingChoice::filterChoicesFromLocation(choices, colour());
                 choices = PlacingChoice::filterChoicesFromIndex(choices, t->getIndex());
                 set_choices(choices, game.getBonus());
-                t->setHoverState(true);
+                if (!choices.empty()) {
+                    Sounds::click(1.5);
+                    t->setHoverState(true);
+                }
             }
         } else {
             if (t->getHoverState()) {

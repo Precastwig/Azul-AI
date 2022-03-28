@@ -14,10 +14,10 @@ public:
     // Button (sf::Texture* normal, sf::Texture* clicked, std::string, sf::Vector2f location);
 
 	virtual void draw (sf::RenderTarget &target, sf::RenderStates states) const override;
-    virtual bool onClick(int x, int y);
+    bool onClick(int x, int y);
+    void onHover(int x, int y);
 
     bool contains(int x, int y);
-    void setHoverState(bool state);
     void setText(std::string);
     void setSize(sf::Vector2f size);
     void setOutlineThickness(float size) {m_background.setOutlineThickness(size);};

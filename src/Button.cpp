@@ -1,4 +1,5 @@
 #include "Colours.hpp"
+#include "utils/Sounds.hpp"
 #include <SFML/Graphics/Color.hpp>
 #include <ui_elements/Button.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
@@ -59,8 +60,17 @@ bool Button::onClick(int x, int y) {
     return false;
 }
 
-void Button::setHoverState(bool state) {
-    m_hovered = state;
+void Button::onHover(int x, int y) {
+    if (contains(x,y)) {
+        if (!m_hovered) {
+            Sounds::click();
+            m_hovered = true;
+        }
+    } else {
+        if (m_hovered) {
+            m_hovered = false;
+        }
+    }
     updateColours();
 }
 

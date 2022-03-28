@@ -123,11 +123,7 @@ void PlayerVisualizer::onHover(int x, int y) {
         return;
     }
     if (g_visual_state.is_placing()) {
-        if (m_doneplacing_button.contains(x, y)) {
-            m_doneplacing_button.setOutlineThickness(3.0);
-        } else {
-            m_doneplacing_button.setOutlineThickness(0.0);
-        }
+        m_doneplacing_button.onHover(x, y);
     }
 
     if (g_visual_state.is_discarding() &&

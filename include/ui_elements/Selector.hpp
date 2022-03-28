@@ -62,6 +62,11 @@ public:
         return false;
     }
 
+    void onHover(int x, int y) {
+        m_prev_triangle.onHover(x, y);
+        m_next_triangle.onHover(x, y);
+    }
+
     float getWidth() {
         if (m_style == SCROLL) {
             return m_text_width + m_prev_triangle.get_height() + m_next_triangle.get_height();

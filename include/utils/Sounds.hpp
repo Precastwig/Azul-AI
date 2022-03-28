@@ -7,11 +7,9 @@ class Sounds {
 public:
     Sounds();
 
-    void pop(float pitch = 1.0);
-
-private:
-    sf::Sound m_sound;
-    sf::SoundBuffer m_pop_sound_buff;
+    static void pop(float pitch = 1.0);
+    static void click(float pitch = 1.0);
+    static void dong(float pitch = 1.0);
 };
 
 #endif

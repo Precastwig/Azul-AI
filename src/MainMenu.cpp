@@ -1,5 +1,6 @@
 #include "players/RandomAI.hpp"
 #include "ui_elements/Selector.hpp"
+#include "utils/Sounds.hpp"
 #include "utils/helper_enums.hpp"
 #include <algorithm>
 #include <ui_elements/MainMenu.hpp>
@@ -39,9 +40,19 @@ void MainMenu::onHover(int x, int y) {
     }
 
     if (g_menu_state == MenuState::MAIN) {
-        m_newgame.setHoverState(m_newgame.contains(x, y));
-        m_exit.setHoverState(m_exit.contains(x, y));
-        m_settings.setHoverState(m_settings.contains(x, y));
+        m_newgame.onHover(x, y);
+        m_exit.onHover(x, y);
+        m_settings.onHover(x, y);
+    }
+
+    if (g_menu_state == MenuState::NEWGAME) {
+        m_num_players.onHover(x, y);
+        for (auto& c_s : m_player_colour_selectors) {
+            c_s.onHover(x, y);
+        }
+        for (auto& t_s : m_player_type_selectors) {
+            t_s.onHover(x, y);
+        }
     }
 }
 
