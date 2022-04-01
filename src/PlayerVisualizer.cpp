@@ -103,6 +103,7 @@ void PlayerVisualizer::onClick(int x, int y) {
         it != tiles.rend(); ++it ) { 
             std::shared_ptr<Tile> tile = *it;
             if (tile->contains(x, y)) {
+                Sounds::crumple();
                 m_player->discardTile(tile);
                 return;
             }

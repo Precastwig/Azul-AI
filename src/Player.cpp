@@ -152,6 +152,7 @@ void Player::pickBonusPieces() {
 	sortTiles();
 	// Remove the tiles from the bonus board
 	m_bag->takeRewardTiles(choices);
+	g_player_info.updateVisuals();
 }
 
 void Player::pass() {

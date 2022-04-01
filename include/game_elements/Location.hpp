@@ -155,12 +155,9 @@ public:
 	}
 	const int count(Direction dir, cIndex index) {
 		int score = 0;
-		if (m_visual_tiles[index.getIndex()]->isFilled()) {
-			if (score >= 6) {
-				return score;
-			}
-			cIndex next = dir == UP ? index + 1 : index - 1;
-			return 1 + count(dir, next);
+		while(m_visual_tiles[index.getIndex()]->isFilled() && score <= 6) {
+			index = dir == UP ? index + 1 : index - 1;
+			score++;
 		}
 		return score;
 	}

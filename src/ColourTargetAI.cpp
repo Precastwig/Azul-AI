@@ -148,8 +148,9 @@ PickingChoice ColourTargetAI::pickTile(
 
 double ColourTargetAI::evaluatePlacingChoice(PlacingChoice& choice, TileType bonusCol) {
     // Evaluate colour, higher ones are better?
-    double score = choice.cost.num_colour + (choice.cost.num_bonus * 0.5);
+    double score = choice.points_gained(); 
     score *= m_tile_picking_weights[choice.cost.colour];
+    score += (choice.cost.num_colour + (choice.cost.num_bonus * 0.5));
     if (choice.star->colour() == LocationType::CENTRE_STAR) {
         // Penalty?
         score -= 1;

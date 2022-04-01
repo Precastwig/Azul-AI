@@ -43,10 +43,11 @@ void RoundVisualizer::spinTile() {
     float total_spin = 720;
     sf::Clock clock;
     while (curr_spin < total_spin) {
-        clock.restart();
         float time = clock.getElapsedTime().asSeconds();
-        m_bonusmarkers[m_current_round].rotate(spin_velocity * time);
-        curr_spin += spin_velocity * time;
+        clock.restart();
+        float spinby = spin_velocity * time;
+        m_bonusmarkers[m_current_round].rotate(spinby);
+        curr_spin += spinby;
     }
 }
 

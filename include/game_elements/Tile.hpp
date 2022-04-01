@@ -4,6 +4,7 @@
 #include "Logger.hpp"
 #include "Colours.hpp"
 #include "ui_elements/CustomShape.hpp"
+#include "utils/Sounds.hpp"
 #include <vector>
 #include <string>
 #include <cmath>
@@ -37,7 +38,7 @@ public:
 			PURPLE
 		};
 	}
-	Tile(TileType t, sf::Vector2f size = sf::Vector2f(DEFAULT_TILE_SIZE_X,DEFAULT_TILE_SIZE_Y)) : m_t(t), m_size(size) {
+	Tile(TileType t, sf::Vector2f size = sf::Vector2f(DEFAULT_TILE_SIZE_X,DEFAULT_TILE_SIZE_Y)) : m_t(t), m_size(size), m_hover_thickness(2.0) {
 		setPointCount(4);
 		setPoint(0, sf::Vector2f(0,DEFAULT_TILE_SIZE_Y));
 		setPoint(1, sf::Vector2f(-DEFAULT_TILE_SIZE_X,0));
@@ -81,6 +82,7 @@ private:
 	}
 	TileType m_t;
 	sf::Vector2f m_size = sf::Vector2f(0,0);
+	float m_hover_thickness;
 };
 
 #endif

@@ -69,21 +69,38 @@ bool Factory::contains(int x, int y) {
 void Factory::onHover(int x, int y, const TileType& bonus, const bool& isCentre) {
 	TileType hovertype = TileType::NONE;
 	for (std::shared_ptr<Tile> tile : m_tiles) {
-		if (tile->colour() != bonus && tile->contains(x, y)) {
-			hovertype = tile->colour();
-			break;
+		if (tile->contains(x, y)) {
+			if (tile->getOutlineThickness() > 0.0) {
+				// Already highlighted
+				return;
+			}
+			if (tile->colour() != bonus) {
+				hovertype = tile->colour();
+				Sounds::click(1.5);
+				break;
+			} else if (isOnlyBonus(bonus)) {
+				tile->setOutlineThickness(2.0);
+				hovertype = tile->colour();
+				Sounds::click(1.5);
+				break;
+			}
 		}
 	}
-	bool one_bonus = false;
-	for (std::shared_ptr<Tile> tile : m_tiles) {
-		if (hovertype == tile->colour() ) {
-			tile->setOutlineThickness(2.0);
-		} else if (hovertype != TileType::NONE && !one_bonus && tile->colour() == bonus) {
-			tile->setOutlineThickness(2.0);
-			one_bonus = true;
-		} else {
-			tile->setOutlineThickness(0.0);
+	if (!isOnlyBonus(bonus)) {
+		bool one_bonus = false;
+		for (std::shared_ptr<Tile> tile : m_tiles) {
+			if (hovertype == tile->colour()) {
+				tile->setOutlineThickness(2.0);
+			} else if (hovertype != TileType::NONE && !one_bonus && tile->colour() == bonus) {
+				tile->setOutlineThickness(2.0);
+				one_bonus = true;
+			} else {
+				tile->setOutlineThickness(0.0);
+			}
 		}
+	} else {
+		//if (hov)
+		// Make the hovered bonus tile become unhovered
 	}
 	std::shared_ptr<Player> curr_player = g_player_info.getCurrentPlayer();
 	if (isCentre && !g_player_info.centreTaken()) {
@@ -126,15 +143,15 @@ void Factory::onClick(int x, int y, Game& game) {
 			if (m_first_tile) {
 				m_first_tile->setHovered(false);
 			}
-			Sounds::pop();
 			if (tile->colour() == game.getBonus()) {
 				// We want to allow picking bonus tiles if the factory only contains bonus tiles
 				if (isOnlyBonus(game.getBonus())) {
 					// Allow it
 					PickingChoice choice(TileType::NONE);
 					choice.with_bonus = true;
-					choice.factory = std::shared_ptr<Factory>(this);
+					choice.factory = shared_from_this();
 					game.pick_tile(choice);
+					Sounds::pop();
 					return;
 				} else {
 					// ??? TODO: something visual
@@ -144,6 +161,7 @@ void Factory::onClick(int x, int y, Game& game) {
 				choice.with_bonus = hasBonus(game.getBonus());
 				choice.factory = shared_from_this();
 				game.pick_tile(choice);
+				Sounds::pop();
 			}
 		}
 	}

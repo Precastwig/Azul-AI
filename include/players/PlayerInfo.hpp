@@ -74,6 +74,7 @@ public:
         starting_player = rand() % players.size();
         current_player = cIndex(starting_player + 1, players.size());
     }
+    void updateVisuals();
 private:
     // A temporary element to visualize because of some hovering
     sf::Drawable* hovered_element; 

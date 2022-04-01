@@ -235,6 +235,11 @@ void Game::draw(sf::RenderTarget &target, sf::RenderStates states) const {
 	}
 	
 	if (g_visual_state.is_finish()) {
+		for (Board* b : getVisualisedBoards()) {
+			if (b) {
+				b->draw(target, states);
+			}
+		}
 		m_finish_screen->draw(target, states);
 	}
 

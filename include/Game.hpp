@@ -72,9 +72,9 @@ public:
 	// Get the current bonus tile type
 	TileType getBonus();
 
+	void updatePlayerVisualizers();
 private:
 	std::vector<Board*> getVisualisedBoards() const;
-	void updatePlayerVisualizers();
 	void positionTiles();
 
 	//-------------------------------------------------------------------

@@ -28,6 +28,15 @@ struct PlacingChoice {
 				cost.num_colour == c.cost.num_colour &&
 				cost.num_bonus == c.cost.num_bonus);
 	};
+	int points_gained() const {
+		// Count points gained
+		int points = 1 + star->count(Location::UP, index + 1);
+		if (points < 6) {
+			// Otherwise we would be double-counting the placed piece
+			points += star->count(Location::DOWN, index - 1);
+		}
+		return points;
+	}
 	std::string to_string() const {
 		if (star) {
 			return star->toString() + " index " + std::to_string(index.getIndex()) + ", " + std::to_string(cost.num_colour) + " " + Tile::toString(cost.colour) + ", " + std::to_string(cost.num_bonus) + " bonus";

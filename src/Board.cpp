@@ -218,12 +218,7 @@ void Board::placeTile(PlacingChoice choice, Player* me) {
 	}
 
 	// Count points gained
-	int points = choice.star->count(Location::UP, choice.index);
-	if (points < 6) {
-		// Otherwise we would be double-counting the placed piece
-		cIndex next = choice.index - 1;
-		points += choice.star->count(Location::DOWN, next);
-	}
+	int points = choice.points_gained();
 	points += bonusPointsAwarded();
 
 	// Give the player their points
