@@ -45,11 +45,13 @@ Game::Game(std::vector<std::pair<PlayerType, PlayerColour::Colour>> players, sf:
 		std::shared_ptr<Player> new_player = nullptr;
 		sf::Vector2f board_position;
 		// The size of the board is hard coded for now
+		bool bonus_right = false;
 		if (i % 2 != 0) {
 			// The board lies on the right
 			board_position.x = playerVisualpositions[i].x - 300;
 		} else {
 			// The board lies on the left
+			bonus_right = true;
 			board_position.x = playerVisualSize.x + 300;
 		}
 		if (i < 2) {
@@ -59,12 +61,22 @@ Game::Game(std::vector<std::pair<PlayerType, PlayerColour::Colour>> players, sf:
 			// The board lies on the bottom half of the screen
 			board_position.y = playerVisualpositions[i].y + 300;
 		}
+		sf::Vector2f board_size(
+			(m_screen_size.x / 2.0) - playerVisualSize.x,
+			600
+		);
+		std::unique_ptr<Board> new_board = std::make_unique<Board>(
+			board_position,
+			board_size,
+			bonus_right,
+			board_size.x - 600
+		);
 		switch (players[i].first) {
 			case HUMAN:
 				new_player = std::make_shared<Human>(
 					players[i].second, 
 					m_bag, 
-					board_position
+					std::move(new_board)
 				);
 				break;
 			case COLOURTARGET:
@@ -72,7 +84,7 @@ Game::Game(std::vector<std::pair<PlayerType, PlayerColour::Colour>> players, sf:
 				new_player = std::make_shared<ColourTargetAI>(
 					players[i].second,
 					m_bag,
-					board_position,
+					std::move(new_board),
 					Tile::all_tile_types()[rand() % Tile::all_tile_types().size()]
 				);
 				break;
@@ -81,7 +93,7 @@ Game::Game(std::vector<std::pair<PlayerType, PlayerColour::Colour>> players, sf:
 				new_player = std::make_shared<RandomAI>(
 					players[i].second, 
 					m_bag,
-					board_position
+					std::move(new_board)
 				);
 		}
 		g_player_info.addPlayer(new_player);

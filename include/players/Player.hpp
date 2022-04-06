@@ -11,7 +11,7 @@ class Game;
 
 class Player {
 public:
-	Player(PlayerColour playercolour, std::shared_ptr<Bag> bag, sf::Vector2f boardpos);
+	Player(PlayerColour playercolour, std::shared_ptr<Bag> bag, std::unique_ptr<Board> board);
 	virtual ~Player() = default;
 
 	// Virtuals that need overriding because an in-game choice is needed
@@ -62,7 +62,7 @@ public:
 		return m_col;
 	};
 	Board* getBoardPtr() {
-		return &m_board;
+		return m_board.get();
 	}
 
 	// Resolvers
@@ -109,7 +109,7 @@ protected:
 	// Flag for when the player has discarded down to 4 tiles remaining
 	bool m_discarded;
 	// The board
-	Board m_board;
+	std::unique_ptr<Board> m_board;
 	// The tiles taken to be placed on the board
 	int m_stored_from_previous_round;
 	PlayerColour m_col;

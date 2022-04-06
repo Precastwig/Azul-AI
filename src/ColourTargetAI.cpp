@@ -8,7 +8,7 @@
 #include <vector>
 #include <set>
 
-ColourTargetAI::ColourTargetAI(PlayerColour colour, std::shared_ptr<Bag> bag, sf::Vector2f boardpos, TileType target) : Player(colour, bag, boardpos), m_target_colour(target) {
+ColourTargetAI::ColourTargetAI(PlayerColour colour, std::shared_ptr<Bag> bag, std::unique_ptr<Board> board, TileType target) : Player(colour, bag, std::move(board)), m_target_colour(target) {
     // Need to apply weights to the different colours
     // This will change as ones board fills up
     m_tile_picking_weights = generatePickingWeightsFromBoard();
@@ -36,7 +36,7 @@ std::vector<double> ColourTargetAI::generatePickingWeightsFromBoardImpl(std::vec
     std::vector<int> numWanted = {0,0,0,0,0,0};
     for (TileType tilecol : Tile::all_tile_types()) {
         int sumOfCost = 0;
-        std::vector<PlacingChoice> choices = m_board.getPlacingChoicesOfCol(tilecol);
+        std::vector<PlacingChoice> choices = m_board->getPlacingChoicesOfCol(tilecol);
         for (PlacingChoice c : choices) {
             if (tilecol == m_target_colour || c.cost.num_colour + c.cost.num_bonus <= 4) {
                 sumOfCost  += c.cost.num_colour;
@@ -48,9 +48,9 @@ std::vector<double> ColourTargetAI::generatePickingWeightsFromBoardImpl(std::vec
         // Bonus stuff, we can only evaluate bonus info if we know the value of all the tile colours
         if (currentWeights) {  
             // Check 2/1 of tilcol and 3/4 of next colour
-            int tilesNeededForStatue = m_board.tilesNeededToGetStatue(Location::location_from_col(tilecol));
+            int tilesNeededForStatue = m_board->tilesNeededToGetStatue(Location::location_from_col(tilecol));
             // Check 5/6 of tilecol
-            int tilesNeededForWindow = m_board.tilesNeededToGetWindow(Location::location_from_col(tilecol)) - 1;
+            int tilesNeededForWindow = m_board->tilesNeededToGetWindow(Location::location_from_col(tilecol)) - 1;
             // -1 for the extra bonus that the window gives
 
             // Ignore columns, for now, it's not worth it? Is it?

@@ -52,7 +52,7 @@ PlacingChoice Human::placeTile(Tile bonus) {
 
 		std::shared_ptr<Location> star_choice = location_choices[star_choice_index];
 
-		std::cout << "Choose a placement:\n" << m_board.toString(star_choice);
+		std::cout << "Choose a placement:\n" << m_board->toString(star_choice);
 		std::vector<PlacingChoice> filteredChoices = PlacingChoice::filterChoicesFromLocation(choices, star_choice->colour());
 		for (PlacingChoice choice : choices) {
 			if (choice.star == star_choice) {

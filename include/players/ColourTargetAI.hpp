@@ -9,7 +9,7 @@
 // and attemtps to fill the centre star in the relevent spots
 class ColourTargetAI : public Player {
 public:
-    ColourTargetAI(PlayerColour colour, std::shared_ptr<Bag> bag, sf::Vector2f boardpos, TileType target);
+    ColourTargetAI(PlayerColour colour, std::shared_ptr<Bag> bag, std::unique_ptr<Board> board, TileType target);
     ~ColourTargetAI() = default;
 
     // Overrides from Player

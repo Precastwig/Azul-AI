@@ -12,7 +12,7 @@
 
 extern GameState g_visual_state;
 
-Board::Board(sf::Vector2f position)
+Board::Board(sf::Vector2f position, sf::Vector2f total_size, bool display_bonus_right, int bonus_size) : m_display_bonus_on_right(display_bonus_right)
 {
 	// Initialise lists
 	double rotation = (11 * M_PI) / 6;
@@ -34,7 +34,7 @@ Board::Board(sf::Vector2f position)
 		m_stars.push_back(star);
 	}
 
-	// Intitialise bonuses
+	// Intitialise tile bonuses
 	for (int i = 0; i < 6; ++i) {
 		m_windows.push_back(false);
 		m_statues.push_back(false);
@@ -46,13 +46,80 @@ Board::Board(sf::Vector2f position)
 	}
 	m_colours_not_in_centre = Tile::all_tile_types();
 
-	m_background = sf::RectangleShape(sf::Vector2f(600,600));
+	int height = total_size.y;
+	int width = total_size.x - bonus_size;
+	m_background = sf::RectangleShape(sf::Vector2f(width,height));
 	m_background.setOrigin(sf::Vector2f(
 		m_background.getSize().x / 2.0,
 		m_background.getSize().y / 2.0
 	));
 	m_background.setPosition(position);
 	m_background.setFillColor(sf::Color::White);
+
+	m_bonus_background = sf::RectangleShape(sf::Vector2f(bonus_size, height));
+	m_bonus_background.setOrigin(sf::Vector2f(
+		m_bonus_background.getSize().x / 2.0,
+		m_bonus_background.getSize().y / 2.0
+	));
+	int bonus_bg_x_pos = (m_display_bonus_on_right) ? 
+		position.x + (width / 2.0) + (bonus_size / 2.0) :
+		position.x - (width / 2.0) - (bonus_size / 2.0);
+	m_bonus_background.setPosition(sf::Vector2f(
+		bonus_bg_x_pos,
+		position.y
+	));
+	m_bonus_background.setFillColor(sf::Color(61,61,61, 255));
+
+	// Work out tile size
+	sf::Vector2f bonus_point_tile_size(
+		(height / 22.0) * (5.0 / 3.0),
+		(height / 22.0)
+	);
+	sf::Vector2f bonus_point_tile_pos(
+		bonus_bg_x_pos,
+		position.y - height / 2.0 + bonus_point_tile_size.y
+	);
+	for (size_t i = 1; i <= 4; ++i) {
+		// Make the 1-4 bonus score tiles
+		std::shared_ptr<Tile> new_t = std::make_shared<Tile>(
+			TileType::NONE, bonus_point_tile_size
+		);
+		new_t->setRotation(0.0);
+		new_t->setPosition(bonus_point_tile_pos);
+		new_t->setFillColor(sf::Color(153,153,153,255));
+		new_t->setOutlineColor(sf::Color(255,255,255,255));
+		new_t->setOutlineThickness(1.0);
+
+		bonus_point_tile_pos.y += bonus_point_tile_size.y * 2;
+		m_bonus_point_nums.push_back(new_t);
+		sf::Text new_text;
+		new_text.setFont(g_font);
+		new_text.setCharacterSize(20);
+		new_text.setString(std::to_string(i));
+		new_text.setColor(sf::Color::Black);
+		m_bonus_point_nums_nums.push_back(new_text);
+	}
+	for (TileType type : Tile::all_tile_types()) {
+		std::shared_ptr<Tile> new_t = std::make_shared<Tile>(
+			type, bonus_point_tile_size
+		);
+		new_t->setRotation(0.0);
+		new_t->setPosition(bonus_point_tile_pos);
+		new_t->setOutlineColor(sf::Color(255,255,255,255));
+		new_t->setOutlineThickness(1.0);
+
+		bonus_point_tile_pos.y += bonus_point_tile_size.y * 2;
+		m_bonus_point_colours.push_back(new_t);
+	}
+	std::shared_ptr<Tile> new_t = std::make_shared<Tile>(
+		TileType::NONE, bonus_point_tile_size
+	);
+	new_t->setRotation(0.0);
+	new_t->setPosition(bonus_point_tile_pos);
+	new_t->setFillColor(sf::Color(200,200,200,255));
+	new_t->setOutlineColor(sf::Color(255,255,255,255));
+	new_t->setOutlineThickness(1.0);
+	m_bonus_point_colours.push_back(new_t);
 }
 
 void Board::onHover(int xpos, int ypos, Game& game) {
@@ -81,17 +148,22 @@ void Board::onRight(TileType bonus) {
 
 void Board::draw (sf::RenderTarget &target, sf::RenderStates states) const {
 	target.draw(m_background, states);	
+	target.draw(m_bonus_background, states);
+	for (std::shared_ptr<Tile> t : m_bonus_point_nums) {
+		target.draw(*t, states);
+	}
+	for (auto& n : m_bonus_point_nums_nums) {
+		target.draw(n, states);
+	}
+	for (std::shared_ptr<Tile> t : m_bonus_point_colours) {
+		target.draw(*t, states);
+	}
 	// Draw each "star" of placing choices, they're not really placing choices
 	for (std::shared_ptr<Location> loc : m_stars) {
 		loc->draw(target, states);
 	}
 	
 	// Draw windows/statues/columns
-
-
-	// on hover, show all placing choices for that space,
-	// Then on click, bring that submenu up permanently
-	// Then allow user to click on each of them
 }
 
 std::vector<TileType> Board::getAdjacentStarColours(TileType starCol) {
@@ -183,7 +255,7 @@ int Board::bonusPiecesAwarded() {
 int Board::bonusPointsAwarded() {
 	int points = 0;
 	for (std::shared_ptr<Location> star : m_stars) {
-		if (star->full()) {
+		if (star->full() && !star->scoredFillPoints()) {
 			points += star->pointsForFill();
 		}
 	}

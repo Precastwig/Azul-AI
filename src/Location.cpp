@@ -9,7 +9,7 @@
 
 extern PlayerInfo g_player_info;
 
-Location::Location(LocationType l) : m_l(l), m_starting_rotation(0.0), m_current_pos() {
+Location::Location(LocationType l) : m_l(l), m_starting_rotation(0.0), m_current_pos(), m_scored_fill_points(false) {
     for (size_t j = 0; j < 6; ++j) {
         m_visual_tiles.push_back(std::make_shared<BoardTile>(j, get_tile_type()));
     }

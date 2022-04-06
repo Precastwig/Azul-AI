@@ -16,7 +16,7 @@ class Player;
 
 class Board : public sf::Drawable {
 public:
-	Board(sf::Vector2f position);
+	Board(sf::Vector2f position, sf::Vector2f total_size, bool display_bonus_right, int bonus_size);
 
 	// Input responding functions
 	void onHover(int xpos, int ypos, Game& game);
@@ -60,6 +60,13 @@ private:
 
 	// The bonus points
 	std::vector<bool> m_full_numbers;
+
+	// Bonus markers
+	bool m_display_bonus_on_right;
+	std::vector<std::shared_ptr<Tile>> m_bonus_point_nums;
+	std::vector<sf::Text> m_bonus_point_nums_nums;
+	std::vector<std::shared_ptr<Tile>> m_bonus_point_colours;
+	sf::RectangleShape m_bonus_background;
 
 	// The tile spaces
 	std::vector<std::shared_ptr<Location>> m_stars;

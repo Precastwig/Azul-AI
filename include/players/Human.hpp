@@ -6,7 +6,7 @@
 
 class Human : public Player {
 public:
-	Human(PlayerColour colour, std::shared_ptr<Bag> bag, sf::Vector2f boardpos) : Player(colour, bag, boardpos) {};
+	Human(PlayerColour colour, std::shared_ptr<Bag> bag, std::unique_ptr<Board> board) : Player(colour, bag, std::move(board)) {};
 	~Human() = default;
 
 	// Decision overrides

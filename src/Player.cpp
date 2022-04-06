@@ -13,8 +13,8 @@
 
 extern PlayerInfo g_player_info;
 
-Player::Player(PlayerColour playercolour, std::shared_ptr<Bag> bag, sf::Vector2f boardpos)
-	:  m_done_placing(false), m_discarded(false), m_board(boardpos), m_bag(bag), m_col(playercolour), m_points(0), m_bonus_to_choose(0), m_stored_from_previous_round(0) {
+Player::Player(PlayerColour playercolour, std::shared_ptr<Bag> bag, std::unique_ptr<Board> board)
+	:  m_done_placing(false), m_discarded(false), m_board(std::move(board)), m_bag(bag), m_col(playercolour), m_points(0), m_bonus_to_choose(0), m_stored_from_previous_round(0) {
 };
 
 void Player::addPoints(int points) {
@@ -173,13 +173,13 @@ int Player::howManyColourStored(TileType t, std::vector<std::shared_ptr<Tile>> s
 }
 
 std::vector<PlacingChoice> Player::getAllowedPlacingChoices(Tile bonus) {
-	std::vector<PlacingChoice> all_choices = m_board.getAllPlacingChoices();
+	std::vector<PlacingChoice> all_choices = m_board->getAllPlacingChoices();
 
 	std::vector<PlacingChoice> valid_choices;
 	for (PlacingChoice choice : all_choices) {
 		std::vector<TileType> potentialCostColours;
 		if (choice.cost.colour == TileType::NONE) {
-			potentialCostColours = m_board.getUnusedColoursInCentre();
+			potentialCostColours = m_board->getUnusedColoursInCentre();
 		} else {
 			potentialCostColours.push_back(choice.cost.colour);
 		}
@@ -234,7 +234,7 @@ void Player::resolvePlacingChoice(PlacingChoice& choice, TileType bonus) {
 		// Put the used tiles in the bin
 		m_bag->toBin(toBin);
 		// Place the tile on the board (this scores us points)
-		m_board.placeTile(choice, this);
+		m_board->placeTile(choice, this);
 	} else if (!m_discarded) {
 		// Remove the tiles down to 4
 		discardDownToFour();
@@ -290,7 +290,7 @@ std::string Player::toString() {
 	if (m_done_placing) {
 		str += "\nFinished placing\n";
 	} else {
-		str += "\n" + m_board.toString();
+		str += "\n" + m_board->toString();
 	}
 	return str;
 }

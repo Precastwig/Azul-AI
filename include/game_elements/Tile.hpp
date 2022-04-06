@@ -40,10 +40,10 @@ public:
 	}
 	Tile(TileType t, sf::Vector2f size = sf::Vector2f(DEFAULT_TILE_SIZE_X,DEFAULT_TILE_SIZE_Y)) : m_t(t), m_size(size), m_hover_thickness(2.0) {
 		setPointCount(4);
-		setPoint(0, sf::Vector2f(0,DEFAULT_TILE_SIZE_Y));
-		setPoint(1, sf::Vector2f(-DEFAULT_TILE_SIZE_X,0));
-		setPoint(2, sf::Vector2f(0, -DEFAULT_TILE_SIZE_Y));
-		setPoint(3, sf::Vector2f(DEFAULT_TILE_SIZE_X, 0));
+		setPoint(0, sf::Vector2f(0,m_size.y));
+		setPoint(1, sf::Vector2f(-m_size.x,0));
+		setPoint(2, sf::Vector2f(0, -m_size.y));
+		setPoint(3, sf::Vector2f(m_size.x, 0));
 		setRotation(rand() % 180);
 		setupColour();
 		update();

@@ -6,9 +6,7 @@
 // A player object that just makes random decisions
 class RandomAI : public Player {
 public:
-	RandomAI(PlayerColour colour, std::shared_ptr<Bag> bag, sf::Vector2f boardpos) : Player(colour, bag, boardpos) {
-		srand (time(NULL));
-	};
+	RandomAI(PlayerColour colour, std::shared_ptr<Bag> bag, std::unique_ptr<Board> board) : Player(colour, bag, std::move(board)) {};
 	~RandomAI() = default;
 
 	// Decision overrides
