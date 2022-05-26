@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <string>
 #include <vector>
@@ -50,6 +51,8 @@ private:
 	int bonusPiecesAwarded();
 	int bonusPointsAwarded();
 
+	void setHoverTextStrAndPos(sf::String str, float xpos, float ypos);
+
 	// The bonus tiles
 	// One window per colour (5 and 6)
 	std::vector<bool> m_windows;
@@ -67,6 +70,7 @@ private:
 	std::vector<sf::Text> m_bonus_point_nums_nums;
 	std::vector<std::shared_ptr<Tile>> m_bonus_point_colours;
 	sf::RectangleShape m_bonus_background;
+	std::shared_ptr<sf::Text> m_hover_text;
 
 	// The tile spaces
 	std::vector<std::shared_ptr<Location>> m_stars;

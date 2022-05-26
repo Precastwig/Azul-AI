@@ -122,7 +122,6 @@ public:
 			// We need to set the tile to the correct colour
 			tile->setTileCol(col);
 		}
-		m_visual_tiles[index]->setFilled(true);
 	}
 	const void place(const cIndex& index, TileType col) {
 		place(index.getIndex(), col);

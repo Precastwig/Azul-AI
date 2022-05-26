@@ -1,5 +1,6 @@
 #include "game_elements/PlayerVisualizer.hpp"
 #include "players/Player.hpp"
+#include "ui_elements/Button.hpp"
 #include "utils/helper_enums.hpp"
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
@@ -43,8 +44,9 @@ PlayerVisualizer::PlayerVisualizer(std::shared_ptr<Player> player, sf::Vector2f 
 
 void PlayerVisualizer::donePlacing() {
     if (m_player->getTiles().size() <= 4) {
-        m_player->pass();
         g_visual_state.set_placing();
+        m_doneplacing_button.setText("Done placing"); // Reset button text
+        m_player->pass();
         return;
     }
     if (g_visual_state.is_placing()) {
@@ -91,6 +93,7 @@ void PlayerVisualizer::updatePlayerTilePositions() {
 
 void PlayerVisualizer::onClick(int x, int y) {
     if (g_player_info.getCurrentPlayer() != m_player) {
+        g_logger.log(Logger::INFO, "Not this players turn");
         return;
     }
     if (g_visual_state.is_discard_button_clickable()) {

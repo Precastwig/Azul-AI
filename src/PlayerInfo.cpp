@@ -15,6 +15,7 @@ void PlayerInfo::passOrChangeState() {
     } else {
         m_game_ptr->switchToPickingStage();
     }
+    updateVisuals();
 }
 
 void PlayerInfo::updateVisuals() {

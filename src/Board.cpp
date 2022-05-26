@@ -9,8 +9,10 @@
 #include <memory>
 #include <vector>
 #include <game_elements/Location.hpp>
+#include <players/PlayerInfo.hpp>
 
 extern GameState g_visual_state;
+extern PlayerInfo g_player_info;
 
 Board::Board(sf::Vector2f position, sf::Vector2f total_size, bool display_bonus_right, int bonus_size) : m_display_bonus_on_right(display_bonus_right)
 {
@@ -70,15 +72,22 @@ Board::Board(sf::Vector2f position, sf::Vector2f total_size, bool display_bonus_
 	));
 	m_bonus_background.setFillColor(sf::Color(61,61,61, 255));
 
+	double bonus_point_tile_spacing = 5.0;
+	int num_bonus_point_tiles = 11;
+	int num_spacings = num_bonus_point_tiles + 1;
+	double bonus_point_tile_height = (height - (num_spacings * bonus_point_tile_spacing)) / (num_bonus_point_tiles * 2.0);
 	// Work out tile size
 	sf::Vector2f bonus_point_tile_size(
-		(height / 22.0) * (5.0 / 3.0),
-		(height / 22.0)
+		bonus_point_tile_height * (5.0 / 3.0),
+		bonus_point_tile_height
 	);
 	sf::Vector2f bonus_point_tile_pos(
 		bonus_bg_x_pos,
-		position.y - height / 2.0 + bonus_point_tile_size.y
+		position.y - height / 2.0 + bonus_point_tile_size.y + bonus_point_tile_spacing
 	);
+	auto next_bonus_tile_pos = [bonus_point_tile_spacing, bonus_point_tile_size](sf::Vector2f& position) {
+		position.y += bonus_point_tile_spacing + (bonus_point_tile_size.y * 2);
+	};
 	for (size_t i = 1; i <= 4; ++i) {
 		// Make the 1-4 bonus score tiles
 		std::shared_ptr<Tile> new_t = std::make_shared<Tile>(
@@ -86,45 +95,75 @@ Board::Board(sf::Vector2f position, sf::Vector2f total_size, bool display_bonus_
 		);
 		new_t->setRotation(0.0);
 		new_t->setPosition(bonus_point_tile_pos);
-		new_t->setFillColor(sf::Color(153,153,153,255));
-		new_t->setOutlineColor(sf::Color(255,255,255,255));
+		new_t->setFillColor(sf::Color(153,153,153,100));
+		new_t->setOutlineColor(sf::Color(255,255,255,100));
 		new_t->setOutlineThickness(1.0);
 
-		bonus_point_tile_pos.y += bonus_point_tile_size.y * 2;
 		m_bonus_point_nums.push_back(new_t);
 		sf::Text new_text;
 		new_text.setFont(g_font);
 		new_text.setCharacterSize(20);
 		new_text.setString(std::to_string(i));
+		sf::FloatRect playerRect = new_text.getLocalBounds();
+    	new_text.setOrigin(playerRect.left + playerRect.width/2.0f,
+                        playerRect.top  + playerRect.height/2.0f);
 		new_text.setColor(sf::Color::Black);
+		new_text.setPosition(bonus_point_tile_pos);
 		m_bonus_point_nums_nums.push_back(new_text);
+		next_bonus_tile_pos(bonus_point_tile_pos);
 	}
-	for (TileType type : Tile::all_tile_types()) {
+	for (auto star : m_stars) {
 		std::shared_ptr<Tile> new_t = std::make_shared<Tile>(
-			type, bonus_point_tile_size
+			star->get_tile_type(), bonus_point_tile_size
 		);
 		new_t->setRotation(0.0);
 		new_t->setPosition(bonus_point_tile_pos);
-		new_t->setOutlineColor(sf::Color(255,255,255,255));
+		new_t->setOutlineColor(sf::Color(255,255,255,100));
 		new_t->setOutlineThickness(1.0);
+		if (new_t->colour() == NONE) {
+			// None doesn't have a default colour to take advantage of
+			new_t->setFillColor(sf::Color(200,200,200,100));
+		}
+		new_t->setOpacity(100);
 
-		bonus_point_tile_pos.y += bonus_point_tile_size.y * 2;
+		next_bonus_tile_pos(bonus_point_tile_pos);
 		m_bonus_point_colours.push_back(new_t);
 	}
-	std::shared_ptr<Tile> new_t = std::make_shared<Tile>(
-		TileType::NONE, bonus_point_tile_size
-	);
-	new_t->setRotation(0.0);
-	new_t->setPosition(bonus_point_tile_pos);
-	new_t->setFillColor(sf::Color(200,200,200,255));
-	new_t->setOutlineColor(sf::Color(255,255,255,255));
-	new_t->setOutlineThickness(1.0);
-	m_bonus_point_colours.push_back(new_t);
+}
+
+void Board::setHoverTextStrAndPos(sf::String str, float xpos, float ypos) {
+	if (m_hover_text) {
+		m_hover_text->setPosition(xpos + 15, ypos + 15);
+	} else {
+		m_hover_text = std::make_shared<sf::Text>();
+		m_hover_text->setFont(g_font);
+		m_hover_text->setCharacterSize(20);
+		m_hover_text->setColor(sf::Color::Green);
+		m_hover_text->setString(str);
+		m_hover_text->setPosition(xpos + 15, ypos + 15);
+	}
 }
 
 void Board::onHover(int xpos, int ypos, Game& game) {
 	for (std::shared_ptr<Location> loc : m_stars) {
 		loc->onHover(xpos, ypos, game);
+	}
+	if (g_visual_state.is_placing()) {
+		bool none = true;
+		for (size_t i = 0 ; i < m_bonus_point_nums.size(); ++i) {
+			if (m_bonus_point_nums[i]->contains(xpos, ypos)) {
+				setHoverTextStrAndPos("+" + std::to_string(all_nums_points[i]), xpos, ypos);
+				return;
+			}
+		}
+		for (size_t i = 0; i < m_bonus_point_colours.size(); ++i) {
+			if (m_bonus_point_colours[i]->contains(xpos, ypos)) {
+				setHoverTextStrAndPos("+" + std::to_string( m_stars[i]->pointsForFill()), xpos, ypos);
+				return;
+			}
+		}
+		// If we reach here then we need to remove the hover text
+		m_hover_text = nullptr;
 	}
 }
 
@@ -164,6 +203,11 @@ void Board::draw (sf::RenderTarget &target, sf::RenderStates states) const {
 	}
 	
 	// Draw windows/statues/columns
+
+	// Draw hover text
+	if (m_hover_text) {
+		target.draw(*m_hover_text, states);
+	}
 }
 
 std::vector<TileType> Board::getAdjacentStarColours(TileType starCol) {
@@ -254,9 +298,12 @@ int Board::bonusPiecesAwarded() {
 
 int Board::bonusPointsAwarded() {
 	int points = 0;
-	for (std::shared_ptr<Location> star : m_stars) {
+	for (size_t i = 0; i < m_stars.size(); ++i) {
+		std::shared_ptr<Location> star = m_stars[i];
 		if (star->full() && !star->scoredFillPoints()) {
 			points += star->pointsForFill();
+			m_bonus_point_colours[i]->setOpacity(255);
+			m_bonus_point_colours[i]->setOutlineThickness(3.0);
 		}
 	}
 	for (int i = 0; i < 4; ++i) {
@@ -269,6 +316,8 @@ int Board::bonusPointsAwarded() {
 			}
 			if (full) {
 				m_full_numbers[i] = true;
+				m_bonus_point_nums[i]->setOpacity(255);
+				m_bonus_point_nums[i]->setOutlineThickness(3.0);
 				points += all_nums_points[i];
 			}
 		}

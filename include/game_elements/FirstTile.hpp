@@ -11,7 +11,7 @@ extern sf::Font g_font;
 
 class FirstTile : public sf::Drawable {
 public:
-    FirstTile() : m_tile(TileType::NONE, sf::Vector2f(25, 15)) {
+    FirstTile() : m_tile(TileType::NONE) {
         m_tile.setFillColor(sf::Color::White);
         m_tile.setOutlineColor(sf::Color::Red);
         setHovered(false);

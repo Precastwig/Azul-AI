@@ -145,7 +145,9 @@ void MainMenu::updatePlayerSelectors() {
         m_player_type_selectors.push_back(newTypeSelector);
         float colour_x = position.x - (newTypeSelector.getWidth() * 1.5);
         Selector<PlayerColour::Colour> newColourSelector(SelectorType::SCROLL,sf::Vector2f(colour_x, player_y));
-        for (PlayerColour::Colour c : PlayerColour::all_colours()) {
+        std::vector<PlayerColour::Colour> colours = PlayerColour::all_colours();
+        std::rotate(colours.begin(), colours.begin() + m_player_colour_selectors.size(), colours.end());
+        for (PlayerColour::Colour c : colours) {
             newColourSelector.addOption(PlayerColour::toString(c), c);
         }
         m_player_colour_selectors.push_back(newColourSelector);

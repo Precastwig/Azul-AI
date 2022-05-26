@@ -54,6 +54,8 @@ bool Button::onClick(int x, int y) {
     sf::FloatRect rect = m_background.getGlobalBounds();
     if (rect.contains(x,y)) {
         m_callback();
+        m_hovered = false;
+        updateColours();
         //setState(!m_current);
         return true;
     }

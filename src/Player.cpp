@@ -159,7 +159,7 @@ void Player::pass() {
 	m_done_placing = true;
 	m_discarded = true;
 	m_stored_from_previous_round = m_stored_tiles.size();
-	g_player_info.nextTurn();	
+	g_player_info.passOrChangeState();	
 }
 
 int Player::howManyColourStored(TileType t, std::vector<std::shared_ptr<Tile>> stored) {

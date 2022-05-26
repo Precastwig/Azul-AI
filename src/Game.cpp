@@ -415,6 +415,7 @@ void Game::switchToPlacingStage() {
 void Game::switchToPickingStage() {
 	g_visual_state.set_picking();
 	g_player_info.setCentreTaken(false);
+	g_player_info.setTurnToStartingPlayer();
 	if (m_round_num < m_bonus_tile_order.size() - 1) {
 		m_round_num++;
 		m_round_visualizer->nextround();
@@ -431,8 +432,6 @@ void Game::switchToPickingStage() {
 }
 
 void Game::place_tile(PlacingChoice& placed) {
-	// The m_current_player var should be correct at this point
-	// But lets check anyway
 	std::shared_ptr<Player> player = g_player_info.getCurrentPlayer();
 	if (player->finishedPlacing() || placed.star == nullptr) {
 		g_logger.log(Logger::ERROR, "Place_tile called when current player has finished placing");

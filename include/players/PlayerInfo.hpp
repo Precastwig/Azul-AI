@@ -25,6 +25,11 @@ public:
     void setHoveredElement(sf::Drawable* element) {
         hovered_element = element;
     }
+    void setTurnToStartingPlayer() {
+        while (getCurrentPlayer() != getStartingPlayer()) {
+            nextTurn();
+        }
+    }
     sf::Drawable* getHoveredElement() {
         return hovered_element;
     }

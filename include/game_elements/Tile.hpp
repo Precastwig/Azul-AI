@@ -5,6 +5,7 @@
 #include "Colours.hpp"
 #include "ui_elements/CustomShape.hpp"
 #include "utils/Sounds.hpp"
+#include <SFML/Graphics/Color.hpp>
 #include <vector>
 #include <string>
 #include <cmath>
@@ -72,6 +73,14 @@ public:
 	}
 	void setType(TileType t) {
 		m_t = t;
+	}
+	void setOpacity(int newOpacity) {
+		sf::Color fc = getFillColor();
+		fc.a = newOpacity;
+		setFillColor(fc);
+		sf::Color oc = getOutlineColor();
+		oc.a = newOpacity;
+		setOutlineColor(oc);
 	}
 	sf::Vector2f getSize() {
 		return m_size;
