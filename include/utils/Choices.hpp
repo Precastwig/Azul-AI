@@ -35,7 +35,7 @@ struct PlacingChoice {
 			// Otherwise we would be double-counting the placed piece
 			points += star->count(Location::DOWN, index - 1);
 		}
-		return points;
+		return std::min(points, 6);
 	}
 	std::string to_string() const {
 		if (star) {

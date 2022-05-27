@@ -53,6 +53,9 @@ void Bag::fillFactory(std::shared_ptr<Factory> f) {
 		std::shared_ptr<Tile> pulled = pullTile();
 		assert(pulled != nullptr);
 		if (pulled != nullptr) {
+			// They could have had their rotation set from being in someones control
+			// So we should randomize it's rotation here to make sure it looks right
+			pulled->setRotation(rand() % 180);
 			f->place(pulled);
 		} else {
 			g_logger.log(Logger::WARNING, "Nothing pulled from bag!");

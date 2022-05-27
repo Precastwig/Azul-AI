@@ -133,10 +133,12 @@ public:
 		return strings[m_l];
 	}
 	const int pointsForFill() {
-		m_scored_fill_points = true;
 		return m_points[m_l];
 	}
-	const bool scoredFillPoints() {
+	const void scoredFillPoints() {
+		m_scored_fill_points = true;
+	}
+	const bool isScoredFillPoints() {
 		return m_scored_fill_points;
 	}
 	const bool operator==(Location l) {

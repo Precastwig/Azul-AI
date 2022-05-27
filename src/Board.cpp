@@ -300,8 +300,10 @@ int Board::bonusPointsAwarded() {
 	int points = 0;
 	for (size_t i = 0; i < m_stars.size(); ++i) {
 		std::shared_ptr<Location> star = m_stars[i];
-		if (star->full() && !star->scoredFillPoints()) {
+		if (star->full() && !star->isScoredFillPoints()) {
 			points += star->pointsForFill();
+			star->scoredFillPoints();
+			g_logger.log(Logger::INFO, "Adding points for filling star");
 			m_bonus_point_colours[i]->setOpacity(255);
 			m_bonus_point_colours[i]->setOutlineThickness(3.0);
 		}
