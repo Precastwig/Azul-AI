@@ -103,12 +103,9 @@ void Player::highlightCostTiles(const PlacingChoice& choice, TileType bonus) {
 }
 
 void Player::commandLineWait() {
-	for (unsigned int i = 0; i < 5; ++i) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(200));
-		std::cout << ".";
-		fflush(stdout);
-	}
-	std::cout << "\n";
+	// For some reason, if the AI makes decisions too quickly, we an get seg faults.
+	// Instead of fixing this properly, just slow down the AI that are too fast.
+	std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 int Player::getPoisonPoints() {

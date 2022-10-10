@@ -1,6 +1,7 @@
 #ifndef BAG
 #define BAG
 
+#include "ui_elements/Button.hpp"
 #include "utils/helper_enums.hpp"
 #include "game_elements/Factory.hpp"
 #include <SFML/Graphics/Drawable.hpp>
@@ -23,6 +24,7 @@ public:
 	void toBin(std::vector<std::shared_ptr<Tile>> tiles);
 
 	void onClick(int x, int y);
+	void onHover(int x, int y);
 
 	// This function removes the given list of tiles from the
 	// reward tiles display

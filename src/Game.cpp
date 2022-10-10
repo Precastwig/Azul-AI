@@ -35,6 +35,14 @@ Game::Game(std::vector<std::pair<PlayerType, PlayerColour::Colour>> players, sf:
 	sf::Vector2f reward_size(reward_size_x, std::min(reward_size_x, size.y));
 	m_bag = std::make_shared<Bag>(reward_size, middle);
 
+	float bag_button_height = size.y/25.0;
+	float bag_button_width = size.x/3.0;
+	m_bag_show_button.setSize(sf::Vector2f(bag_button_width, bag_button_height));
+	m_bag_show_button.setText("Show reward tiles");
+	m_bag_show_button.setColour(sf::Color(50,166,168,255));
+	m_bag_show_button.setOutlineThickness(0.0);
+	m_bag_show_button.setPosition(sf::Vector2f((size.x/2.0)-bag_button_width/2.0, size.y-bag_button_height-10));
+
 	std::vector<sf::Vector2f> playerVisualpositions;
 	playerVisualpositions.push_back(sf::Vector2f(0,0));
 	playerVisualpositions.push_back(sf::Vector2f(size.x - playerVisualSize.x,0));
@@ -176,14 +184,19 @@ void Game::onClick(int xPos, int yPos) {
 
 void Game::onHover(int xPos, int yPos) {
 	if (g_visual_state.is_popup_game_board()) {
-		sf::Drawable* hovered_game_board = nullptr;
+		sf::Drawable* hovered_element = nullptr;
 		for (auto& pv : m_player_visualizers) {
 			if (pv->contains(xPos, yPos)) {
 				std::shared_ptr<Player> p = pv->getPlayerVisualized();
-				hovered_game_board = p->getBoardPtr();
+				hovered_element = p->getBoardPtr();
 			}
 		}
-		g_player_info.setHoveredElement(hovered_game_board);
+		if (!hovered_element) {
+			if (m_bag_show_button.contains(xPos, yPos)) {
+				hovered_element = m_bag.get();
+			}
+		}
+		g_player_info.setHoveredElement(hovered_element);
 	}
 	if (g_visual_state.is_picking()) {
 		for (std::shared_ptr<Factory> factory : m_factories) {
@@ -244,6 +257,10 @@ void Game::draw(sf::RenderTarget &target, sf::RenderStates states) const {
 			m_player_visualizers[i]->draw(target, states);
 		}
 		m_round_visualizer->draw(target, states);
+	}
+
+	if (g_visual_state.is_popup_game_board()) {
+		m_bag_show_button.draw(target, states);
 	}
 	
 	if (g_visual_state.is_finish()) {

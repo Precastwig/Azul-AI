@@ -1,6 +1,7 @@
 #include <ui_elements/MainMenu.hpp>
 #include <cstdlib>
 #include "Logger.hpp"
+#include "utils/Choices.hpp"
 #include "utils/Sounds.hpp"
 #include "utils/helper_enums.hpp"
 #include <SFML/System/Vector2.hpp>
@@ -31,14 +32,26 @@ int main(int argc, char *argv[]) {
 	// Initialise random seed
 	srand(time(nullptr));
 	// Parse flags
+	int autoMode = -1;
 	for (int i = 1; i < argc; i++) {
 		std::string arg(argv[i]);
+		if (autoMode > 0) {
+			if (arg == "rand" || arg == "random") {
+				autoMode--;
+			}
+			if (arg == "colrand") {
+				autoMode--;
+			}
+		}
 		if (arg == "-cmd") {
 			guiMode = COMMAND_LINE;
 		} else if (arg == "-qt") {
 			guiMode = QT;
 		} else if (arg == "-v") {
 			g_logger.enable();
+		} else if (arg == "-auto") {
+			autoMode = 2;
+			// We expect the next two arguments to be the two types of AI to play
 		}
 	}
 	if (guiMode == COMMAND_LINE) {

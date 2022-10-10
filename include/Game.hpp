@@ -91,6 +91,7 @@ private:
 
 	// Tile sources
 	std::shared_ptr<Bag> m_bag;
+	Button m_bag_show_button;
 
 	// Central tiles
 	std::vector<std::shared_ptr<Factory>> m_factories;

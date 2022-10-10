@@ -29,7 +29,7 @@ Bag::Bag(sf::Vector2f size, sf::Vector2f position) : m_tile_bin(), m_reward_tile
 	m_background.setOrigin(bgRect.left + bgRect.width/2.0f,
                         	bgRect.top  + bgRect.height/2.0f);
 	m_background.setPosition(position);
-	m_background.setFillColor(sf::Color::Magenta);
+	m_background.setFillColor(sf::Color(50,102, 168, 255));
 	m_txt = sf::Text();
 	m_txt.setFont(g_font);
 	m_txt.setString("Reward Tiles");
@@ -126,6 +126,10 @@ void Bag::onClick(int x, int y) {
 		g_visual_state.set_placing();
 		g_player_info.passOrChangeState();
 	}
+}
+
+void Bag::onHover(int x, int y) {
+
 }
 
 void Bag::binToBag() {

@@ -19,7 +19,7 @@ struct TileAndCount {
     int m_count;
 };
 
-std::vector<double> ColourTargetAI::generatePickingWeightsFromBoardImpl(std::vector<double>* currentWeights) {
+std::vector<double> ColourTargetAI::generatePickingWeightsFromBoardImpl() {
     std::vector<double> weights = {1,1,1,1,1,1};
     weights[m_target_colour] = 1.5;
     std::vector<TileType> adjacentTiles = Board::getAdjacentStarColours(m_target_colour);
@@ -32,7 +32,6 @@ std::vector<double> ColourTargetAI::generatePickingWeightsFromBoardImpl(std::vec
     // it's contribution to getting bonus tiles (smallestNumTilesNeededForBonus)
     // Future idea: We should simulate our board using our currently held pieces, 
     // and evaluate the picking weights from the best ones,
-    std::vector<int> smallestNumTilesNeededForBonus = {0,0,0,0,0,0};
     std::vector<int> numWanted = {0,0,0,0,0,0};
     for (TileType tilecol : Tile::all_tile_types()) {
         int sumOfCost = 0;
@@ -44,47 +43,13 @@ std::vector<double> ColourTargetAI::generatePickingWeightsFromBoardImpl(std::vec
         }        
 
         numWanted[tilecol] = sumOfCost - howManyColourStored(tilecol, getTiles());
-
-        // Bonus stuff, we can only evaluate bonus info if we know the value of all the tile colours
-        if (currentWeights) {  
-            // Check 2/1 of tilcol and 3/4 of next colour
-            int tilesNeededForStatue = m_board->tilesNeededToGetStatue(Location::location_from_col(tilecol));
-            // Check 5/6 of tilecol
-            int tilesNeededForWindow = m_board->tilesNeededToGetWindow(Location::location_from_col(tilecol)) - 1;
-            // -1 for the extra bonus that the window gives
-
-            // Ignore columns, for now, it's not worth it? Is it?
-            if (tilesNeededForStatue > 0 && tilesNeededForWindow > 0) {
-                smallestNumTilesNeededForBonus[tilecol] = std::min(tilesNeededForStatue, tilesNeededForWindow);
-            } else if (tilesNeededForWindow > 0) {
-                smallestNumTilesNeededForBonus[tilecol] = tilesNeededForWindow;    
-            } else if (tilesNeededForStatue > 0) {
-                smallestNumTilesNeededForBonus[tilecol] = tilesNeededForStatue;    
-            } 
-        }
-    }
-
-    if (currentWeights) {   
-        // We then modify this by the quality of the bonus tiles available
-        // according to the currentWeights
-        bool rewardTilesUseful = false;
-        std::vector<int> rewardTileCount = {0,0,0,0,0,0};
-        for (TileType tilecol : Tile::all_tile_types()) {
-            int rewardTileCount = howManyColourStored(tilecol, m_bag->rewardTiles());
-            // If there are enough reward tiles for our needs then this is valid
-            //if (rewardTileCount > 2 && numWanted[tilecol] )
-        }
-        
-
-        //smallestNumTilesNeededForBonus;
-
     }
 
     // Rank the number wanted of colours, 
     auto comparator = [](TileAndCount a, TileAndCount b) {
         return a.m_count < b.m_count;
     };
-    std::set<TileAndCount, decltype(comparator)> sortedNumWanted;
+    std::multiset<TileAndCount, decltype(comparator)> sortedNumWanted;
     for (TileType tilecol : Tile::all_tile_types()) {
         TileAndCount tac;
         tac.m_type = tilecol;
@@ -93,16 +58,66 @@ std::vector<double> ColourTargetAI::generatePickingWeightsFromBoardImpl(std::vec
     }
     // and give bonus based on position
     double bonus = 0.05;
+    std::cout << "Sorted num wanted\n";
     for (TileAndCount tac : sortedNumWanted) {
+        std::cout << Tile::toString(tac.m_type) << ": " << tac.m_count << "\n";
         weights[tac.m_type] += bonus;
         bonus += 0.05;
     }
     return weights;
 }
 
+std::vector<double> ColourTargetAI::modifyPickingWeightsBasedOnBonus(std::vector<double> currentWeights) {
+    std::vector<double> closenessToColMultiplier =    {0,0,0,0,0,0};
+    for (TileType tilecol : Tile::all_tile_types()) {
+        int smallestNumTilesNeededForBonus = -1;
+        // Check 2/1 of tilcol and 3/4 of next colour
+        int tilesNeededForStatue = m_board->tilesNeededToGetStatue(Location::location_from_col(tilecol));
+        // Check 5/6 of tilecol
+        int tilesNeededForWindow = m_board->tilesNeededToGetWindow(Location::location_from_col(tilecol)) - 1;
+        // -1 for the extra bonus that the window gives
+
+        // Ignore columns, for now, it's not worth it? Is it?
+        if (tilesNeededForStatue > 0 && tilesNeededForWindow > 0) {
+            smallestNumTilesNeededForBonus = std::min(tilesNeededForStatue, tilesNeededForWindow);
+        } else if (tilesNeededForWindow > 0) {
+            smallestNumTilesNeededForBonus = tilesNeededForWindow;    
+        } else if (tilesNeededForStatue > 0) {
+            smallestNumTilesNeededForBonus = tilesNeededForStatue;    
+        } 
+
+        // Convert the smallestNumTilesNeededForBonus into to a multiplying variable
+        if (smallestNumTilesNeededForBonus > 0) {
+            closenessToColMultiplier[tilecol] = std::max(0.0, 1.0 - (smallestNumTilesNeededForBonus / 10.0));
+        } else {
+            closenessToColMultiplier[tilecol] = 0.0;
+        }
+    }
+
+    // We then modify this by the quality of the bonus tiles available
+    // according to the currentWeights
+    double AmountWeWantBonus = 0.0;
+    for (TileType tilecol : Tile::all_tile_types()) {
+        int rewardTileCount = howManyColourStored(tilecol, m_bag->rewardTiles());
+        // The more reward tiles that we can use for our needs the better
+        AmountWeWantBonus += rewardTileCount * currentWeights[tilecol];
+        // Is this silly? Does this need to be capped at some value?
+    }
+        
+
+    //smallestNumTilesNeededForBonus matters as much as there are bonus tiles we want
+
+    // currentWeights + (inverted)smallestNumTilesNeededForBonus (smaller is better) * Amount we want the bonus
+    //                      smallestNumTilesNeededForBonus == 1 ? 1 : == 7 ? 0.1
+    for (TileType tilecol : Tile::all_tile_types()) {
+        currentWeights[tilecol] = currentWeights[tilecol] + (closenessToColMultiplier[tilecol] * AmountWeWantBonus);
+    }
+    return currentWeights;
+}
+
 std::vector<double> ColourTargetAI::generatePickingWeightsFromBoard() {
-    std::vector<double> weights = generatePickingWeightsFromBoardImpl(nullptr);
-    return generatePickingWeightsFromBoardImpl(&weights);
+    std::vector<double> weights = generatePickingWeightsFromBoardImpl();
+    return modifyPickingWeightsBasedOnBonus(weights);
 }
 
 double ColourTargetAI::evaluatePickingChoice(PickingChoice choice, TileType bonusCol) {
@@ -149,11 +164,9 @@ PickingChoice ColourTargetAI::pickTile(
 double ColourTargetAI::evaluatePlacingChoice(PlacingChoice& choice, TileType bonusCol) {
     // Evaluate colour, higher ones are better?
     double score = choice.points_gained(); 
-    score *= m_tile_picking_weights[choice.cost.colour];
-    score += (choice.cost.num_colour + (choice.cost.num_bonus * 0.5));
-    if (choice.star->colour() == LocationType::CENTRE_STAR) {
-        // Penalty?
-        score -= 1;
+    score += (choice.cost.num_colour + choice.cost.num_bonus);
+    if (choice.star->colour() != LocationType::CENTRE_STAR) {
+        score *= m_tile_picking_weights[choice.cost.colour];
     }
     return score;
 }

@@ -31,7 +31,8 @@ public:
 	}
 private:
     std::vector<double> generatePickingWeightsFromBoard();
-	std::vector<double> generatePickingWeightsFromBoardImpl(std::vector<double>* currentWeights);
+	std::vector<double> generatePickingWeightsFromBoardImpl();
+	std::vector<double> modifyPickingWeightsBasedOnBonus(std::vector<double> currentWeights);
 	double evaluatePlacingChoice(PlacingChoice& choice, TileType bonusCol);
     double evaluatePickingChoice(PickingChoice choice, TileType bonusCol);
     std::vector<double> m_tile_picking_weights;
